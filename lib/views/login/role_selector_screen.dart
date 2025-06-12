@@ -1,6 +1,6 @@
 // lib/views/login/role_selector_screen.dart
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
+import 'law_login_screen.dart';
 import 'resident_login_screen.dart';
 
 class RoleSelectorScreen extends StatelessWidget {
