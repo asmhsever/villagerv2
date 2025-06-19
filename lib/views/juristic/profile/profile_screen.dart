@@ -1,4 +1,5 @@
-// lib/views/juristic/profile_screen.dart
+// 📁 lib/views/juristic/profile/profile_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'edit_profile_screen.dart';
@@ -15,8 +16,6 @@ class JuristicProfileScreen extends StatefulWidget {
 class _JuristicProfileScreenState extends State<JuristicProfileScreen> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
-  final String defaultImageUrl =
-      'https://rehsssptxuhahcfoxubc.supabase.co/storage/v1/object/public/01/test1.png';
 
   @override
   void initState() {
@@ -38,6 +37,15 @@ class _JuristicProfileScreenState extends State<JuristicProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider profileImage;
+    if (userData != null && userData!['img'] != null && userData!['img'].toString().isNotEmpty) {
+      profileImage = NetworkImage(
+        Supabase.instance.client.storage.from('01').getPublicUrl(userData!['img']),
+      );
+    } else {
+      profileImage = const AssetImage('lib/images/test1.png');
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('ข้อมูลส่วนตัว')),
       body: isLoading
@@ -50,14 +58,7 @@ class _JuristicProfileScreenState extends State<JuristicProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: NetworkImage(
-                  userData!['img'] != null && userData!['img'].toString().isNotEmpty
-                      ? 'https://rehsssptxuhahcfoxubc.supabase.co/storage/v1/object/public/01/${userData!['img']}'
-                      : defaultImageUrl,
-                ),
-              ),
+              child: CircleAvatar(radius: 50, backgroundImage: profileImage),
             ),
             const SizedBox(height: 16),
             Text('ชื่อ: ${userData!['first_name'] ?? '-'}'),

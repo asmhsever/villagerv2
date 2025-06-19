@@ -1,7 +1,10 @@
 // lib/views/juristic/juristic_dashboard.dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'profile_screen.dart';
+import 'package:superprojectv2/views/juristic/profile/profile_screen.dart';
+
+import '../views/juristic/house/house_main_screen.dart';
+
 
 
 class JuristicDashboard extends StatefulWidget {
@@ -68,7 +71,6 @@ class _JuristicDashboardState extends State<JuristicDashboard> {
                 }
               },
             ),
-
             const SizedBox(height: 16),
             _buildMenuButton(
               icon: Icons.campaign,
@@ -90,13 +92,54 @@ class _JuristicDashboardState extends State<JuristicDashboard> {
             _buildMenuButton(
               icon: Icons.report_problem,
               label: 'จัดการปัญหา/คำร้องเรียน',
-              onTap: () => Navigator.pushNamed(context, '/juristic/complaints'),
+              onTap: () {
+                if (villageId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('ไม่พบข้อมูลหมู่บ้าน')),
+                  );
+                  return;
+                }
+                Navigator.pushNamed(
+                  context,
+                  '/juristic/complaints',
+                  arguments: villageId,
+                );
+              },
             ),
+
             const SizedBox(height: 16),
             _buildMenuButton(
               icon: Icons.attach_money,
               label: 'จัดการค่าส่วนกลาง',
-              onTap: () => Navigator.pushNamed(context, '/juristic/fees'),
+              onTap: () {
+                if (villageId != null) {
+                  Navigator.pushNamed(
+                    context,
+                    '/juristic/fees',
+                    arguments: villageId,
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('ไม่พบข้อมูลหมู่บ้าน')),
+                  );
+                }
+              },
+            ),
+
+            const SizedBox(height: 16),
+            _buildMenuButton(
+              icon: Icons.group,
+              label: 'จัดการลูกบ้าน',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => HouseMainScreen(villageId: villageId!),
+
+                    settings: RouteSettings(arguments: lawId),
+                  ),
+                );
+              },
             ),
           ],
         ),

@@ -1,11 +1,11 @@
-// lib/views/juristic/fees_screen.dart
+// 📁 lib/views/juristic/fees/fees_screen.dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'bill_detail_screen.dart';
-
+import '../bill/bill_detail_screen.dart';
 
 class JuristicFeesScreen extends StatefulWidget {
-  const JuristicFeesScreen({super.key});
+  final int villageId;
+  const JuristicFeesScreen({super.key, required this.villageId});
 
   @override
   State<JuristicFeesScreen> createState() => _JuristicFeesScreenState();
@@ -26,14 +26,15 @@ class _JuristicFeesScreenState extends State<JuristicFeesScreen> {
     try {
       final data = await client
           .from('bill_area')
-          .select('bill_id, house_id, bill_date, total_amount, status');
+          .select('bill_id, house_id, bill_date, total_amount, status, house!inner(village_id)')
+          .eq('house.village_id', widget.villageId);
 
       setState(() {
         _bills = List<Map<String, dynamic>>.from(data);
         _loading = false;
       });
     } catch (e) {
-      debugPrint('loadBills error: $e');
+      debugPrint('❌ loadBills error: $e');
       setState(() => _loading = false);
     }
   }
@@ -69,7 +70,8 @@ class _JuristicFeesScreenState extends State<JuristicFeesScreen> {
                 children: [
                   Text(_formatStatus(bill['status'])),
                   TextButton(
-                    onPressed: () => _toggleStatus(bill['bill_id'], bill['status']),
+                    onPressed: () =>
+                        _toggleStatus(bill['bill_id'], bill['status']),
                     child: const Text('เปลี่ยนสถานะ'),
                   ),
                 ],
@@ -77,9 +79,13 @@ class _JuristicFeesScreenState extends State<JuristicFeesScreen> {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => BillDetailScreen(billId: bill['bill_id']),
+                  builder: (_) => BillDetailScreen(
+                    billId: bill['bill_id'],
+                    villageId: widget.villageId,
+                  ),
                 ),
               ),
+
             ),
           );
         },

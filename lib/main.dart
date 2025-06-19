@@ -3,22 +3,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:superprojectv2/views/juristic/house/house_main_screen.dart';
 
 import 'views/login/role_selector_screen.dart';
-import 'views/login/law_login_screen.dart';
 import 'views/login/resident_login_screen.dart';
-import 'views/admin/admin_dashboard.dart';
-import 'views/juristic/juristic_dashboard.dart';
-import 'views/juristic/notion_screen.dart';
-import 'views/juristic/complaint_screen.dart';
-import 'views/resident/resident_dashboard.dart';
+import 'dashboard/admin_dashboard.dart';
+import 'dashboard/juristic_dashboard.dart';
+import 'views/juristic/notion/notion_screen.dart';
+import 'views/juristic/complaint/complaint_screen.dart';
+import 'dashboard/resident_dashboard.dart';
 import 'views/resident/complaint_screen.dart';
-import 'views/resident/bill_screen.dart';
+import 'views/juristic/bill/bill_screen.dart';
 import 'views/resident/notion_screen.dart';
-import 'views/juristic/fees_screen.dart';
-import 'views/juristic/profile_screen.dart';
-import 'views/juristic/change_password_screen.dart';
-import 'views/juristic/edit_profile_screen.dart';
+import 'views/juristic/fees/fees_screen.dart';
+import 'views/juristic/profile/profile_screen.dart';
+import 'views/juristic/profile/change_password_screen.dart';
+import 'views/juristic/profile/edit_profile_screen.dart';
+
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('th_TH', null);
@@ -52,8 +54,17 @@ class MyApp extends StatelessWidget {
         '/admin': (context) => const AdminDashboard(),
         '/juristic': (context) => const JuristicDashboard(),
         '/juristic/notion': (context) => const NotionScreen(),
-        '/juristic/complaint': (_) => const ComplaintScreen(),
-        '/juristic/fees': (context) => const JuristicFeesScreen(),
+        '/juristic/complaints': (context) => const JuristicComplaintScreen(),
+        '/juristic/fees': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          if (args is int) {
+            return JuristicFeesScreen(villageId: args);
+          } else {
+            return const Scaffold(
+              body: Center(child: Text('❌ villageId not provided')),
+            );
+          }
+        },
 
         '/resident': (context) => const ResidentDashboard(),
         '/resident/bill': (_) => const ResidentBillScreen(),
@@ -72,6 +83,13 @@ class MyApp extends StatelessWidget {
           final args = ModalRoute.of(context)!.settings.arguments as Map;
           return EditProfileScreen(lawId: args['law_id']);
         },
+        '/juristic/houses': (context) {
+          final villageId = ModalRoute.of(context)!.settings.arguments as int;
+          return HouseMainScreen(villageId: villageId);
+        },
+
+
+
 
       },
     );
