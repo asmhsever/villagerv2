@@ -16,6 +16,7 @@ class JuristicProfileScreen extends StatefulWidget {
 class _JuristicProfileScreenState extends State<JuristicProfileScreen> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
+  ImageProvider? profileImage;
 
   @override
   void initState() {
@@ -29,23 +30,35 @@ class _JuristicProfileScreenState extends State<JuristicProfileScreen> {
         .select()
         .eq('law_id', widget.lawId)
         .maybeSingle();
+
+    if (data != null) {
+      profileImage = await _resolveProfileImage(widget.lawId);
+    }
+
     setState(() {
       userData = data;
       isLoading = false;
     });
   }
 
+  Future<ImageProvider> _resolveProfileImage(int lawId) async {
+    final bucket = Supabase.instance.client.storage.from('images');
+    final basePath = 'law/law_$lawId';
+
+    for (final ext in ['jpg', 'png']) {
+      final path = '$basePath.$ext';
+      try {
+        final signedUrl = await bucket.createSignedUrl(path, 60);
+        if (signedUrl.isNotEmpty) {
+          return NetworkImage(bucket.getPublicUrl(path));
+        }
+      } catch (_) {}
+    }
+    return const AssetImage('lib/images/test1.png');
+  }
+
   @override
   Widget build(BuildContext context) {
-    ImageProvider profileImage;
-    if (userData != null && userData!['img'] != null && userData!['img'].toString().isNotEmpty) {
-      profileImage = NetworkImage(
-        Supabase.instance.client.storage.from('01').getPublicUrl(userData!['img']),
-      );
-    } else {
-      profileImage = const AssetImage('lib/images/test1.png');
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('ข้อมูลส่วนตัว')),
       body: isLoading

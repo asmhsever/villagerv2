@@ -14,7 +14,7 @@ import 'views/juristic/complaint/complaint_screen.dart';
 import 'dashboard/resident_dashboard.dart';
 import 'views/resident/complaint_screen.dart';
 import 'views/juristic/bill/bill_screen.dart';
-import 'views/resident/notion_screen.dart';
+import 'views/juristic/notion/notion_screen.dart';
 import 'views/juristic/fees/fees_screen.dart';
 import 'views/juristic/profile/profile_screen.dart';
 import 'views/juristic/profile/change_password_screen.dart';
@@ -53,7 +53,18 @@ class MyApp extends StatelessWidget {
       routes: {
         '/admin': (context) => const AdminDashboard(),
         '/juristic': (context) => const JuristicDashboard(),
-        '/juristic/notion': (context) => const NotionScreen(),
+        '/juristic/notion': (context) {
+          final rawArgs = ModalRoute.of(context)!.settings.arguments as Map;
+          final lawId = rawArgs['law_id'] as int;
+          final villageId = rawArgs['village_id'] as int;
+
+          return NotionScreen(
+            lawId: lawId,
+            villageId: villageId,
+          );
+
+        },
+
         '/juristic/complaints': (context) => const JuristicComplaintScreen(),
         '/juristic/fees': (context) {
           final args = ModalRoute.of(context)!.settings.arguments;
@@ -70,7 +81,6 @@ class MyApp extends StatelessWidget {
         '/resident/bill': (_) => const ResidentBillScreen(),
         '/resident/complaint': (_) => const ResidentComplaintScreen(),
         '/resident/login': (_) => const ResidentLoginScreen(),
-        '/resident/notion': (context) => const ResidentNotionScreen(),
         '/juristic/profile': (context) {
           final args = ModalRoute.of(context)?.settings.arguments as int;
           return JuristicProfileScreen(lawId: args);
