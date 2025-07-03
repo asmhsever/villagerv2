@@ -15,6 +15,7 @@ class Assets {
   static const String feesFeesScreen = 'lib/views/juristic/fees/fees_screen.dart';
   static const String generatedAssets = 'lib/generated/assets.dart';
   static const String houseAnimalDetailScreen = 'lib/views/juristic/house/animal_detail_screen.dart';
+  static const String houseAnimalService = 'lib/views/juristic/house/animal_service.dart';
   static const String houseCarDetailScreen = 'lib/views/juristic/house/car_detail_screen.dart';
   static const String houseEditAnimalScreen = 'lib/views/juristic/house/edit_animal_screen.dart';
   static const String houseEditCarScreen = 'lib/views/juristic/house/edit_car_screen.dart';
@@ -25,7 +26,6 @@ class Assets {
   static const String houseHouseMainScreen = 'lib/views/juristic/house/house_main_screen.dart';
   static const String houseHouseSearchScreen = 'lib/views/juristic/house/house_search_screen.dart';
   static const String houseVillagerDetailScreen = 'lib/views/juristic/house/villager_detail_screen.dart';
-  static const String imagesTest1 = 'lib/images/test1.png';
   static const String libMain = 'lib/main.dart';
   static const String loginLawLoginScreen = 'lib/views/login/law_login_screen.dart';
   static const String loginResidentLoginScreen = 'lib/views/login/resident_login_screen.dart';

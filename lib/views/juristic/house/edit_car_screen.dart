@@ -1,6 +1,8 @@
-// 📁 lib/views/juristic/edit_car_screen.dart
+// 📁 lib/views/juristic/house/edit_car_screen.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditCarScreen extends StatefulWidget {
@@ -19,6 +21,7 @@ class _EditCarScreenState extends State<EditCarScreen> {
   final modelCtrl = TextEditingController();
   final numberCtrl = TextEditingController();
   String? selectedHouseId;
+  File? selectedImage;
 
   @override
   void initState() {
@@ -34,8 +37,16 @@ class _EditCarScreenState extends State<EditCarScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() => selectedImage = File(picked.path));
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+
     final payload = {
       'brand': brandCtrl.text.trim(),
       'model': modelCtrl.text.trim(),
@@ -44,10 +55,25 @@ class _EditCarScreenState extends State<EditCarScreen> {
     };
 
     final client = Supabase.instance.client;
+    int carId;
+
     if (widget.car != null) {
       await client.from('car').update(payload).eq('car_id', widget.car!['car_id']);
+      carId = widget.car!['car_id'];
     } else {
-      await client.from('car').insert(payload);
+      final inserted = await client.from('car').insert(payload).select().maybeSingle();
+      if (inserted == null) return;
+      carId = inserted['car_id'];
+    }
+
+    if (selectedImage != null) {
+      final bytes = await selectedImage!.readAsBytes();
+      final ext = selectedImage!.path.split('.').last;
+      final fileName = '$carId.$ext';
+
+      await client.storage
+          .from('car-images')
+          .uploadBinary(fileName, bytes, fileOptions: const FileOptions(upsert: true));
     }
 
     if (context.mounted) Navigator.pop(context);
@@ -79,13 +105,24 @@ class _EditCarScreenState extends State<EditCarScreen> {
               TextFormField(
                 controller: modelCtrl,
                 decoration: const InputDecoration(labelText: 'รุ่น'),
+                validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกรุ่น' : null,
               ),
               TextFormField(
                 controller: numberCtrl,
                 decoration: const InputDecoration(labelText: 'ทะเบียน'),
+                validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกทะเบียน' : null,
               ),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _save, child: const Text('บันทึก')),
+              ElevatedButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.image),
+                label: const Text('เลือกรูปภาพ'),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _save,
+                child: const Text('บันทึก'),
+              ),
             ],
           ),
         ),

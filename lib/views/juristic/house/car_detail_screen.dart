@@ -1,96 +1,156 @@
-// lib/views/juristic/car_detail_screen.dart
+// 📁 lib/views/juristic/house/car_detail_screen.dart
 
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'edit_car_screen.dart';
 
 class CarDetailScreen extends StatefulWidget {
   final Map<String, dynamic>? car;
-  final int? houseId;
 
-  const CarDetailScreen({super.key, this.car, this.houseId});
+  const CarDetailScreen({super.key, this.car});
 
   @override
   State<CarDetailScreen> createState() => _CarDetailScreenState();
 }
 
 class _CarDetailScreenState extends State<CarDetailScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final plateCtrl = TextEditingController();
-  final brandCtrl = TextEditingController();
-  final colorCtrl = TextEditingController();
-  String? selectedHouseId;
+  Uint8List? imageBytes;
+  bool loadingImage = true;
 
   @override
   void initState() {
     super.initState();
-    if (widget.car != null) {
-      final c = widget.car!;
-      plateCtrl.text = c['license_plate'] ?? '';
-      brandCtrl.text = c['brand'] ?? '';
-      colorCtrl.text = c['color'] ?? '';
-      selectedHouseId = c['house_id'].toString();
-    } else if (widget.houseId != null) {
-      selectedHouseId = widget.houseId.toString();
+    _loadImage();
+  }
+
+  Future<void> _loadImage() async {
+    final id = widget.car?['car_id'];
+    if (id == null) return;
+    final formats = ['jpg', 'png', 'webp'];
+    for (final ext in formats) {
+      final url = 'https://asmhsevers.supabase.co/storage/v1/object/public/car-images/$id.$ext';
+      try {
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          setState(() {
+            imageBytes = response.bodyBytes;
+            loadingImage = false;
+          });
+          return;
+        }
+      } catch (_) {}
+    }
+    setState(() => loadingImage = false);
+  }
+
+  void _editCar(BuildContext context) {
+    if (widget.car == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditCarScreen(car: widget.car!),
+      ),
+    );
+  }
+
+  Future<void> _deleteCar(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('ลบรถ'),
+        content: const Text('คุณต้องการลบรถนี้ใช่หรือไม่?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ยกเลิก')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('ลบ')),
+        ],
+      ),
+    );
+
+    if (confirm == true && widget.car != null) {
+      final client = Supabase.instance.client;
+      await client.from('car').delete().eq('car_id', widget.car!['car_id']);
+      if (context.mounted) Navigator.pop(context);
     }
   }
 
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-    final payload = {
-      'license_plate': plateCtrl.text.trim(),
-      'brand': brandCtrl.text.trim(),
-      'color': colorCtrl.text.trim(),
-      'house_id': int.tryParse(selectedHouseId ?? '0'),
-    };
-
-    final client = Supabase.instance.client;
-    if (widget.car != null) {
-      await client
-          .from('car')
-          .update(payload)
-          .eq('car_id', widget.car!['car_id']);
-    } else {
-      await client.from('car').insert(payload);
-    }
-
-    if (context.mounted) Navigator.pop(context);
-  }
-
-  @override
-  void dispose() {
-    plateCtrl.dispose();
-    brandCtrl.dispose();
-    colorCtrl.dispose();
-    super.dispose();
+  void _showFullImage() {
+    if (imageBytes == null) return;
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: InteractiveViewer(
+            child: Image.memory(imageBytes!),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.car == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('รถ')),
+        body: const Center(child: Text('ไม่พบข้อมูลรถ')),
+      );
+    }
+
+    final car = widget.car!;
+
     return Scaffold(
-      appBar: AppBar(title: Text(widget.car != null ? 'แก้ไขรถ' : 'เพิ่มรถ')),
+      appBar: AppBar(
+        title: const Text('รายละเอียดรถ'),
+        actions: [
+          IconButton(icon: const Icon(Icons.edit), onPressed: () => _editCar(context)),
+          IconButton(icon: const Icon(Icons.delete), onPressed: () => _deleteCar(context)),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: plateCtrl,
-                decoration: const InputDecoration(labelText: 'ป้ายทะเบียน'),
-                validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกป้ายทะเบียน' : null,
-              ),
-              TextFormField(
-                controller: brandCtrl,
-                decoration: const InputDecoration(labelText: 'ยี่ห้อ'),
-              ),
-              TextFormField(
-                controller: colorCtrl,
-                decoration: const InputDecoration(labelText: 'สี'),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: _save, child: const Text('บันทึก')),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (loadingImage)
+              const Center(child: CircularProgressIndicator())
+            else if (imageBytes != null)
+              Center(
+                child: GestureDetector(
+                  onTap: _showFullImage,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.memory(
+                      imageBytes!,
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              )
+            else
+              const Center(child: Icon(Icons.directions_car, size: 100)),
+
+            const SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('ยี่ห้อ: ${car['brand'] ?? '-'}', style: const TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('รุ่น: ${car['model'] ?? '-'}', style: const TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('ทะเบียน: ${car['number'] ?? '-'}', style: const TextStyle(fontSize: 18)),
+            ),
+          ],
         ),
       ),
     );
