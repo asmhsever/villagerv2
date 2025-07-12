@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
+import 'package:intl/intl.dart';
 
 class JuristicProfileScreen extends StatefulWidget {
   final int lawId;
@@ -76,7 +77,7 @@ class _JuristicProfileScreenState extends State<JuristicProfileScreen> {
             const SizedBox(height: 16),
             Text('ชื่อ: ${userData!['first_name'] ?? '-'}'),
             Text('นามสกุล: ${userData!['last_name'] ?? '-'}'),
-            Text('วันเกิด: ${userData!['birth_date'] ?? '-'}'),
+            Text('วันเกิด: ${userData!['birth_date'] != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(userData!['birth_date'])) : '-'}'),
             Text('เบอร์โทร: ${userData!['phone'] ?? '-'}'),
             Text('เพศ: ${userData!['gender'] ?? '-'}'),
             Text('ที่อยู่: ${userData!['address'] ?? '-'}'),

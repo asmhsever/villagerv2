@@ -1,7 +1,8 @@
 // 📁 lib/views/juristic/fees/fees_screen.dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../bill/bill_detail_screen.dart';
+import 'fees_by_house_screen.dart';
+import 'package:intl/intl.dart';
 
 class JuristicFeesScreen extends StatefulWidget {
   final int villageId;
@@ -12,83 +13,138 @@ class JuristicFeesScreen extends StatefulWidget {
 }
 
 class _JuristicFeesScreenState extends State<JuristicFeesScreen> {
-  List<Map<String, dynamic>> _bills = [];
+  List<Map<String, dynamic>> _houses = [];
+  List<Map<String, dynamic>> _filteredHouses = [];
   bool _loading = true;
+  bool _showUnpaidOnly = false;
+  final TextEditingController _searchCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadBills();
+    _loadGroupedHouses();
   }
 
-  Future<void> _loadBills() async {
+  Future<void> _loadGroupedHouses() async {
     final client = Supabase.instance.client;
     try {
       final data = await client
           .from('bill_area')
-          .select('bill_id, house_id, bill_date, total_amount, status, house!inner(village_id)')
+          .select('house_id, amount, paid_status, house(house_number)')
           .eq('house.village_id', widget.villageId);
 
-      setState(() {
-        _bills = List<Map<String, dynamic>>.from(data);
-        _loading = false;
-      });
+      final List<Map<String, dynamic>> bills = List<Map<String, dynamic>>.from(data);
+      final Map<int, Map<String, dynamic>> grouped = {};
+
+      for (var bill in bills) {
+        final house = bill['house'];
+        if (house == null) continue;
+
+        final houseId = bill['house_id'];
+        final houseNumber = house['house_number'] ?? '-';
+        final unpaid = bill['paid_status'] == 0 ? 1 : 0;
+        final amount = bill['amount'] ?? 0;
+
+        if (!grouped.containsKey(houseId)) {
+          grouped[houseId] = {
+            'house_id': houseId,
+            'house_number': houseNumber,
+            'total_unpaid': unpaid,
+            'total_amount': unpaid == 1 ? amount : 0,
+          };
+        } else {
+          grouped[houseId]!['total_unpaid'] += unpaid;
+          grouped[houseId]!['total_amount'] += unpaid == 1 ? amount : 0;
+        }
+      }
+
+      _houses = grouped.values.toList();
+      _applyFilter();
+      setState(() => _loading = false);
     } catch (e) {
-      debugPrint('❌ loadBills error: $e');
+      debugPrint('❌ loadGroupedHouses error: $e');
       setState(() => _loading = false);
     }
   }
 
-  String _formatStatus(int status) => status == 1 ? 'ชำระแล้ว' : 'ยังไม่จ่าย';
+  void _applyFilter() {
+    final query = _searchCtrl.text.toLowerCase();
+    setState(() {
+      _filteredHouses = _houses.where((h) {
+        final hn = h['house_number']?.toString().toLowerCase() ?? '';
+        final matchesSearch = hn.contains(query);
+        final matchesUnpaid = !_showUnpaidOnly || h['total_unpaid'] > 0;
+        return matchesSearch && matchesUnpaid;
+      }).toList();
+    });
+  }
 
-  Future<void> _toggleStatus(int billId, int currentStatus) async {
-    final newStatus = currentStatus == 1 ? 0 : 1;
-    await Supabase.instance.client
-        .from('bill_area')
-        .update({'status': newStatus})
-        .eq('bill_id', billId);
-    _loadBills();
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final fmt = NumberFormat('#,##0', 'th_TH');
+
     return Scaffold(
-      appBar: AppBar(title: const Text('จัดการค่าส่วนกลาง')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-        itemCount: _bills.length,
-        itemBuilder: (_, i) {
-          final bill = _bills[i];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ListTile(
-              title: Text('บ้านเลขที่: ${bill['house_id']}'),
-              subtitle: Text('ยอดรวม: ${bill['total_amount']} บาท'),
-              trailing: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(_formatStatus(bill['status'])),
-                  TextButton(
-                    onPressed: () =>
-                        _toggleStatus(bill['bill_id'], bill['status']),
-                    child: const Text('เปลี่ยนสถานะ'),
-                  ),
-                ],
-              ),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BillDetailScreen(
-                    billId: bill['bill_id'],
-                    villageId: widget.villageId,
+      appBar: AppBar(title: const Text('บ้านที่มีค่าส่วนกลาง')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchCtrl,
+                    decoration: InputDecoration(
+                      hintText: 'ค้นหาบ้านเลขที่',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onChanged: (_) => _applyFilter(),
                   ),
                 ),
-              ),
-
+                const SizedBox(width: 8),
+                FilterChip(
+                  label: const Text('แสดงเฉพาะที่ยังไม่จ่าย'),
+                  selected: _showUnpaidOnly,
+                  onSelected: (v) {
+                    setState(() => _showUnpaidOnly = v);
+                    _applyFilter();
+                  },
+                ),
+              ],
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+              itemCount: _filteredHouses.length,
+              itemBuilder: (_, i) {
+                final house = _filteredHouses[i];
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: ListTile(
+                    title: Text('บ้านเลขที่: ${house['house_number']}'),
+                    subtitle: Text('ยอดค้าง: ${fmt.format(house['total_amount'])} บาท\nยังไม่จ่าย: ${house['total_unpaid']} บิล'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FeesByHouseScreen(houseId: house['house_id']),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

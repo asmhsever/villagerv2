@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final int lawId;
@@ -19,8 +20,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final lastNameCtrl = TextEditingController();
   final phoneCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
-  final genderCtrl = TextEditingController();
+  String? selectedGender;
+  DateTime? birthDate;
   File? pickedImage;
+  String? oldImageExt;
 
   @override
   void initState() {
@@ -39,25 +42,64 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       lastNameCtrl.text = data['last_name'] ?? '';
       phoneCtrl.text = data['phone'] ?? '';
       addressCtrl.text = data['address'] ?? '';
-      genderCtrl.text = data['gender'] ?? '';
+      selectedGender = data['gender'];
+      if (data['birth_date'] != null) {
+        birthDate = DateTime.tryParse(data['birth_date']);
+      }
+
+      for (final ext in ['jpg', 'png']) {
+        final url = Supabase.instance.client.storage.from('images').getPublicUrl('law/law_${widget.lawId}.$ext');
+        try {
+          final response = await HttpClient().getUrl(Uri.parse(url)).then((r) => r.close());
+          if (response.statusCode == 200) {
+            oldImageExt = ext;
+            break;
+          }
+        } catch (_) {}
+      }
+      setState(() {});
     }
   }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final result = await picker.pickImage(source: ImageSource.gallery);
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('เลือกรูปภาพ'),
+        content: const Text('เลือกวิธีการเลือกรูปภาพ'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, ImageSource.camera), child: const Text('กล้อง')),
+          TextButton(onPressed: () => Navigator.pop(context, ImageSource.gallery), child: const Text('แกลเลอรี')),
+        ],
+      ),
+    );
+    if (source == null) return;
+
+    final result = await picker.pickImage(source: source);
     if (result != null) {
-      setState(() => pickedImage = File(result.path));
+      final file = File(result.path);
+      final bytes = await file.length();
+      if (bytes > 5 * 1024 * 1024) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ขนาดรูปภาพต้องไม่เกิน 5MB')));
+        return;
+      }
+      setState(() => pickedImage = file);
     }
   }
 
   Future<void> _uploadImage(int lawId) async {
     if (pickedImage == null) return;
     final bucket = Supabase.instance.client.storage.from('images');
-    final filePath = 'law/law_$lawId.jpg';
+    final ext = pickedImage!.path.split('.').last;
+    final path = 'law/law_$lawId.$ext';
+
+    if (oldImageExt != null) {
+      await bucket.remove(['law/law_$lawId.$oldImageExt']);
+    }
+
     final bytes = await pickedImage!.readAsBytes();
-    await bucket.remove([filePath]);
-    await bucket.uploadBinary(filePath, bytes);
+    await bucket.uploadBinary(path, bytes, fileOptions: const FileOptions(upsert: true));
   }
 
   Future<void> _save() async {
@@ -67,7 +109,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'last_name': lastNameCtrl.text.trim(),
       'phone': phoneCtrl.text.trim(),
       'address': addressCtrl.text.trim(),
-      'gender': genderCtrl.text.trim(),
+      'gender': selectedGender,
+      'birth_date': birthDate?.toIso8601String(),
     };
     await Supabase.instance.client
         .from('law')
@@ -76,7 +119,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     await _uploadImage(widget.lawId);
 
-    if (context.mounted) Navigator.pop(context, true);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('บันทึกข้อมูลเรียบร้อย')));
+      Navigator.pop(context, true);
+    }
   }
 
   @override
@@ -85,8 +131,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     lastNameCtrl.dispose();
     phoneCtrl.dispose();
     addressCtrl.dispose();
-    genderCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickBirthDate() async {
+    final now = DateTime.now();
+    final result = await showDatePicker(
+      context: context,
+      initialDate: birthDate ?? DateTime(now.year - 20),
+      firstDate: DateTime(1900),
+      lastDate: now,
+    );
+    if (result != null) setState(() => birthDate = result);
   }
 
   @override
@@ -132,14 +188,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               TextFormField(
                 controller: phoneCtrl,
                 decoration: const InputDecoration(labelText: 'เบอร์โทร'),
+                validator: (v) => v == null || v.isEmpty
+                    ? 'กรุณากรอกเบอร์โทร'
+                    : !RegExp(r'^\d{10}\$').hasMatch(v)
+                    ? 'เบอร์โทรไม่ถูกต้อง'
+                    : null,
               ),
               TextFormField(
                 controller: addressCtrl,
                 decoration: const InputDecoration(labelText: 'ที่อยู่'),
               ),
-              TextFormField(
-                controller: genderCtrl,
+              DropdownButtonFormField<String>(
+                value: selectedGender,
                 decoration: const InputDecoration(labelText: 'เพศ'),
+                items: const [
+                  DropdownMenuItem(value: 'M', child: Text('ชาย')),
+                  DropdownMenuItem(value: 'F', child: Text('หญิง')),
+                ],
+                onChanged: (v) => setState(() => selectedGender = v),
+                validator: (v) => v == null ? 'กรุณาเลือกเพศ' : null,
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                title: const Text('วันเกิด'),
+                subtitle: Text(birthDate != null
+                    ? DateFormat('dd/MM/yyyy').format(birthDate!)
+                    : 'ยังไม่เลือก'),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: _pickBirthDate,
               ),
               const SizedBox(height: 20),
               ElevatedButton(
