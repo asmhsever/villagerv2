@@ -4,9 +4,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'car_model.dart';
 
 class EditCarScreen extends StatefulWidget {
-  final Map<String, dynamic>? car;
+  final Car? car;
   final int? houseId;
 
   const EditCarScreen({super.key, this.car, this.houseId});
@@ -20,60 +21,63 @@ class _EditCarScreenState extends State<EditCarScreen> {
   final brandCtrl = TextEditingController();
   final modelCtrl = TextEditingController();
   final numberCtrl = TextEditingController();
-  String? selectedHouseId;
   File? selectedImage;
+  final picker = ImagePicker();
+
+  int? get currentHouseId => widget.car?.houseId ?? widget.houseId;
 
   @override
   void initState() {
     super.initState();
     if (widget.car != null) {
-      final c = widget.car!;
-      brandCtrl.text = c['brand'] ?? '';
-      modelCtrl.text = c['model'] ?? '';
-      numberCtrl.text = c['number'] ?? '';
-      selectedHouseId = c['house_id'].toString();
-    } else if (widget.houseId != null) {
-      selectedHouseId = widget.houseId.toString();
+      brandCtrl.text = widget.car!.brand ?? '';
+      modelCtrl.text = widget.car!.model ?? '';
+      numberCtrl.text = widget.car!.number ?? '';
     }
   }
 
   Future<void> _pickImage() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
       setState(() => selectedImage = File(picked.path));
     }
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate() || currentHouseId == null) return;
 
-    final payload = {
-      'brand': brandCtrl.text.trim(),
-      'model': modelCtrl.text.trim(),
-      'number': numberCtrl.text.trim(),
-      'house_id': int.tryParse(selectedHouseId ?? '0'),
-    };
-
+    final brand = brandCtrl.text.trim();
+    final model = modelCtrl.text.trim();
+    final number = numberCtrl.text.trim();
     final client = Supabase.instance.client;
-    int carId;
 
+    int carId;
     if (widget.car != null) {
-      await client.from('car').update(payload).eq('car_id', widget.car!['car_id']);
-      carId = widget.car!['car_id'];
+      await client.from('car').update({
+        'brand': brand,
+        'model': model,
+        'number': number,
+      }).eq('car_id', widget.car!.carId);
+      carId = widget.car!.carId;
     } else {
-      final inserted = await client.from('car').insert(payload).select().maybeSingle();
+      final inserted = await client.from('car')
+          .insert({
+        'house_id': currentHouseId,
+        'brand': brand,
+        'model': model,
+        'number': number,
+      })
+          .select()
+          .maybeSingle();
       if (inserted == null) return;
       carId = inserted['car_id'];
     }
 
     if (selectedImage != null) {
-      final bytes = await selectedImage!.readAsBytes();
       final ext = selectedImage!.path.split('.').last;
-      final fileName = '$carId.$ext';
-
       await client.storage
           .from('car-images')
-          .uploadBinary(fileName, bytes, fileOptions: const FileOptions(upsert: true));
+          .uploadBinary('$carId.$ext', await selectedImage!.readAsBytes(), fileOptions: const FileOptions(upsert: true));
     }
 
     if (context.mounted) Navigator.pop(context);
@@ -90,35 +94,32 @@ class _EditCarScreenState extends State<EditCarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.car != null ? 'แก้ไขรถ' : 'เพิ่มรถ')),
+      appBar: AppBar(title: const Text('รถยนต์')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
             children: [
               TextFormField(
                 controller: brandCtrl,
                 decoration: const InputDecoration(labelText: 'ยี่ห้อ'),
-                validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกยี่ห้อ' : null,
               ),
               TextFormField(
                 controller: modelCtrl,
                 decoration: const InputDecoration(labelText: 'รุ่น'),
-                validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกรุ่น' : null,
               ),
               TextFormField(
                 controller: numberCtrl,
                 decoration: const InputDecoration(labelText: 'ทะเบียน'),
-                validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกทะเบียน' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               ElevatedButton.icon(
                 onPressed: _pickImage,
                 icon: const Icon(Icons.image),
                 label: const Text('เลือกรูปภาพ'),
               ),
-              const SizedBox(height: 16),
+              const Spacer(),
               ElevatedButton(
                 onPressed: _save,
                 child: const Text('บันทึก'),

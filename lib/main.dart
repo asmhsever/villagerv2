@@ -65,7 +65,11 @@ class MyApp extends StatelessWidget {
 
         },
 
-        '/juristic/complaints': (context) => const JuristicComplaintScreen(),
+        '/juristic/complaints': (context) {
+          final houseId = ModalRoute.of(context)!.settings.arguments as int;
+          return ComplaintScreen(houseId: houseId);
+        },
+
         '/juristic/fees': (context) {
           final args = ModalRoute.of(context)!.settings.arguments;
           if (args is int) {

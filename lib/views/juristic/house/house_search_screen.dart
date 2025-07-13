@@ -1,6 +1,15 @@
+// 📁 lib/views/juristic/house/house_search_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'animal_model.dart';
+import 'car_model.dart';
+import 'house_model.dart';
+import 'villager_model.dart';
+import 'animal_detail_screen.dart';
+import 'car_detail_screen.dart';
 import 'house_detail_screen.dart';
+import 'villager_detail_screen.dart';
 
 class HouseSearchScreen extends StatefulWidget {
   const HouseSearchScreen({super.key});
@@ -12,7 +21,7 @@ class HouseSearchScreen extends StatefulWidget {
 class _HouseSearchScreenState extends State<HouseSearchScreen> {
   final TextEditingController _controller = TextEditingController();
   bool _loading = false;
-  List<Map<String, dynamic>> _results = [];
+  List<dynamic> _results = [];
 
   Future<void> _performSearch() async {
     final keyword = _controller.text.trim().toLowerCase();
@@ -21,41 +30,39 @@ class _HouseSearchScreenState extends State<HouseSearchScreen> {
     setState(() => _loading = true);
     final client = Supabase.instance.client;
 
-    final List<List<Map<String, dynamic>>> responses = await Future.wait([
+    final List<List<dynamic>> responses = await Future.wait([
       client
           .from('house')
           .select()
           .ilike('username', '%$keyword%')
-          .then((res) => List<Map<String, dynamic>>.from(res).map((e) => {...e, 'type': 'house'}).toList()),
+          .then((res) => List<Map<String, dynamic>>.from(res)
+          .map((e) => House.fromMap(e)).toList()),
 
       client
           .from('villager')
           .select()
           .or('first_name.ilike.%$keyword%,last_name.ilike.%$keyword%')
-          .then((res) => List<Map<String, dynamic>>.from(res).map((e) => {...e, 'type': 'villager'}).toList()),
+          .then((res) => List<Map<String, dynamic>>.from(res)
+          .map((e) => Villager.fromMap(e)).toList()),
 
       client
           .from('car')
           .select()
           .ilike('number', '%$keyword%')
-          .then((res) => List<Map<String, dynamic>>.from(res).map((e) => {...e, 'type': 'car'}).toList()),
+          .then((res) => List<Map<String, dynamic>>.from(res)
+          .map((e) => Car.fromMap(e)).toList()),
 
       client
           .from('animal')
           .select()
           .ilike('name', '%$keyword%')
-          .then((res) => List<Map<String, dynamic>>.from(res).map((e) => {...e, 'type': 'animal'}).toList()),
+          .then((res) => List<Map<String, dynamic>>.from(res)
+          .map((e) => Animal.fromMap(e)).toList()),
     ]);
 
-
-    final all = <Map<String, dynamic>>[];
+    final all = <dynamic>[];
     for (final list in responses) {
-      for (final row in list) {
-        final houseId = row['house_id'];
-        if (houseId != null) {
-          all.add({...row, 'house_id': houseId});
-        }
-      }
+      all.addAll(list);
     }
 
     setState(() {
@@ -64,43 +71,24 @@ class _HouseSearchScreenState extends State<HouseSearchScreen> {
     });
   }
 
-  Icon getIconByType(String type) {
-    switch (type) {
-      case 'house':
-        return const Icon(Icons.home, color: Colors.blue);
-      case 'villager':
-        return const Icon(Icons.person, color: Colors.green);
-      case 'car':
-        return const Icon(Icons.directions_car, color: Colors.orange);
-      case 'animal':
-        return const Icon(Icons.pets, color: Colors.purple);
-      default:
-        return const Icon(Icons.help_outline);
+  void _openDetail(dynamic item) {
+    if (item is House) {
+      Navigator.push(context, MaterialPageRoute(
+        builder: (_) => HouseDetailScreen(houseId: item.houseId),
+      ));
+    } else if (item is Villager) {
+      Navigator.push(context, MaterialPageRoute(
+        builder: (_) => VillagerDetailScreen(villager: item),
+      ));
+    } else if (item is Car) {
+      Navigator.push(context, MaterialPageRoute(
+        builder: (_) => CarDetailScreen(car: item),
+      ));
+    } else if (item is Animal) {
+      Navigator.push(context, MaterialPageRoute(
+        builder: (_) => AnimalDetailScreen(animal: item),
+      ));
     }
-  }
-
-  String getLabelByType(Map<String, dynamic> data) {
-    switch (data['type']) {
-      case 'house':
-        return 'เจ้าของ: ${data['username'] ?? ''}';
-      case 'villager':
-        return 'ลูกบ้าน: ${data['first_name']} ${data['last_name']}';
-      case 'car':
-        return 'ทะเบียน: ${data['number']}';
-      case 'animal':
-        return 'สัตว์เลี้ยง: ${data['name']} (${data['type']})';
-      default:
-        return '';
-    }
-  }
-
-  void _openHouse(int houseId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => HouseDetailScreen(houseId: houseId),
-      ),
-    );
   }
 
   @override
@@ -114,35 +102,47 @@ class _HouseSearchScreenState extends State<HouseSearchScreen> {
             TextField(
               controller: _controller,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                hintText: 'ค้นหาจากชื่อเจ้าของ/ลูกบ้าน/สัตว์เลี้ยง/ทะเบียนรถ',
+                hintText: 'ค้นหาด้วยชื่อ, ทะเบียนรถ, ชื่อสัตว์เลี้ยง',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: _performSearch,
                 ),
               ),
-              onSubmitted: (_) => _performSearch(),
             ),
             const SizedBox(height: 16),
-            if (_loading)
-              const CircularProgressIndicator()
-            else if (_results.isEmpty)
-              const Text('ไม่พบข้อมูล')
-            else
+            if (_loading) const CircularProgressIndicator(),
+            if (!_loading && _results.isEmpty) const Text('ไม่พบข้อมูล'),
+            if (!_loading && _results.isNotEmpty)
               Expanded(
                 child: ListView.builder(
                   itemCount: _results.length,
                   itemBuilder: (_, i) {
-                    final r = _results[i];
+                    final item = _results[i];
+                    String title = '';
+                    String subtitle = '';
+
+                    if (item is House) {
+                      title = 'บ้านเลขที่: ${item.houseNumber ?? '-'}';
+                      subtitle = 'เจ้าของ: ${item.username ?? '-'}';
+                    } else if (item is Villager) {
+                      title = 'ชื่อ: ${item.firstName ?? '-'}';
+                      subtitle = 'เบอร์: ${item.phone ?? '-'}';
+                    } else if (item is Car) {
+                      title = 'ทะเบียน: ${item.number ?? '-'}';
+                      subtitle = 'ยี่ห้อ: ${item.brand ?? '-'}';
+                    } else if (item is Animal) {
+                      title = 'ชื่อสัตว์เลี้ยง: ${item.name ?? '-'}';
+                      subtitle = 'ประเภท: ${item.type ?? '-'}';
+                    }
+
                     return ListTile(
-                      leading: getIconByType(r['type']),
-                      title: Text('บ้านเลขที่ ${r['house_id']}'),
-                      subtitle: Text(getLabelByType(r)),
-                      onTap: () => _openHouse(r['house_id']),
+                      title: Text(title),
+                      subtitle: Text(subtitle),
+                      onTap: () => _openDetail(item),
                     );
                   },
                 ),
-              ),
+              )
           ],
         ),
       ),

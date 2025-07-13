@@ -1,9 +1,10 @@
 // 📁 lib/views/juristic/house_dashboard_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'house_detail_screen.dart';
 import 'edit_house_screen.dart';
+import 'house_service.dart';
+import 'house_model.dart';
 
 class HouseDashboardScreen extends StatefulWidget {
   final int villageId;
@@ -14,7 +15,8 @@ class HouseDashboardScreen extends StatefulWidget {
 }
 
 class _HouseDashboardScreenState extends State<HouseDashboardScreen> {
-  List<Map<String, dynamic>> houses = [];
+  final HouseService houseService = HouseService();
+  List<House> houses = [];
   bool isLoading = true;
 
   @override
@@ -24,12 +26,9 @@ class _HouseDashboardScreenState extends State<HouseDashboardScreen> {
   }
 
   Future<void> _loadHouses() async {
-    final response = await Supabase.instance.client
-        .from('house')
-        .select()
-        .eq('village_id', widget.villageId);
+    final results = await houseService.getByVillage(widget.villageId);
     setState(() {
-      houses = List<Map<String, dynamic>>.from(response);
+      houses = results;
       isLoading = false;
     });
   }
@@ -67,9 +66,9 @@ class _HouseDashboardScreenState extends State<HouseDashboardScreen> {
         itemBuilder: (_, i) {
           final h = houses[i];
           return ListTile(
-            title: Text('บ้านเลขที่: ${h['house_id']}'),
-            subtitle: Text('เจ้าของ: ${h['username'] ?? '-'}'),
-            onTap: () => _openHouse(h['house_id']),
+            title: Text('บ้านเลขที่: \${h.houseNumber ?? "-"}'),
+            subtitle: Text('เจ้าของ: \${h.username ?? "-"}'),
+            onTap: () => _openHouse(h.houseId),
           );
         },
       ),

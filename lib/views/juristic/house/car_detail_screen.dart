@@ -1,15 +1,17 @@
-// 📁 lib/views/juristic/house/car_detail_screen.dart
+// lib/views/juristic/house/car_detail_screen.dart
 
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'edit_car_screen.dart';
+import 'car_model.dart';
 
 class CarDetailScreen extends StatefulWidget {
-  final Map<String, dynamic>? car;
+  final Car car;
+  final int? houseId;
 
-  const CarDetailScreen({super.key, this.car});
+  const CarDetailScreen({super.key, required this.car, this.houseId});
 
   @override
   State<CarDetailScreen> createState() => _CarDetailScreenState();
@@ -26,8 +28,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   }
 
   Future<void> _loadImage() async {
-    final id = widget.car?['car_id'];
-    if (id == null) return;
+    final id = widget.car.carId;
     final formats = ['jpg', 'png', 'webp'];
     for (final ext in formats) {
       final url = 'https://asmhsevers.supabase.co/storage/v1/object/public/car-images/$id.$ext';
@@ -46,11 +47,11 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   }
 
   void _editCar(BuildContext context) {
-    if (widget.car == null) return;
+    final actualHouseId = widget.houseId ?? widget.car.houseId;
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EditCarScreen(car: widget.car!),
+        builder: (_) => EditCarScreen(car: widget.car, houseId: actualHouseId),
       ),
     );
   }
@@ -59,97 +60,56 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('ลบรถ'),
-        content: const Text('คุณต้องการลบรถนี้ใช่หรือไม่?'),
+        title: const Text('ลบรถยนต์'),
+        content: const Text('คุณต้องการลบรถยนต์นี้ใช่หรือไม่?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ยกเลิก')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('ลบ')),
         ],
       ),
     );
+    if (confirm != true) return;
 
-    if (confirm == true && widget.car != null) {
-      final client = Supabase.instance.client;
-      await client.from('car').delete().eq('car_id', widget.car!['car_id']);
-      if (context.mounted) Navigator.pop(context);
-    }
-  }
+    await Supabase.instance.client
+        .from('car')
+        .delete()
+        .eq('car_id', widget.car.carId);
 
-  void _showFullImage() {
-    if (imageBytes == null) return;
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: InteractiveViewer(
-            child: Image.memory(imageBytes!),
-          ),
-        ),
-      ),
-    );
+    if (context.mounted) Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.car == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('รถ')),
-        body: const Center(child: Text('ไม่พบข้อมูลรถ')),
-      );
-    }
-
-    final car = widget.car!;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('รายละเอียดรถ'),
+        title: const Text('รายละเอียดรถยนต์'),
         actions: [
-          IconButton(icon: const Icon(Icons.edit), onPressed: () => _editCar(context)),
-          IconButton(icon: const Icon(Icons.delete), onPressed: () => _deleteCar(context)),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () => _editCar(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => _deleteCar(context),
+          )
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (loadingImage)
-              const Center(child: CircularProgressIndicator())
-            else if (imageBytes != null)
-              Center(
-                child: GestureDetector(
-                  onTap: _showFullImage,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.memory(
-                      imageBytes!,
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              )
-            else
-              const Center(child: Icon(Icons.directions_car, size: 100)),
-
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('ยี่ห้อ: ${car['brand'] ?? '-'}', style: const TextStyle(fontSize: 18)),
-            ),
+            Text('ยี่ห้อ: \${widget.car.brand ?? "-"}'),
             const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('รุ่น: ${car['model'] ?? '-'}', style: const TextStyle(fontSize: 18)),
-            ),
+            Text('รุ่น: \${widget.car.model ?? "-"}'),
             const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('ทะเบียน: ${car['number'] ?? '-'}', style: const TextStyle(fontSize: 18)),
-            ),
+            Text('ทะเบียน: \${widget.car.number ?? "-"}'),
+            const SizedBox(height: 16),
+            loadingImage
+                ? const CircularProgressIndicator()
+                : imageBytes != null
+                ? Image.memory(imageBytes!, height: 200)
+                : const Text('ไม่พบรูปภาพ'),
           ],
         ),
       ),

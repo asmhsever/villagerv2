@@ -1,16 +1,17 @@
-// 📁 lib/views/juristic/house/animal_detail_screen.dart
+// lib/views/juristic/house/animal_detail_screen.dart
 
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'edit_animal_screen.dart';
+import 'animal_model.dart';
 
 class AnimalDetailScreen extends StatefulWidget {
-  final Map<String, dynamic>? animal;
+  final Animal animal;
   final int? houseId;
 
-  const AnimalDetailScreen({super.key, this.animal, this.houseId});
+  const AnimalDetailScreen({super.key, required this.animal, this.houseId});
 
   @override
   State<AnimalDetailScreen> createState() => _AnimalDetailScreenState();
@@ -27,8 +28,7 @@ class _AnimalDetailScreenState extends State<AnimalDetailScreen> {
   }
 
   Future<void> _loadImage() async {
-    final id = widget.animal?['animal_id'];
-    if (id == null) return;
+    final id = widget.animal.animalId;
     final formats = ['jpg', 'png', 'webp'];
     for (final ext in formats) {
       final url = 'https://asmhsevers.supabase.co/storage/v1/object/public/animal-images/$id.$ext';
@@ -47,11 +47,11 @@ class _AnimalDetailScreenState extends State<AnimalDetailScreen> {
   }
 
   void _editAnimal(BuildContext context) {
-    final actualHouseId = widget.houseId ?? widget.animal?['house_id'] as int;
+    final actualHouseId = widget.houseId ?? widget.animal.houseId;
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EditAnimalScreen(animal: widget.animal!, houseId: actualHouseId),
+        builder: (_) => EditAnimalScreen(animal: widget.animal, houseId: actualHouseId),
       ),
     );
   }
@@ -68,89 +68,46 @@ class _AnimalDetailScreenState extends State<AnimalDetailScreen> {
         ],
       ),
     );
+    if (confirm != true) return;
 
-    if (confirm == true && widget.animal != null) {
-      final client = Supabase.instance.client;
-      await client.from('animal').delete().eq('animal_id', widget.animal!['animal_id']);
-      if (context.mounted) Navigator.pop(context);
-    }
-  }
+    await Supabase.instance.client
+        .from('animal')
+        .delete()
+        .eq('animal_id', widget.animal.animalId);
 
-  void _showFullImage() {
-    if (imageBytes == null) return;
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: InteractiveViewer(
-            child: Image.memory(imageBytes!),
-          ),
-        ),
-      ),
-    );
+    if (context.mounted) Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.animal == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('สัตว์เลี้ยง')),
-        body: const Center(child: Text('ไม่พบข้อมูลสัตว์เลี้ยง')),
-      );
-    }
-
-    final animal = widget.animal!;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('รายละเอียดสัตว์เลี้ยง'),
         actions: [
-          IconButton(icon: const Icon(Icons.edit), onPressed: () => _editAnimal(context)),
-          IconButton(icon: const Icon(Icons.delete), onPressed: () => _deleteAnimal(context)),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () => _editAnimal(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => _deleteAnimal(context),
+          )
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (loadingImage)
-              const Center(child: CircularProgressIndicator())
-            else if (imageBytes != null)
-              Center(
-                child: GestureDetector(
-                  onTap: _showFullImage,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.memory(
-                      imageBytes!,
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              )
-            else
-              const Center(child: Icon(Icons.pets, size: 100)),
-
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('ชื่อ: ${animal['name'] ?? '-'}', style: const TextStyle(fontSize: 18)),
-            ),
+            Text('ชื่อ: \${widget.animal.name ?? "-"}'),
             const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('ประเภท: ${animal['type'] ?? '-'}', style: const TextStyle(fontSize: 18)),
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('บ้านเลขที่: ${animal['house_id'] ?? '-'}', style: const TextStyle(fontSize: 18)),
-            ),
+            Text('ประเภท: \${widget.animal.type ?? "-"}'),
+            const SizedBox(height: 16),
+            loadingImage
+                ? const CircularProgressIndicator()
+                : imageBytes != null
+                ? Image.memory(imageBytes!, height: 200)
+                : const Text('ไม่พบรูปภาพ'),
           ],
         ),
       ),

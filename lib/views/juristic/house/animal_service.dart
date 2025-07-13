@@ -1,34 +1,46 @@
-// 📁 lib/services/animal_service.dart
+// lib/views/juristic/house/animal_service.dart
 
 import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'animal_model.dart';
+import 'package:image_picker/image_picker.dart';
+
 
 class AnimalService {
-  final client = Supabase.instance.client;
+  final _client = Supabase.instance.client;
 
-  Future<void> addAnimalWithImage({
-    required int houseId,
-    required String name,
-    required String type,
-    required XFile imageFile,
-  }) async {
-    // Step 1: Insert new animal (img will be set to animal_id.jpg by trigger)
-    final insertResponse = await client.from('animal').insert({
-      'name': name,
-      'type': type,
-      'house_id': houseId,
-    }).select('animal_id').single();
+  Future<List<Animal>> getAnimalsByHouse(int houseId) async {
+    final res = await _client
+        .from('animal')
+        .select()
+        .eq('house_id', houseId);
+    return List<Map<String, dynamic>>.from(res)
+        .map((e) => Animal.fromMap(e))
+        .toList();
+  }
 
-    final animalId = insertResponse['animal_id'];
-    final fileExt = imageFile.path.split('.').last;
-    final filename = '$animalId.$fileExt';
-    final fileBytes = await imageFile.readAsBytes();
+  Future<Animal?> insertAnimal(Animal animal, File imageFile) async {
+    final inserted = await _client
+        .from('animal')
+        .insert(animal.toInsertMap())
+        .select()
+        .maybeSingle();
+    if (inserted == null) return null;
 
-    // Step 2: Upload image to Supabase Storage
-    await client.storage
+    final newId = inserted['animal_id'];
+    final ext = imageFile.path.split('.').last;
+    await _client.storage
         .from('animal-images')
-        .uploadBinary(filename, fileBytes, fileOptions: const FileOptions(upsert: true));
+        .uploadBinary('$newId.$ext', await imageFile.readAsBytes(), fileOptions: const FileOptions(upsert: true));
+
+    return Animal.fromMap(inserted);
+  }
+
+  Future<void> updateAnimal(Animal animal) async {
+    await _client
+        .from('animal')
+        .update(animal.toMap())
+        .eq('animal_id', animal.animalId);
   }
 
   Future<void> updateAnimalWithImage({
@@ -36,22 +48,26 @@ class AnimalService {
     required int houseId,
     required String name,
     required String type,
-    XFile? imageFile, // optional update
+    XFile? imageFile,
   }) async {
-    await client.from('animal').update({
+    await _client.from('animal').update({
+      'house_id': houseId,
       'name': name,
       'type': type,
-      'house_id': houseId,
     }).eq('animal_id', animalId);
 
     if (imageFile != null) {
-      final fileExt = imageFile.path.split('.').last;
-      final filename = '$animalId.$fileExt';
-      final fileBytes = await imageFile.readAsBytes();
-
-      await client.storage
+      final ext = imageFile.path.split('.').last;
+      await _client.storage
           .from('animal-images')
-          .uploadBinary(filename, fileBytes, fileOptions: const FileOptions(upsert: true));
+          .uploadBinary('$animalId.$ext', await imageFile.readAsBytes(), fileOptions: const FileOptions(upsert: true));
     }
+  }
+
+  Future<void> deleteAnimal(int animalId) async {
+    await _client
+        .from('animal')
+        .delete()
+        .eq('animal_id', animalId);
   }
 }

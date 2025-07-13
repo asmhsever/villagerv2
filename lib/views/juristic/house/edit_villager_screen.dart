@@ -1,10 +1,12 @@
-// 📁 lib/views/juristic/edit_villager_screen.dart
+// 📁 lib/views/juristic/house/edit_villager_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'villager_model.dart';
+import 'villager_service.dart';
 
 class EditVillagerScreen extends StatefulWidget {
-  final Map<String, dynamic>? villager;
+  final Villager? villager;
   final int? houseId;
 
   const EditVillagerScreen({super.key, this.villager, this.houseId});
@@ -21,45 +23,41 @@ class _EditVillagerScreenState extends State<EditVillagerScreen> {
   final birthdateCtrl = TextEditingController();
   final genderCtrl = TextEditingController();
   final cardNumberCtrl = TextEditingController();
-  String? selectedHouseId;
+  final villagerService = VillagerService();
+
+  int? get currentHouseId => widget.villager?.houseId ?? widget.houseId;
 
   @override
   void initState() {
     super.initState();
     if (widget.villager != null) {
-      final v = widget.villager!;
-      firstNameCtrl.text = v['first_name'] ?? '';
-      lastNameCtrl.text = v['last_name'] ?? '';
-      phoneCtrl.text = v['phone'] ?? '';
-      birthdateCtrl.text = v['birth_date'] ?? '';
-      genderCtrl.text = v['gender'] ?? '';
-      cardNumberCtrl.text = v['card_number'] ?? '';
-      selectedHouseId = v['house_id'].toString();
-    } else if (widget.houseId != null) {
-      selectedHouseId = widget.houseId.toString();
+      firstNameCtrl.text = widget.villager!.firstName ?? '';
+      lastNameCtrl.text = widget.villager!.lastName ?? '';
+      phoneCtrl.text = widget.villager!.phone ?? '';
+      birthdateCtrl.text = widget.villager!.birthDate ?? '';
+      genderCtrl.text = widget.villager!.gender ?? '';
+      cardNumberCtrl.text = widget.villager!.cardNumber ?? '';
     }
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-    final payload = {
-      'first_name': firstNameCtrl.text.trim(),
-      'last_name': lastNameCtrl.text.trim(),
-      'phone': phoneCtrl.text.trim(),
-      'birth_date': birthdateCtrl.text.trim(),
-      'gender': genderCtrl.text.trim(),
-      'card_number': cardNumberCtrl.text.trim(),
-      'house_id': int.tryParse(selectedHouseId ?? '0'),
-    };
+    if (!_formKey.currentState!.validate() || currentHouseId == null) return;
 
-    final client = Supabase.instance.client;
+    final newVillager = Villager(
+      villagerId: widget.villager?.villagerId ?? 0,
+      houseId: currentHouseId!,
+      firstName: firstNameCtrl.text.trim(),
+      lastName: lastNameCtrl.text.trim(),
+      birthDate: birthdateCtrl.text.trim(),
+      gender: genderCtrl.text.trim(),
+      phone: phoneCtrl.text.trim(),
+      cardNumber: cardNumberCtrl.text.trim(),
+    );
+
     if (widget.villager != null) {
-      await client
-          .from('villager')
-          .update(payload)
-          .eq('villager_id', widget.villager!['villager_id']);
+      await villagerService.updateVillager(newVillager);
     } else {
-      await client.from('villager').insert(payload);
+      await villagerService.insertVillager(newVillager);
     }
 
     if (context.mounted) Navigator.pop(context);
@@ -79,7 +77,7 @@ class _EditVillagerScreenState extends State<EditVillagerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.villager != null ? 'แก้ไขลูกบ้าน' : 'เพิ่มลูกบ้าน')),
+      appBar: AppBar(title: const Text('เพิ่ม/แก้ไขผู้อยู่อาศัย')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -94,7 +92,10 @@ class _EditVillagerScreenState extends State<EditVillagerScreen> {
               TextFormField(
                 controller: lastNameCtrl,
                 decoration: const InputDecoration(labelText: 'นามสกุล'),
-                validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกนามสกุล' : null,
+              ),
+              TextFormField(
+                controller: phoneCtrl,
+                decoration: const InputDecoration(labelText: 'เบอร์โทร'),
               ),
               TextFormField(
                 controller: birthdateCtrl,
@@ -105,17 +106,14 @@ class _EditVillagerScreenState extends State<EditVillagerScreen> {
                 decoration: const InputDecoration(labelText: 'เพศ'),
               ),
               TextFormField(
-                controller: phoneCtrl,
-                decoration: const InputDecoration(labelText: 'เบอร์โทร'),
-                keyboardType: TextInputType.phone,
-                validator: (v) => v == null || v.length < 9 ? 'เบอร์ไม่ถูกต้อง' : null,
-              ),
-              TextFormField(
                 controller: cardNumberCtrl,
                 decoration: const InputDecoration(labelText: 'เลขบัตรประชาชน'),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: _save, child: const Text('บันทึก')),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _save,
+                child: const Text('บันทึก'),
+              )
             ],
           ),
         ),

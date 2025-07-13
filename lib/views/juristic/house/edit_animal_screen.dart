@@ -5,9 +5,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'animal_service.dart';
+import 'animal_model.dart';
 
 class EditAnimalScreen extends StatefulWidget {
-  final Map<String, dynamic>? animal;
+  final Animal? animal;
   final int houseId;
 
   const EditAnimalScreen({super.key, this.animal, required this.houseId});
@@ -28,9 +29,8 @@ class _EditAnimalScreenState extends State<EditAnimalScreen> {
   void initState() {
     super.initState();
     if (widget.animal != null) {
-      final a = widget.animal!;
-      nameCtrl.text = a['name'] ?? '';
-      typeCtrl.text = a['type'] ?? '';
+      nameCtrl.text = widget.animal!.name ?? '';
+      typeCtrl.text = widget.animal!.type ?? '';
     }
   }
 
@@ -49,25 +49,30 @@ class _EditAnimalScreenState extends State<EditAnimalScreen> {
 
     if (widget.animal != null) {
       await service.updateAnimalWithImage(
-        animalId: widget.animal!['animal_id'],
-        houseId: widget.houseId,
+        animalId: widget.animal!.animalId,
+        houseId: widget.animal!.houseId,
         name: name,
         type: type,
         imageFile: imageFile,
       );
     } else {
       if (imageFile == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('กรุณาเลือกรูปภาพสัตว์เลี้ยง'),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('กรุณาเลือกรูปภาพสัตว์เลี้ยง')),
+        );
         return;
       }
-      await service.addAnimalWithImage(
-        houseId: widget.houseId,
-        name: name,
-        type: type,
-        imageFile: imageFile!,
+      await service.insertAnimal(
+        Animal(
+          animalId: 0,
+          houseId: widget.houseId,
+          name: name,
+          type: type,
+          img: null,
+        ),
+        File(imageFile!.path),
       );
+
     }
 
     if (context.mounted) Navigator.pop(context);
@@ -83,12 +88,12 @@ class _EditAnimalScreenState extends State<EditAnimalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.animal != null ? 'แก้ไขสัตว์เลี้ยง' : 'เพิ่มสัตว์เลี้ยง')),
+      appBar: AppBar(title: const Text('สัตว์เลี้ยง')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
             children: [
               TextFormField(
                 controller: nameCtrl,
@@ -98,21 +103,18 @@ class _EditAnimalScreenState extends State<EditAnimalScreen> {
               TextFormField(
                 controller: typeCtrl,
                 decoration: const InputDecoration(labelText: 'ประเภท'),
-                validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกประเภท' : null,
               ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
                 onPressed: _pickImage,
                 icon: const Icon(Icons.image),
-                label: const Text('เลือกรูปสัตว์เลี้ยง'),
+                label: const Text('เลือกรูปภาพ'),
               ),
-              if (imageFile != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Image.file(File(imageFile!.path), height: 150),
-                ),
-              const SizedBox(height: 20),
-              ElevatedButton(onPressed: _save, child: const Text('บันทึก')),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: _save,
+                child: const Text('บันทึก'),
+              ),
             ],
           ),
         ),

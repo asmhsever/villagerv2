@@ -1,11 +1,13 @@
-// 📁 lib/views/juristic/edit_house_screen.dart
+// 📁 lib/views/juristic/house/edit_house_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'house_model.dart';
 
 class EditHouseScreen extends StatefulWidget {
-  final Map<String, dynamic>? house;
+  final House? house;
   final int? villageId;
+
   const EditHouseScreen({super.key, this.house, this.villageId});
 
   @override
@@ -14,14 +16,16 @@ class EditHouseScreen extends StatefulWidget {
 
 class _EditHouseScreenState extends State<EditHouseScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController usernameCtrl;
-  late TextEditingController sizeCtrl;
+  final usernameCtrl = TextEditingController();
+  final sizeCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    usernameCtrl = TextEditingController(text: widget.house?['username'] ?? '');
-    sizeCtrl = TextEditingController(text: widget.house?['size'] ?? '');
+    if (widget.house != null) {
+      usernameCtrl.text = widget.house!.username ?? '';
+      sizeCtrl.text = widget.house!.size ?? '';
+    }
   }
 
   Future<void> _save() async {
@@ -34,13 +38,23 @@ class _EditHouseScreenState extends State<EditHouseScreen> {
     };
 
     final client = Supabase.instance.client;
-    if (widget.house != null && widget.house!['house_id'] != null) {
-      await client.from('house').update(payload).eq('house_id', widget.house!['house_id']);
+    if (widget.house != null) {
+      await client.from('house')
+          .update(payload)
+          .eq('house_id', widget.house!.houseId);
     } else {
-      await client.from('house').insert(payload);
+      await client.from('house')
+          .insert(payload);
     }
 
     if (context.mounted) Navigator.pop(context, true);
+  }
+
+  @override
+  void dispose() {
+    usernameCtrl.dispose();
+    sizeCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -60,20 +74,15 @@ class _EditHouseScreenState extends State<EditHouseScreen> {
                 decoration: const InputDecoration(labelText: 'เจ้าของบ้าน'),
                 validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกชื่อเจ้าของบ้าน' : null,
               ),
-              const SizedBox(height: 16),
               TextFormField(
                 controller: sizeCtrl,
                 decoration: const InputDecoration(labelText: 'ขนาดบ้าน'),
-                validator: (v) => v == null || v.isEmpty ? 'กรุณากรอกขนาดบ้าน' : null,
               ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _save,
-                  child: Text(widget.house == null ? 'เพิ่มบ้าน' : 'บันทึกการแก้ไข'),
-                ),
-              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _save,
+                child: const Text('บันทึก'),
+              )
             ],
           ),
         ),
