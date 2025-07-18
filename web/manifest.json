@@ -1,6 +1,6 @@
 {
-    "name": "superprojectv2",
-    "short_name": "superprojectv2",
+    "name": "fullproject",
+    "short_name": "fullproject",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
