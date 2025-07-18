@@ -26,4 +26,6 @@ class AppRoutes {
 
   // Error
   static const String notFound = '/not_found';
-}
+
+  static const String lawDebtStatus = '/not_found';
+  static const String lawChangePassword = '/not_found';

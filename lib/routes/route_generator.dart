@@ -28,7 +28,14 @@ class RouteGenerator {
       case AppRoutes.houseDashboard:
         return _createRoute(const HouseDashboardPage());
       case AppRoutes.lawDashboard:
-        return _createRoute(const LawDashboardPage());
+        final args = settings.arguments as Map<String, dynamic>;
+        return _createRoute(
+          LawDashboardPage(
+            lawId: args['lawId'],
+            villageId: args['villageId'],
+          ),
+        );
+
       case AppRoutes.lawComplaintList:
         return _createRoute(const ComplaintListPage());
 
