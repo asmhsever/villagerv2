@@ -4,6 +4,7 @@ import 'package:fullproject/domains/bill_domain.dart';
 import 'package:fullproject/models/bill_model.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/pages/law/bill/bill_form_page.dart';
+import 'package:fullproject/pages/law/bill/bill_detail_page.dart';
 import 'package:fullproject/services/auth_service.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:intl/intl.dart';
@@ -80,14 +81,14 @@ class _BillPageState extends State<BillPage> {
     }
   }
 
-  Future<void> _navigateToEditForm(BillModel bill) async {
-    final result = await Navigator.push(
+  void _navigateToDetail(BillModel bill) async {
+    await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => BillFormPage(bill: bill)),
+      MaterialPageRoute(
+        builder: (_) => BillDetailPage(bill: bill, houseNumber: houseMap[bill.houseId] ?? '-'),
+      ),
     );
-    if (result == true) {
-      _refreshBills();
-    }
+    _refreshBills();
   }
 
   List<BillModel> _filterBills(List<BillModel> bills) {
@@ -173,26 +174,10 @@ class _BillPageState extends State<BillPage> {
                       final bill = filtered[index];
                       final houseNumber = houseMap[bill.houseId] ?? 'ไม่ทราบเลขที่';
                       return ListTile(
-                        title: Text(
-                            'บ้านเลขที่ $houseNumber - ${bill.amount} บาท'),
+                        title: Text('บ้านเลขที่ $houseNumber - ${bill.amount} บาท'),
                         subtitle: Text(
                             'ครบกำหนด: ${formatDate(bill.dueDate)} | สถานะ: ${bill.paidStatus == 1 ? 'ชำระแล้ว' : 'ยังไม่ชำระ'}'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _navigateToEditForm(bill),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () async {
-                                await _domain.removeBill(bill.billId);
-                                _refreshBills();
-                              },
-                            ),
-                          ],
-                        ),
+                        onTap: () => _navigateToDetail(bill),
                       );
                     },
                   ),

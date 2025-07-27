@@ -1,4 +1,3 @@
-
 class BillModel {
   final int billId;
   final int houseId;
@@ -8,6 +7,7 @@ class BillModel {
   final DateTime? paidDate;
   final String? paidMethod;
   final int? service;
+  final Map<String, dynamic>? serviceObj;
   final DateTime? dueDate;
   final String? referenceNo;
 
@@ -20,6 +20,7 @@ class BillModel {
     this.paidDate,
     this.paidMethod,
     this.service,
+    this.serviceObj,
     this.dueDate,
     this.referenceNo,
   });
@@ -33,6 +34,7 @@ class BillModel {
     DateTime? paidDate,
     String? paidMethod,
     int? service,
+    Map<String, dynamic>? serviceObj,
     DateTime? dueDate,
     String? referenceNo,
   }) {
@@ -45,6 +47,7 @@ class BillModel {
       paidDate: paidDate ?? this.paidDate,
       paidMethod: paidMethod ?? this.paidMethod,
       service: service ?? this.service,
+      serviceObj: serviceObj ?? this.serviceObj,
       dueDate: dueDate ?? this.dueDate,
       referenceNo: referenceNo ?? this.referenceNo,
     );
@@ -59,7 +62,8 @@ class BillModel {
       paidStatus: json['paid_status'] as int,
       paidDate: json['paid_date'] != null ? DateTime.tryParse(json['paid_date']) : null,
       paidMethod: json['paid_method'],
-      service: json['service'],
+      service: json['service'] is int ? json['service'] : null,
+      serviceObj: json['service'] is Map<String, dynamic> ? json['service'] : null,
       dueDate: json['due_date'] != null ? DateTime.tryParse(json['due_date']) : null,
       referenceNo: json['reference_no'],
     );
@@ -79,4 +83,6 @@ class BillModel {
       'reference_no': referenceNo,
     };
   }
+
+  String get serviceName => serviceObj?['name'] ?? 'ไม่ระบุประเภท';
 }
