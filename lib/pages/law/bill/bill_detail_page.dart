@@ -91,7 +91,8 @@ class BillDetailPage extends StatelessWidget {
     );
 
     if (confirm == true) {
-      await BillDomain().removeBill(bill.billId);
+      await BillDomain().delete(bill.billId);
+
       if (context.mounted) Navigator.pop(context, true);
     }
   }

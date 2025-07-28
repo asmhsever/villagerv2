@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/models/bill_model.dart';
 import 'package:fullproject/config/supabase_config.dart';
+import 'package:fullproject/domains/bill_domain.dart';
 import 'package:fullproject/services/auth_service.dart';
-import 'package:fullproject/services/bill_service/bill_service.dart';
 import 'package:intl/intl.dart';
 
 
@@ -64,15 +64,15 @@ class _BillFormPageState extends State<BillFormPage> {
       referenceNo: widget.bill?.referenceNo ?? 'REF${DateTime.now().millisecondsSinceEpoch}',
     );
 
-    final service = BillService();
     if (isEdit) {
-      await service.updateBill(bill);
+      await BillDomain().update(bill);
     } else {
-      await service.addBill(bill);
+      await BillDomain().create(bill);
     }
 
     if (mounted) Navigator.pop(context, true);
   }
+
 
   @override
   Widget build(BuildContext context) {

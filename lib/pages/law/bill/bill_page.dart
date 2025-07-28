@@ -38,7 +38,8 @@ class _BillPageState extends State<BillPage> {
       setState(() => law = user);
       await _loadHouseMap(user.villageId);
       setState(() {
-        _bills = _domain.fetchBillsForLaw(user.villageId);
+        _domain.getByVillage(user.villageId);
+
       });
     } else {
       _bills = Future.value([]);
@@ -66,7 +67,7 @@ class _BillPageState extends State<BillPage> {
   Future<void> _refreshBills() async {
     if (law != null) {
       setState(() {
-        _bills = _domain.fetchBillsForLaw(law!.villageId);
+        _domain.getByVillage(law!.villageId);
       });
     }
   }

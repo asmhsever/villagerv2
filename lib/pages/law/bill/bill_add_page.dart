@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fullproject/models/bill_model.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:fullproject/services/auth_service.dart';
-import 'package:fullproject/services/bill_service/bill_service.dart';
+import 'package:fullproject/domains/bill_domain.dart';
 import 'package:intl/intl.dart';
 
 class BillAddPage extends StatefulWidget {
@@ -53,8 +53,8 @@ class _BillAddPageState extends State<BillAddPage> {
       referenceNo: 'REF${DateTime.now().millisecondsSinceEpoch}',
     );
 
-    final service = BillService();
-    await service.addBill(bill);
+    await BillDomain().create(bill);
+
 
     if (mounted) Navigator.pop(context, true);
   }

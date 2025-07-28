@@ -69,6 +69,7 @@ class BillModel {
     );
   }
 
+  /// ใช้สำหรับ insert/update ไปยัง Supabase
   Map<String, dynamic> toJson() {
     return {
       'bill_id': billId,
@@ -84,5 +85,6 @@ class BillModel {
     };
   }
 
+  /// ใช้ในฝั่ง UI เพื่อแสดงชื่อประเภทบริการจาก object
   String get serviceName => serviceObj?['name'] ?? 'ไม่ระบุประเภท';
 }

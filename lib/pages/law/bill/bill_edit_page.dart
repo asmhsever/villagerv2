@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fullproject/domains/bill_domain.dart';
 import 'package:fullproject/models/bill_model.dart';
 import 'package:fullproject/config/supabase_config.dart';
-import 'package:fullproject/services/bill_service/bill_service.dart';
 import 'package:intl/intl.dart';
 
 class BillEditPage extends StatefulWidget {
@@ -49,7 +49,10 @@ class _BillEditPageState extends State<BillEditPage> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate() || _dueDate == null || _selectedHouseId == null || _selectedServiceId == null) return;
+    if (!_formKey.currentState!.validate() ||
+        _dueDate == null ||
+        _selectedHouseId == null ||
+        _selectedServiceId == null) return;
 
     final bill = widget.bill.copyWith(
       houseId: _selectedHouseId!,
@@ -58,11 +61,11 @@ class _BillEditPageState extends State<BillEditPage> {
       service: _selectedServiceId,
     );
 
-    final service = BillService();
-    await service.updateBill(bill);
+    await BillDomain().update(bill);
 
     if (mounted) Navigator.pop(context, true);
   }
+
 
   String _getServiceNameTh(String? eng) {
     switch (eng) {
