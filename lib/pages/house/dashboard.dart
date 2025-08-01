@@ -71,7 +71,8 @@ class HouseNotionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: NotionDomain.getRecentNotions(villageId: villageId),
+      future: NotionDomain.getRecentNotions(villageId: villageId!),
+
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());

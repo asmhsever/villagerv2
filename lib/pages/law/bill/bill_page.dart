@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:fullproject/domains/bill_domain.dart';
 import 'package:fullproject/models/bill_model.dart';
 import 'package:fullproject/models/law_model.dart';
-import 'package:fullproject/pages/law/bill/bill_form_page.dart';
 import 'package:fullproject/pages/law/bill/bill_detail_page.dart';
+import 'package:fullproject/pages/law/bill/bill_add_page.dart';
 import 'package:fullproject/services/auth_service.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:intl/intl.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+
 
 class BillPage extends StatefulWidget {
   const BillPage({super.key});
@@ -38,7 +37,8 @@ class _BillPageState extends State<BillPage> {
       setState(() => law = user);
       await _loadHouseMap(user.villageId);
       setState(() {
-        _domain.getByVillage(user.villageId);
+        _bills = _domain.getByVillage(user.villageId);
+
 
       });
     } else {
@@ -67,15 +67,18 @@ class _BillPageState extends State<BillPage> {
   Future<void> _refreshBills() async {
     if (law != null) {
       setState(() {
-        _domain.getByVillage(law!.villageId);
+        _bills = _domain.getByVillage(law!.villageId);
+
+
+
       });
     }
   }
 
-  Future<void> _navigateToAddForm() async {
+  Future<void> _navigateToAddBillPage()  async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const BillFormPage()),
+      MaterialPageRoute(builder: (_) => const BillAddPage()),
     );
     if (result == true) {
       _refreshBills();
@@ -97,34 +100,7 @@ class _BillPageState extends State<BillPage> {
     return bills.where((b) => b.paidStatus == filterStatus).toList();
   }
 
-  Future<void> _exportToPdf(List<BillModel> bills) async {
-    final pdf = pw.Document();
 
-    pdf.addPage(
-      pw.Page(
-        build: (context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('รายงานค่าส่วนกลาง', style: pw.TextStyle(fontSize: 18)),
-              pw.SizedBox(height: 12),
-              pw.TableHelper.fromTextArray(
-                headers: ['บ้านเลขที่', 'จำนวนเงิน', 'ครบกำหนด', 'สถานะ'],
-                data: bills.map((bill) {
-                  final houseNumber = houseMap[bill.houseId] ?? 'ไม่ทราบ';
-                  final status = bill.paidStatus == 1 ? 'ชำระแล้ว' : 'ยังไม่ชำระ';
-                  final due = formatDate(bill.dueDate);
-                  return [houseNumber, '${bill.amount}', due, status];
-                }).toList(),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-
-    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,13 +136,10 @@ class _BillPageState extends State<BillPage> {
                         onChanged: (value) => setState(() => filterStatus = value),
                       ),
                       const Spacer(),
-                      ElevatedButton.icon(
-                        onPressed: () => _exportToPdf(filtered),
-                        icon: const Icon(Icons.picture_as_pdf),
-                        label: const Text('Export PDF'),
-                      )
+
                     ],
                   ),
+
                 ),
                 Expanded(
                   child: ListView.builder(
@@ -193,7 +166,7 @@ class _BillPageState extends State<BillPage> {
         children: [
           FloatingActionButton(
             heroTag: 'addBill',
-            onPressed: _navigateToAddForm,
+          onPressed: _navigateToAddBillPage,
             tooltip: 'เพิ่มค่าส่วนกลาง',
             child: const Icon(Icons.add),
           ),

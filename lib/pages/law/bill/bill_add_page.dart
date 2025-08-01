@@ -17,12 +17,16 @@ class _BillAddPageState extends State<BillAddPage> {
   final _amountController = TextEditingController();
   DateTime? _dueDate;
   int? _selectedHouseId;
+  int? _selectedServiceId;
+
   List<Map<String, dynamic>> _houses = [];
+  List<Map<String, dynamic>> _services = [];
 
   @override
   void initState() {
     super.initState();
     _fetchHouses();
+    _fetchServices();
   }
 
   Future<void> _fetchHouses() async {
@@ -37,8 +41,18 @@ class _BillAddPageState extends State<BillAddPage> {
     });
   }
 
+  Future<void> _fetchServices() async {
+    final response = await SupabaseConfig.client
+        .from('service')
+        .select('service_id, name');
+
+    setState(() {
+      _services = List<Map<String, dynamic>>.from(response);
+    });
+  }
+
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate() || _dueDate == null || _selectedHouseId == null) return;
+    if (!_formKey.currentState!.validate() || _dueDate == null || _selectedHouseId == null || _selectedServiceId == null) return;
 
     final bill = BillModel(
       billId: 0,
@@ -49,21 +63,22 @@ class _BillAddPageState extends State<BillAddPage> {
       billDate: DateTime.now(),
       paidMethod: '',
       paidDate: null,
-      service: null,
+      service: _selectedServiceId, // ใส่ประเภทบริการที่เลือก
       referenceNo: 'REF${DateTime.now().millisecondsSinceEpoch}',
     );
 
     await BillDomain().create(bill);
-
 
     if (mounted) Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = _houses.isEmpty || _services.isEmpty;
+
     return Scaffold(
       appBar: AppBar(title: const Text('เพิ่มค่าส่วนกลาง')),
-      body: _houses.isEmpty
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.all(16.0),
@@ -85,12 +100,27 @@ class _BillAddPageState extends State<BillAddPage> {
                 decoration: const InputDecoration(labelText: 'บ้านเลขที่'),
                 validator: (value) => value == null ? 'กรุณาเลือกบ้าน' : null,
               ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<int>(
+                value: _services.any((s) => s['service_id'] == _selectedServiceId)
+                    ? _selectedServiceId
+                    : null,
+                items: _services.map((service) {
+                  return DropdownMenuItem<int>(
+                    value: service['service_id'],
+                    child: Text(service['name']),
+                  );
+                }).toList(),
+                onChanged: (val) => setState(() => _selectedServiceId = val),
+                decoration: const InputDecoration(labelText: 'ประเภทบริการ'),
+                validator: (value) => value == null ? 'กรุณาเลือกประเภทบริการ' : null,
+              ),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'จำนวนเงิน'),
-                validator: (value) =>
-                value == null || value.isEmpty ? 'กรุณากรอกจำนวนเงิน' : null,
+                validator: (value) => value == null || value.isEmpty ? 'กรุณากรอกจำนวนเงิน' : null,
               ),
               const SizedBox(height: 12),
               Row(

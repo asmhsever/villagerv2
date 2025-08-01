@@ -4,6 +4,7 @@ import 'package:fullproject/pages/admin/dashboard.dart';
 import 'package:fullproject/pages/house/dashboard.dart';
 import 'package:fullproject/pages/law/bill/bill_page.dart';
 import 'package:fullproject/pages/law/dashboard.dart';
+import 'package:fullproject/pages/law/notion/notion_page.dart';
 import 'package:fullproject/pages/notfound_age.dart';
 import 'package:fullproject/pages/splash_page.dart';
 import 'package:fullproject/pages/welcome_page.dart';
@@ -31,6 +32,9 @@ class RouteGenerator {
         return _createRoute(const SplashPage());
       case AppRoutes.lawBill:
         return _createRoute(const BillPage());
+      case AppRoutes.notion:
+        return _createRoute(const NotionPage());
+
 
     /*case AppRoutes.complaint:
         return _createRoute(const NotFoundPage());
@@ -41,8 +45,7 @@ class RouteGenerator {
       case AppRoutes.meeting:
         return _createRoute(const NotFoundPage());
 
-      case AppRoutes.notion:
-        return _createRoute(const NotFoundPage());
+
 
       case AppRoutes.resident:
         return _createRoute(const NotFoundPage());*/

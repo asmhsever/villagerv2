@@ -54,7 +54,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
           AppNavigation.navigateTo(AppRoutes.notFound);
         }),
         _DashboardItem(Icons.announcement, 'ข่าวสาร', () {
-          AppNavigation.navigateTo(AppRoutes.notFound);
+          AppNavigation.navigateTo(AppRoutes.notion);
         }),
         _DashboardItem(Icons.pets, 'สัตว์เลี้ยง', () {
           AppNavigation.navigateTo(AppRoutes.notFound);

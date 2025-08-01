@@ -22,10 +22,12 @@ class NotionModel {
       notionId: json['notion_id'] ?? 0,
       lawId: json['law_id'] ?? 0,
       villageId: json['village_id'] ?? 0,
-      header: json['header'] ?? "",
-      description: json['description'] ?? "",
-      createDate: DateTime.parse(json['created_at']),
-      img: json['img'] ?? "",
+      header: json['header'] as String?,
+      description: json['description'] as String?,
+      createDate: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'])
+          : null,
+      img: json['img'] as String?,
     );
   }
 
@@ -36,7 +38,7 @@ class NotionModel {
       'village_id': villageId,
       'header': header,
       'description': description,
-      'created_at': createDate,
+      'created_at': createDate?.toIso8601String(),
       'img': img,
     };
   }
