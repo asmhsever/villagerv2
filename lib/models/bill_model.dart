@@ -2,14 +2,14 @@ class BillModel {
   final int billId;
   final int houseId;
   final DateTime billDate;
-  final int amount;
+  final double amount;
   final int paidStatus;
   final DateTime? paidDate;
   final String? paidMethod;
-  final int? service;
-  final Map<String, dynamic>? serviceObj;
-  final DateTime? dueDate;
+  final int service;
+  final DateTime dueDate;
   final String? referenceNo;
+  final String? paidImg; // เพิ่มฟิลด์นี้
 
   BillModel({
     required this.billId,
@@ -19,17 +19,17 @@ class BillModel {
     required this.paidStatus,
     this.paidDate,
     this.paidMethod,
-    this.service,
-    this.serviceObj,
-    this.dueDate,
+    required this.service,
+    required this.dueDate,
     this.referenceNo,
+    this.paidImg, // เพิ่มใน constructor
   });
 
   BillModel copyWith({
     int? billId,
     int? houseId,
     DateTime? billDate,
-    int? amount,
+    double? amount,
     int? paidStatus,
     DateTime? paidDate,
     String? paidMethod,
@@ -47,7 +47,6 @@ class BillModel {
       paidDate: paidDate ?? this.paidDate,
       paidMethod: paidMethod ?? this.paidMethod,
       service: service ?? this.service,
-      serviceObj: serviceObj ?? this.serviceObj,
       dueDate: dueDate ?? this.dueDate,
       referenceNo: referenceNo ?? this.referenceNo,
     );
@@ -55,21 +54,28 @@ class BillModel {
 
   factory BillModel.fromJson(Map<String, dynamic> json) {
     return BillModel(
-      billId: json['bill_id'] as int,
-      houseId: json['house_id'] as int,
-      billDate: DateTime.parse(json['bill_date']),
-      amount: json['amount'] as int,
-      paidStatus: json['paid_status'] as int,
-      paidDate: json['paid_date'] != null ? DateTime.tryParse(json['paid_date']) : null,
+      billId: json['bill_id'] ?? 0,
+      houseId: json['house_id'] ?? 0,
+      billDate: json['bill_date'] is String
+          ? DateTime.parse(json['bill_date'])
+          : json['bill_date'] as DateTime,
+      amount: (json['amount'] ?? 0).toDouble(),
+      paidStatus: json['paid_status'] ?? 0,
+      paidDate: json['paid_date'] != null
+          ? (json['paid_date'] is String
+                ? DateTime.parse(json['paid_date'])
+                : json['paid_date'] as DateTime)
+          : null,
       paidMethod: json['paid_method'],
-      service: json['service'] is int ? json['service'] : null,
-      serviceObj: json['service'] is Map<String, dynamic> ? json['service'] : null,
-      dueDate: json['due_date'] != null ? DateTime.tryParse(json['due_date']) : null,
+      service: json['service'] ?? 0,
+      dueDate: json['due_date'] is String
+          ? DateTime.parse(json['due_date'])
+          : json['due_date'] as DateTime,
       referenceNo: json['reference_no'],
+      paidImg: json['paid_img'],
     );
   }
 
-  /// ใช้สำหรับ insert/update ไปยัง Supabase
   Map<String, dynamic> toJson() {
     return {
       'bill_id': billId,
@@ -80,11 +86,9 @@ class BillModel {
       'paid_date': paidDate?.toIso8601String(),
       'paid_method': paidMethod,
       'service': service,
-      'due_date': dueDate?.toIso8601String(),
+      'due_date': dueDate.toIso8601String(),
       'reference_no': referenceNo,
+      'paid_img': paidImg,
     };
   }
-
-  /// ใช้ในฝั่ง UI เพื่อแสดงชื่อประเภทบริการจาก object
-  String get serviceName => serviceObj?['name'] ?? 'ไม่ระบุประเภท';
 }

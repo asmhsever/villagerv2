@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:fullproject/main.dart';
 import 'package:fullproject/pages/admin/dashboard.dart';
-import 'package:fullproject/pages/house/dashboard.dart';
-import 'package:fullproject/pages/law/bill/bill_page.dart';
+import 'package:fullproject/pages/house/complaint/complaint_form.dart';
+import 'package:fullproject/pages/house/main.dart';
 import 'package:fullproject/pages/law/dashboard.dart';
 import 'package:fullproject/pages/law/notion/notion_page.dart';
 import 'package:fullproject/pages/notfound_age.dart';
 import 'package:fullproject/pages/splash_page.dart';
 import 'package:fullproject/pages/welcome_page.dart';
 import 'package:fullproject/pages/login_page.dart';
+import '../pages/law/house/house_page.dart';
+
 import 'app_routes.dart';
 
 class RouteGenerator {
@@ -25,15 +26,25 @@ class RouteGenerator {
       case AppRoutes.adminDashboard:
         return _createRoute(const AdminDashboardPage());
       case AppRoutes.houseDashboard:
-        return _createRoute(const HouseDashboardPage());
+        return _createRoute(const HouseMainPage());
       case AppRoutes.lawDashboard:
         return _createRoute(const LawDashboardPage());
       case AppRoutes.splash:
         return _createRoute(const SplashPage());
-      case AppRoutes.lawBill:
-        return _createRoute(const BillPage());
+      // case AppRoutes.lawBill:
+      //   return _createRoute(const BillPage());
+      case AppRoutes.houseComplaintForm:
+        final args = settings.arguments as Map<String, dynamic>;
+        final houseId = args['houseId'] as int;
+        return _createRoute(HouseComplaintFormPage(houseId: houseId));
       case AppRoutes.notion:
-        return _createRoute(const NotionPage());
+        return _createRoute(const LawNotionPage());
+
+      case AppRoutes.resident:
+        final args = settings.arguments as Map<String, dynamic>;
+        final villageId = args['villageId'] as int;
+        return _createRoute(HouseManagePage(villageId: villageId));
+
 
 
     /*case AppRoutes.complaint:
@@ -49,7 +60,6 @@ class RouteGenerator {
 
       case AppRoutes.resident:
         return _createRoute(const NotFoundPage());*/
-
       default:
         return _createRoute(const NotFoundPage());
     }

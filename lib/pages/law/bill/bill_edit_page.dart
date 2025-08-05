@@ -52,20 +52,20 @@ class _BillEditPageState extends State<BillEditPage> {
     if (!_formKey.currentState!.validate() ||
         _dueDate == null ||
         _selectedHouseId == null ||
-        _selectedServiceId == null) return;
+        _selectedServiceId == null)
+      return;
 
     final bill = widget.bill.copyWith(
       houseId: _selectedHouseId!,
-      amount: int.parse(_amountController.text),
+      amount: double.parse(_amountController.text),
       dueDate: _dueDate,
       service: _selectedServiceId,
     );
 
-    await BillDomain().update(bill);
+    await BillDomain.update(billId: bill.billId, updatedBill: bill);
 
     if (mounted) Navigator.pop(context, true);
   }
-
 
   String _getServiceNameTh(String? eng) {
     switch (eng) {
@@ -89,86 +89,99 @@ class _BillEditPageState extends State<BillEditPage> {
       body: _houses.isEmpty || _services.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DropdownButtonFormField<int>(
-                value: _houses.any((h) => h['house_id'] == _selectedHouseId)
-                    ? _selectedHouseId
-                    : null,
-                items: _houses.map((house) {
-                  return DropdownMenuItem<int>(
-                    value: house['house_id'],
-                    child: Text(house['house_number']),
-                  );
-                }).toList(),
-                onChanged: (val) => setState(() => _selectedHouseId = val),
-                decoration: const InputDecoration(labelText: 'บ้านเลขที่'),
-                validator: (value) => value == null ? 'กรุณาเลือกบ้าน' : null,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<int>(
-                value: _selectedServiceId,
-                decoration: const InputDecoration(labelText: 'ประเภทบริการ'),
-                items: _services.map((s) {
-                  return DropdownMenuItem<int>(
-                    value: s['service_id'],
-                    child: Text(_getServiceNameTh(s['name'])),
-                  );
-                }).toList(),
-                onChanged: (val) => setState(() => _selectedServiceId = val),
-                validator: (val) => val == null ? 'กรุณาเลือกประเภท' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'จำนวนเงิน'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'กรุณากรอกจำนวนเงิน'
-                    : null,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _dueDate == null
-                          ? 'เลือกวันครบกำหนด'
-                          : 'ครบกำหนด: ${DateFormat('dd/MM/yyyy').format(_dueDate!)}',
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButtonFormField<int>(
+                      value:
+                          _houses.any((h) => h['house_id'] == _selectedHouseId)
+                          ? _selectedHouseId
+                          : null,
+                      items: _houses.map((house) {
+                        return DropdownMenuItem<int>(
+                          value: house['house_id'],
+                          child: Text(house['house_number']),
+                        );
+                      }).toList(),
+                      onChanged: (val) =>
+                          setState(() => _selectedHouseId = val),
+                      decoration: const InputDecoration(
+                        labelText: 'บ้านเลขที่',
+                      ),
+                      validator: (value) =>
+                          value == null ? 'กรุณาเลือกบ้าน' : null,
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _dueDate ?? DateTime.now(),
-                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                      );
-                      if (picked != null) {
-                        setState(() => _dueDate = picked);
-                      }
-                    },
-                    child: const Text('เลือกวันที่'),
-                  )
-                ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _submit,
-                  child: const Text('บันทึกการแก้ไข'),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      value: _selectedServiceId,
+                      decoration: const InputDecoration(
+                        labelText: 'ประเภทบริการ',
+                      ),
+                      items: _services.map((s) {
+                        return DropdownMenuItem<int>(
+                          value: s['service_id'],
+                          child: Text(_getServiceNameTh(s['name'])),
+                        );
+                      }).toList(),
+                      onChanged: (val) =>
+                          setState(() => _selectedServiceId = val),
+                      validator: (val) =>
+                          val == null ? 'กรุณาเลือกประเภท' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'จำนวนเงิน'),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'กรุณากรอกจำนวนเงิน'
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _dueDate == null
+                                ? 'เลือกวันครบกำหนด'
+                                : 'ครบกำหนด: ${DateFormat('dd/MM/yyyy').format(_dueDate!)}',
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _dueDate ?? DateTime.now(),
+                              firstDate: DateTime.now().subtract(
+                                const Duration(days: 365),
+                              ),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365),
+                              ),
+                            );
+                            if (picked != null) {
+                              setState(() => _dueDate = picked);
+                            }
+                          },
+                          child: const Text('เลือกวันที่'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _submit,
+                        child: const Text('บันทึกการแก้ไข'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

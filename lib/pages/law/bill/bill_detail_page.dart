@@ -8,13 +8,8 @@ import 'package:printing/printing.dart';
 
 class BillDetailPage extends StatelessWidget {
   final BillModel bill;
-  final String houseNumber;
 
-  const BillDetailPage({
-    super.key,
-    required this.bill,
-    required this.houseNumber,
-  });
+  const BillDetailPage({super.key, required this.bill});
 
   String formatDate(DateTime? date) {
     if (date == null) return '-';
@@ -51,7 +46,7 @@ class BillDetailPage extends StatelessWidget {
             pw.Text('รายละเอียดค่าส่วนกลาง', style: pw.TextStyle(fontSize: 18)),
             pw.SizedBox(height: 12),
             pw.Text('รหัสบิล: ${bill.billId}'),
-            pw.Text('บ้าน: บ้านเลขที่ $houseNumber'),
+            pw.Text('บ้าน: บ้านเลขที่ ${bill.houseId}'),
             pw.Text('ประเภทบริการ: ${getServiceLabel(bill.service)}'),
             pw.Text('จำนวนเงิน: ${bill.amount} บาท'),
             pw.Text('สถานะ: ${getPaidStatus(bill.paidStatus)}'),
@@ -91,7 +86,7 @@ class BillDetailPage extends StatelessWidget {
     );
 
     if (confirm == true) {
-      await BillDomain().delete(bill.billId);
+      await BillDomain.delete(bill.billId);
 
       if (context.mounted) Navigator.pop(context, true);
     }
@@ -131,7 +126,7 @@ class BillDetailPage extends StatelessWidget {
             Text('ข้อมูลบิล', style: Theme.of(context).textTheme.titleMedium),
             const Divider(),
             Text('รหัสบิล: ${bill.billId}'),
-            Text('บ้าน: บ้านเลขที่ $houseNumber'),
+            Text('บ้าน: บ้านเลขที่ ${bill.houseId}'),
             Text('ประเภทบริการ: ${getServiceLabel(bill.service)}'),
             Text('จำนวนเงิน: ${bill.amount} บาท'),
             Text('สถานะ: ${getPaidStatus(bill.paidStatus)}'),

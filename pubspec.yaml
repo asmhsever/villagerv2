@@ -33,9 +33,12 @@ dependencies:
   shared_preferences: ^2.5.0
   supabase_flutter: ^2.9.0
   postgrest: ^2.4.0
-  intl: ^0.20.2
+  intl: ^0.18.0
   pdf: ^3.11.3
   printing: ^5.14.2
+  image_picker: ^1.0.7
+  permission_handler: ^11.0.0
+  image: ^4.1.7
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8

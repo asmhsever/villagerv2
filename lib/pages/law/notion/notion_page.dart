@@ -7,14 +7,14 @@ import 'package:fullproject/services/auth_service.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/pages/law/notion/notion_add_page.dart';
 
-class NotionPage extends StatefulWidget {
-  const NotionPage({super.key});
+class LawNotionPage extends StatefulWidget {
+  const LawNotionPage({super.key});
 
   @override
-  State<NotionPage> createState() => _NotionPageState();
+  State<LawNotionPage> createState() => _LawNotionPageState();
 }
 
-class _NotionPageState extends State<NotionPage> {
+class _LawNotionPageState extends State<LawNotionPage> {
   final NotionDomain _domain = NotionDomain();
   Future<List<NotionModel>>? _notions;
   LawModel? law;
@@ -46,7 +46,7 @@ class _NotionPageState extends State<NotionPage> {
   Future<void> _navigateToAdd() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const NotionAddPage()),
+      MaterialPageRoute(builder: (_) => const LawNotionAddPage()),
     );
     if (result == true) _loadNotions();
   }
@@ -54,7 +54,7 @@ class _NotionPageState extends State<NotionPage> {
   Future<void> _navigateToEdit(NotionModel notion) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => NotionEditPage(notion: notion)),
+      MaterialPageRoute(builder: (_) => LawNotionEditPage(notion: notion)),
     );
     if (result == true) _loadNotions();
   }
@@ -66,8 +66,14 @@ class _NotionPageState extends State<NotionPage> {
         title: const Text("ยืนยันการลบ"),
         content: Text("คุณต้องการลบข่าว '${notion.header}' ใช่หรือไม่?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("ยกเลิก")),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text("ลบ")),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("ยกเลิก"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("ลบ"),
+          ),
         ],
       ),
     );
@@ -101,13 +107,19 @@ class _NotionPageState extends State<NotionPage> {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
-                  title: Text(notion.header ?? '-', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    notion.header ?? '-',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(notion.description ?? ''),
                       const SizedBox(height: 4),
-                      Text('วันที่: ${_formatDate(notion.createDate)}', style: const TextStyle(fontSize: 12)),
+                      Text(
+                        'วันที่: ${_formatDate(notion.createDate)}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ],
                   ),
                   trailing: Row(

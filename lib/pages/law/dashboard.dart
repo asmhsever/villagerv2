@@ -59,8 +59,13 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         _DashboardItem(Icons.pets, 'สัตว์เลี้ยง', () {
           AppNavigation.navigateTo(AppRoutes.notFound);
         }),
-        _DashboardItem(Icons.people, 'ลูกบ้าน', () {
-          AppNavigation.navigateTo(AppRoutes.notFound);
+        _DashboardItem(Icons.people, 'ลูกบ้าน', () async {
+          if (lawModel != null) {
+            AppNavigation.navigateTo(
+              AppRoutes.resident,
+              arguments: {'villageId': lawModel!.villageId},
+            );
+          }
         }),
         _DashboardItem(Icons.meeting_room, 'ประชุม', () {
           AppNavigation.navigateTo(AppRoutes.notFound);
@@ -99,14 +104,19 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
                       onTap: item.onTap,
                       child: Card(
                         elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(item.icon, size: 48),
                               const SizedBox(height: 8),
-                              Text(item.label, style: const TextStyle(fontSize: 16)),
+                              Text(
+                                item.label,
+                                style: const TextStyle(fontSize: 16),
+                              ),
                             ],
                           ),
                         ),
@@ -114,7 +124,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
                     );
                   },
                 ),
-              )
+              ),
             ],
           ),
         ),

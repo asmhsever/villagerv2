@@ -22,12 +22,12 @@ class NotionModel {
       notionId: json['notion_id'] ?? 0,
       lawId: json['law_id'] ?? 0,
       villageId: json['village_id'] ?? 0,
-      header: json['header'] as String?,
-      description: json['description'] as String?,
+      header: json['header'] ?? "",
+      description: json['description'] ?? "",
       createDate: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'])
           : null,
-      img: json['img'] as String?,
+      img: json['img'] ?? "",
     );
   }
 

@@ -65,7 +65,6 @@ class HouseModel {
     };
   }
 
-  /// แบบย่อไว้ใช้กับ session
   Map<String, dynamic> toSessionJson() {
     return {
       'house_id': houseId,
@@ -73,5 +72,37 @@ class HouseModel {
       'village_id': villageId,
       'user_id': userId,
     };
+  }
+
+  HouseModel copyWith({
+    int? houseId,
+    int? villageId,
+    int? userId,
+    String? size,
+    String? houseNumber,
+    String? phone,
+    String? owner,
+    String? status,
+    String? houseType,
+    int? floors,
+    String? usableArea,
+    String? usageStatus,
+    String? img,
+  }) {
+    return HouseModel(
+      houseId: houseId ?? this.houseId,
+      villageId: villageId ?? this.villageId,
+      userId: userId ?? this.userId,
+      size: size ?? this.size,
+      houseNumber: houseNumber ?? this.houseNumber,
+      phone: phone ?? this.phone,
+      owner: owner ?? this.owner,
+      status: status ?? this.status,
+      houseType: houseType ?? this.houseType,
+      floors: floors ?? this.floors,
+      usableArea: usableArea ?? this.usableArea,
+      usageStatus: usageStatus ?? this.usageStatus,
+      img: img ?? this.img,
+    );
   }
 }

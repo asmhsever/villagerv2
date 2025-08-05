@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:fullproject/domains/notion_domain.dart';
 import 'package:fullproject/models/notion_model.dart';
 
-class NotionEditPage extends StatefulWidget {
+class LawNotionEditPage extends StatefulWidget {
   final NotionModel notion;
 
-  const NotionEditPage({super.key, required this.notion});
+  const LawNotionEditPage({super.key, required this.notion});
 
   @override
-  State<NotionEditPage> createState() => _NotionEditPageState();
+  State<LawNotionEditPage> createState() => _LawNotionEditPageState();
 }
 
-class _NotionEditPageState extends State<NotionEditPage> {
+class _LawNotionEditPageState extends State<LawNotionEditPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _headerController;
   late TextEditingController _descController;
@@ -21,7 +21,9 @@ class _NotionEditPageState extends State<NotionEditPage> {
   void initState() {
     super.initState();
     _headerController = TextEditingController(text: widget.notion.header ?? '');
-    _descController = TextEditingController(text: widget.notion.description ?? '');
+    _descController = TextEditingController(
+      text: widget.notion.description ?? '',
+    );
   }
 
   Future<void> _submit() async {
@@ -29,19 +31,30 @@ class _NotionEditPageState extends State<NotionEditPage> {
 
     setState(() => _isSaving = true);
 
-    final updatedNotion = NotionModel(
-      notionId: widget.notion.notionId,
-      lawId: widget.notion.lawId,
-      villageId: widget.notion.villageId,
-      header: _headerController.text.trim(),
-      description: _descController.text.trim(),
-      createDate: widget.notion.createDate,
-      img: widget.notion.img,
-    );
-
-    await NotionDomain().update(updatedNotion);
-
-    if (mounted) Navigator.pop(context, true);
+    try {
+      final updatedNotion = NotionModel(
+        notionId: widget.notion.notionId,
+        lawId: widget.notion.lawId,
+        villageId: widget.notion.villageId,
+        header: _headerController.text.trim(),
+        description: _descController.text.trim(),
+        createDate: widget.notion.createDate,
+        img: widget.notion.img,
+      );
+      await NotionDomain.update(updatedNotion);
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      print("error can update notion $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ไม่สามารถเพิ่มข่าวสารได้ กรุณาลองใหม่อีกครั้ง'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -57,14 +70,18 @@ class _NotionEditPageState extends State<NotionEditPage> {
               TextFormField(
                 controller: _headerController,
                 decoration: const InputDecoration(labelText: 'หัวข้อข่าว'),
-                validator: (value) => value == null || value.isEmpty ? 'กรุณากรอกหัวข้อข่าว' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'กรุณากรอกหัวข้อข่าว'
+                    : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _descController,
                 maxLines: 5,
                 decoration: const InputDecoration(labelText: 'เนื้อหาข่าว'),
-                validator: (value) => value == null || value.isEmpty ? 'กรุณากรอกรายละเอียดข่าว' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'กรุณากรอกรายละเอียดข่าว'
+                    : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -72,7 +89,7 @@ class _NotionEditPageState extends State<NotionEditPage> {
                 child: _isSaving
                     ? const CircularProgressIndicator()
                     : const Text('บันทึกการแก้ไข'),
-              )
+              ),
             ],
           ),
         ),
