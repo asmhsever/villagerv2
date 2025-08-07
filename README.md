@@ -1,4 +1,4 @@
-# superprojectv2
+# fullproject
 
 A new Flutter project.
 
