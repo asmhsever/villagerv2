@@ -9,6 +9,8 @@ import 'package:fullproject/pages/notfound_age.dart';
 import 'package:fullproject/pages/splash_page.dart';
 import 'package:fullproject/pages/welcome_page.dart';
 import 'package:fullproject/pages/login_page.dart';
+import 'package:fullproject/pages/law/profile/profile_page.dart';
+import '../pages/law/profile/profile_page.dart';
 import 'app_routes.dart';
 
 class RouteGenerator {
@@ -41,6 +43,17 @@ class RouteGenerator {
         final args = settings.arguments as Map<String, dynamic>;
         final villageId = args['villageId'] as int;
         return _createRoute(LawHouseManagePage(villageId: villageId));
+      case AppRoutes.LawProfilePage:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final lawId = args?['lawId'] as int?;
+
+        if (lawId == null) {
+          return _createRoute(const NotFoundPage());
+        }
+
+        return _createRoute(LawProfilePage(lawId: lawId));
+
+        return _createRoute(LawProfilePage(lawId: lawId));
       /*case AppRoutes.complaint:
         return _createRoute(const NotFoundPage());
 

@@ -16,6 +16,7 @@ class AppRoutes {
   static const String resident = '/law/resident';
   static const String meeting = '/law/meeting';
   static const String lawBill = '/law/bill';
+  static const String LawProfilePage = '/law/profile';
 
   static const String notFound = 'not_found';
   static const String splash = 'splash';
