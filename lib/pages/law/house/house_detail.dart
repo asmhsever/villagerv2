@@ -7,6 +7,9 @@ import 'package:fullproject/domains/animal_domain.dart';
 import 'package:fullproject/domains/vehicle_domain.dart';
 import 'package:fullproject/services/image_service.dart';
 import 'house_edit.dart';
+import 'animal_edit.dart';
+import 'vehicle_edit.dart';
+
 
 class HouseDetailPage extends StatefulWidget {
   final int houseId;
@@ -16,7 +19,8 @@ class HouseDetailPage extends StatefulWidget {
   State<HouseDetailPage> createState() => _HouseDetailPageState();
 }
 
-class _HouseDetailPageState extends State<HouseDetailPage> with SingleTickerProviderStateMixin {
+class _HouseDetailPageState extends State<HouseDetailPage>
+    with SingleTickerProviderStateMixin {
   HouseModel? house;
   List<AnimalModel> animals = [];
   List<VehicleModel> vehicles = [];
@@ -109,11 +113,238 @@ class _HouseDetailPageState extends State<HouseDetailPage> with SingleTickerProv
     ]);
   }
 
+  // Navigation methods for Management Pages (ดูทั้งหมด)
+  Future<void> _navigateToAnimalManagement() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AnimalEditSinglePage(houseId: widget.houseId),
+      ),
+    );
+
+    // Refresh animals data when returning
+    if (result != null && mounted) {
+      loadAnimals();
+    }
+  }
+
+  Future<void> _navigateToVehicleManagement() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VehicleEditSinglePage(houseId: widget.houseId),
+      ),
+    );
+
+    // Refresh vehicles data when returning
+    if (result != null && mounted) {
+      loadVehicles();
+    }
+  }
+
+  // Navigation methods for Single Edit Pages (แก้ไข/เพิ่มทีละรายการ)
+  Future<void> _navigateToAnimalEdit({AnimalModel? animal}) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AnimalEditSinglePage(
+          houseId: widget.houseId,
+          animal: animal,
+        ),
+      ),
+    );
+
+    // Refresh animals data when returning
+    if (result == true && mounted) {
+      loadAnimals();
+    }
+  }
+
+  Future<void> _navigateToVehicleEdit({VehicleModel? vehicle}) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VehicleEditSinglePage(
+          houseId: widget.houseId,
+          vehicle: vehicle,
+        ),
+      ),
+    );
+
+    // Refresh vehicles data when returning
+    if (result == true && mounted) {
+      loadVehicles();
+    }
+  }
+
+  // Quick delete methods
+  Future<void> _deleteAnimal(AnimalModel animal) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange[600], size: 28),
+            const SizedBox(width: 12),
+            const Text('ยืนยันการลบ'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('คุณแน่ใจหรือไม่ว่าต้องการลบ'),
+            Text(
+              animal.name ?? 'สัตว์เลี้ยง',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('ยกเลิก'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('ลบ'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await AnimalDomain.delete(animal.animalId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('ลบ ${animal.name ?? 'สัตว์เลี้ยง'} สำเร็จ'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          loadAnimals();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('เกิดข้อผิดพลาดในการลบ'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _deleteVehicle(VehicleModel vehicle) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange[600], size: 28),
+            const SizedBox(width: 12),
+            const Text('ยืนยันการลบ'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('คุณแน่ใจหรือไม่ว่าต้องการลบ'),
+            Text(
+              '${vehicle.brand ?? ''} ${vehicle.model ?? ''}'.trim(),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('ยกเลิก'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('ลบ'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await VehicleDomain.delete(vehicle.vehicleId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('ลบ ${vehicle.brand ?? ''} ${vehicle.model ?? ''} สำเร็จ'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          loadVehicles();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('เกิดข้อผิดพลาดในการลบ'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Widget _buildFloatingActionButton() {
+    final currentTab = _tabController.index;
+
+    if (currentTab == 1) { // Animals tab
+      return FloatingActionButton.extended(
+        onPressed: () => _navigateToAnimalEdit(),
+        icon: const Icon(Icons.add),
+        label: const Text('เพิ่มสัตว์เลี้ยง'),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+      );
+    } else if (currentTab == 2) { // Vehicles tab
+      return FloatingActionButton.extended(
+        onPressed: () => _navigateToVehicleEdit(),
+        icon: const Icon(Icons.add),
+        label: const Text('เพิ่มยานพาหนะ'),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      );
+    }
+
+    return Container(); // No FAB for house info tab
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text('บ้านเลขที่ ${house?.houseNumber ?? widget.houseId}'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
         actions: [
           if (house != null)
             IconButton(
@@ -167,6 +398,7 @@ class _HouseDetailPageState extends State<HouseDetailPage> with SingleTickerProv
           _buildVehiclesTab(),
         ],
       ),
+      floatingActionButton: loading ? null : _buildFloatingActionButton(),
     );
   }
 
@@ -228,85 +460,223 @@ class _HouseDetailPageState extends State<HouseDetailPage> with SingleTickerProv
   }
 
   Widget _buildAnimalsTab() {
-    if (animalsLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (animals.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: loadAnimals,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
+      children: [
+        // Header with statistics and manage button
+        Container(
+          padding: const EdgeInsets.all(16),
+          color: Colors.white,
+          child: Row(
             children: [
-              Icon(Icons.pets_outlined, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 16),
-              Text(
-                'ไม่มีสัตว์เลี้ยงในบ้านนี้',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'สัตว์เลี้ยงทั้งหมด',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    Text(
+                      '${animals.length} รายการ',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'ดึงลงเพื่อรีเฟรช',
-                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              ElevatedButton.icon(
+                onPressed: _navigateToAnimalManagement,
+                icon: const Icon(Icons.list, size: 18),
+                label: const Text('ดูทั้งหมด'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
             ],
           ),
         ),
-      );
-    }
 
-    return RefreshIndicator(
-      onRefresh: loadAnimals,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: animals.length,
-        itemBuilder: (context, index) {
-          final animal = animals[index];
-          return _buildAnimalCard(animal);
-        },
-      ),
+        // Animals content
+        Expanded(
+          child: animalsLoading
+              ? const Center(child: CircularProgressIndicator())
+              : animals.isEmpty
+              ? _buildEmptyAnimalsState()
+              : RefreshIndicator(
+            onRefresh: loadAnimals,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: animals.length,
+              itemBuilder: (context, index) {
+                final animal = animals[index];
+                return _buildAnimalCard(animal);
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildVehiclesTab() {
-    if (vehiclesLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (vehicles.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: loadVehicles,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
+      children: [
+        // Header with statistics and manage button
+        Container(
+          padding: const EdgeInsets.all(16),
+          color: Colors.white,
+          child: Row(
             children: [
-              Icon(Icons.directions_car_outlined, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 16),
-              Text(
-                'ไม่มียานพาหนะในบ้านนี้',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ยานพาหนะทั้งหมด',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    Text(
+                      '${vehicles.length} คัน',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'ดึงลงเพื่อรีเฟรช',
-                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              ElevatedButton.icon(
+                onPressed: _navigateToVehicleManagement,
+                icon: const Icon(Icons.list, size: 18),
+                label: const Text('ดูทั้งหมด'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
             ],
           ),
         ),
-      );
-    }
 
-    return RefreshIndicator(
-      onRefresh: loadVehicles,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: vehicles.length,
-        itemBuilder: (context, index) {
-          final vehicle = vehicles[index];
-          return _buildVehicleCard(vehicle);
-        },
+        // Vehicles content
+        Expanded(
+          child: vehiclesLoading
+              ? const Center(child: CircularProgressIndicator())
+              : vehicles.isEmpty
+              ? _buildEmptyVehiclesState()
+              : RefreshIndicator(
+            onRefresh: loadVehicles,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: vehicles.length,
+              itemBuilder: (context, index) {
+                final vehicle = vehicles[index];
+                return _buildVehicleCard(vehicle);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyAnimalsState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.pets_outlined, size: 80, color: Colors.grey[400]),
+          const SizedBox(height: 24),
+          Text(
+            'ไม่มีสัตว์เลี้ยงในบ้านนี้',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'กดปุ่ม "ดูทั้งหมด" เพื่อจัดการข้อมูล',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () => _navigateToAnimalEdit(),
+            icon: const Icon(Icons.add),
+            label: const Text('เพิ่มสัตว์เลี้ยง'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyVehiclesState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.directions_car_outlined, size: 80, color: Colors.grey[400]),
+          const SizedBox(height: 24),
+          Text(
+            'ไม่มียานพาหนะในบ้านนี้',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'กดปุ่ม "ดูทั้งหมด" เพื่อจัดการข้อมูล',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () => _navigateToVehicleEdit(),
+            icon: const Icon(Icons.add),
+            label: const Text('เพิ่มยานพาหนะ'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -366,38 +736,74 @@ class _HouseDetailPageState extends State<HouseDetailPage> with SingleTickerProv
   Widget _buildAnimalCard(AnimalModel animal) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Animal Image/Icon
+            // Animal Image/Icon - ขนาดใหญ่ขึ้น
             Container(
-              width: 60,
-              height: 60,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 color: _getAnimalTypeColor(animal.type).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _getAnimalTypeColor(animal.type).withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
-              child: animal.img != null && animal.img!.isNotEmpty
-                  ? ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: BuildImage(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: animal.img != null && animal.img!.isNotEmpty
+                    ? BuildImage(
                   imagePath: animal.img!,
                   tablePath: 'animal',
+                  width: 80,
+                  height: 80,
                   fit: BoxFit.cover,
-                  errorWidget: Icon(
+                  errorWidget: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          _getAnimalTypeColor(animal.type).withValues(alpha: 0.7),
+                          _getAnimalTypeColor(animal.type).withValues(alpha: 0.9),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      _getAnimalIcon(animal.type),
+                      size: 36,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+                    : Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        _getAnimalTypeColor(animal.type).withValues(alpha: 0.7),
+                        _getAnimalTypeColor(animal.type).withValues(alpha: 0.9),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
                     _getAnimalIcon(animal.type),
-                    size: 30,
-                    color: _getAnimalTypeColor(animal.type),
+                    size: 36,
+                    color: Colors.white,
                   ),
                 ),
-              )
-                  : Icon(
-                _getAnimalIcon(animal.type),
-                size: 30,
-                color: _getAnimalTypeColor(animal.type),
               ),
             ),
 
@@ -415,43 +821,76 @@ class _HouseDetailPageState extends State<HouseDetailPage> with SingleTickerProv
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        _getAnimalIcon(animal.type),
-                        size: 16,
-                        color: Colors.grey[600],
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getAnimalTypeColor(animal.type).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _getAnimalTypeColor(animal.type).withValues(alpha: 0.3),
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        animal.type ?? 'ไม่ระบุประเภท',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _getAnimalIcon(animal.type),
+                          size: 16,
+                          color: _getAnimalTypeColor(animal.type),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 6),
+                        Text(
+                          animal.type ?? 'ไม่ระบุประเภท',
+                          style: TextStyle(
+                            color: _getAnimalTypeColor(animal.type),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'ID: ${animal.animalId}',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
             ),
 
-            // Animal ID Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _getAnimalTypeColor(animal.type),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                'ID: ${animal.animalId}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+            // Action Buttons
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue, size: 22),
+                    onPressed: () => _navigateToAnimalEdit(animal: animal),
+                    tooltip: 'แก้ไข',
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 22),
+                    onPressed: () => _deleteAnimal(animal),
+                    tooltip: 'ลบ',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -462,38 +901,74 @@ class _HouseDetailPageState extends State<HouseDetailPage> with SingleTickerProv
   Widget _buildVehicleCard(VehicleModel vehicle) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Vehicle Image/Icon
+            // Vehicle Image/Icon - ขนาดใหญ่ขึ้น
             Container(
-              width: 60,
-              height: 60,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 color: Colors.blue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.blue.withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
-              child: vehicle.img != null && vehicle.img!.isNotEmpty
-                  ? ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: BuildImage(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: vehicle.img != null && vehicle.img!.isNotEmpty
+                    ? BuildImage(
                   imagePath: vehicle.img!,
                   tablePath: 'vehicle',
+                  width: 80,
+                  height: 80,
                   fit: BoxFit.cover,
-                  errorWidget: const Icon(
+                  errorWidget: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF1976D2),
+                          Color(0xFF1565C0),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.directions_car,
+                      size: 36,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+                    : Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF1976D2),
+                        Color(0xFF1565C0),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(
                     Icons.directions_car,
-                    size: 30,
-                    color: Colors.blue,
+                    size: 36,
+                    color: Colors.white,
                   ),
                 ),
-              )
-                  : const Icon(
-                Icons.directions_car,
-                size: 30,
-                color: Colors.blue,
               ),
             ),
 
@@ -505,51 +980,123 @@ class _HouseDetailPageState extends State<HouseDetailPage> with SingleTickerProv
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${vehicle.brand ?? ''} ${vehicle.model ?? ''}'.trim(),
+                    '${vehicle.brand ?? ''} ${vehicle.model ?? ''}'.trim().isEmpty
+                        ? 'ไม่มีข้อมูลรถ'
+                        : '${vehicle.brand ?? ''} ${vehicle.model ?? ''}'.trim(),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   if (vehicle.number != null && vehicle.number!.isNotEmpty)
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.confirmation_number,
-                          size: 16,
-                          color: Colors.grey,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.amber[100]!,
+                            Colors.amber[50]!,
+                          ],
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          vehicle.number!,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.amber[300]!),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.amber.withValues(alpha: 0.2),
+                            spreadRadius: 1,
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.confirmation_number,
+                            size: 16,
+                            color: Colors.amber[700],
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            vehicle.number!,
+                            style: TextStyle(
+                              color: Colors.amber[800],
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.help_outline,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'ไม่มีทะเบียน',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'ID: ${vehicle.vehicleId}',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            // Vehicle ID Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                'ID: ${vehicle.vehicleId}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+            // Action Buttons
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue, size: 22),
+                    onPressed: () => _navigateToVehicleEdit(vehicle: vehicle),
+                    tooltip: 'แก้ไข',
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 22),
+                    onPressed: () => _deleteVehicle(vehicle),
+                    tooltip: 'ลบ',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
