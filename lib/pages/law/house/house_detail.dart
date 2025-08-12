@@ -8,7 +8,9 @@ import 'package:fullproject/domains/vehicle_domain.dart';
 import 'package:fullproject/services/image_service.dart';
 import 'house_edit.dart';
 import 'animal_edit.dart';
+import 'animal_add.dart';
 import 'vehicle_edit.dart';
+import 'vehicle_add.dart';
 
 
 class HouseDetailPage extends StatefulWidget {
@@ -113,31 +115,31 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     ]);
   }
 
-  // Navigation methods for Management Pages (ดูทั้งหมด)
-  Future<void> _navigateToAnimalManagement() async {
+  // Navigation to Add Pages
+  Future<void> _navigateToAnimalAdd() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AnimalEditSinglePage(houseId: widget.houseId),
+        builder: (context) => AnimalAddPage(houseId: widget.houseId),
       ),
     );
 
     // Refresh animals data when returning
-    if (result != null && mounted) {
+    if (result == true && mounted) {
       loadAnimals();
     }
   }
 
-  Future<void> _navigateToVehicleManagement() async {
+  Future<void> _navigateToVehicleAdd() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => VehicleEditSinglePage(houseId: widget.houseId),
+        builder: (context) => VehicleAddPage(houseId: widget.houseId),
       ),
     );
 
     // Refresh vehicles data when returning
-    if (result != null && mounted) {
+    if (result == true && mounted) {
       loadVehicles();
     }
   }
@@ -312,29 +314,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     }
   }
 
-  Widget _buildFloatingActionButton() {
-    final currentTab = _tabController.index;
 
-    if (currentTab == 1) { // Animals tab
-      return FloatingActionButton.extended(
-        onPressed: () => _navigateToAnimalEdit(),
-        icon: const Icon(Icons.add),
-        label: const Text('เพิ่มสัตว์เลี้ยง'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-      );
-    } else if (currentTab == 2) { // Vehicles tab
-      return FloatingActionButton.extended(
-        onPressed: () => _navigateToVehicleEdit(),
-        icon: const Icon(Icons.add),
-        label: const Text('เพิ่มยานพาหนะ'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      );
-    }
-
-    return Container(); // No FAB for house info tab
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -346,21 +326,34 @@ class _HouseDetailPageState extends State<HouseDetailPage>
         foregroundColor: Colors.black87,
         elevation: 1,
         actions: [
+          // เปลี่ยนปุ่ม edit house ให้ง่ายขึ้น
           if (house != null)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditHousePage(house: house!),
-                  ),
-                );
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              child: TextButton.icon(
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditHousePage(house: house!),
+                    ),
+                  );
 
-                if (result is HouseModel && mounted) {
-                  setState(() => house = result);
-                }
-              },
+                  if (result is HouseModel && mounted) {
+                    setState(() => house = result);
+                  }
+                },
+                icon: const Icon(Icons.edit, size: 18),
+                label: const Text('แก้ไข'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                ),
+              ),
             ),
         ],
         bottom: loading
@@ -398,7 +391,8 @@ class _HouseDetailPageState extends State<HouseDetailPage>
           _buildVehiclesTab(),
         ],
       ),
-      floatingActionButton: loading ? null : _buildFloatingActionButton(),
+      // ลบ FloatingActionButton ออก
+      // floatingActionButton: loading ? null : _buildFloatingActionButton(),
     );
   }
 
@@ -453,6 +447,45 @@ class _HouseDetailPageState extends State<HouseDetailPage>
               _buildDetailRow('พื้นที่ใช้สอย', house!.usableArea),
               _buildDetailRow('สถานะการใช้งาน', house!.usageStatus),
             ]),
+
+            const SizedBox(height: 24),
+
+            // ปุ่มแก้ไขข้อมูลบ้าน
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditHousePage(house: house!),
+                    ),
+                  );
+
+                  if (result is HouseModel && mounted) {
+                    setState(() => house = result);
+                  }
+                },
+                icon: const Icon(Icons.edit, size: 20),
+                label: const Text(
+                  'แก้ไขข้อมูลบ้าน',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  elevation: 2,
+                  shadowColor: Colors.blue.withValues(alpha: 0.3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -462,7 +495,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
   Widget _buildAnimalsTab() {
     return Column(
       children: [
-        // Header with statistics and manage button
+        // Header with statistics and add button
         Container(
           padding: const EdgeInsets.all(16),
           color: Colors.white,
@@ -490,10 +523,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                   ],
                 ),
               ),
+              // เปลี่ยนเป็นปุ่มเพิ่มข้อมูล
               ElevatedButton.icon(
-                onPressed: _navigateToAnimalManagement,
-                icon: const Icon(Icons.list, size: 18),
-                label: const Text('ดูทั้งหมด'),
+                onPressed: _navigateToAnimalAdd,
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('เพิ่มข้อมูล'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
@@ -531,7 +565,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
   Widget _buildVehiclesTab() {
     return Column(
       children: [
-        // Header with statistics and manage button
+        // Header with statistics and add button
         Container(
           padding: const EdgeInsets.all(16),
           color: Colors.white,
@@ -559,10 +593,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                   ],
                 ),
               ),
+              // เปลี่ยนเป็นปุ่มเพิ่มข้อมูล
               ElevatedButton.icon(
-                onPressed: _navigateToVehicleManagement,
-                icon: const Icon(Icons.list, size: 18),
-                label: const Text('ดูทั้งหมด'),
+                onPressed: _navigateToVehicleAdd,
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('เพิ่มข้อมูล'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -614,7 +649,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
           ),
           const SizedBox(height: 8),
           Text(
-            'กดปุ่ม "ดูทั้งหมด" เพื่อจัดการข้อมูล',
+            'กดปุ่ม "เพิ่มข้อมูล" เพื่อเพิ่มสัตว์เลี้ยง',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],
@@ -622,7 +657,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
           ),
           const SizedBox(height: 32),
           ElevatedButton.icon(
-            onPressed: () => _navigateToAnimalEdit(),
+            onPressed: _navigateToAnimalAdd,
             icon: const Icon(Icons.add),
             label: const Text('เพิ่มสัตว์เลี้ยง'),
             style: ElevatedButton.styleFrom(
@@ -656,7 +691,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
           ),
           const SizedBox(height: 8),
           Text(
-            'กดปุ่ม "ดูทั้งหมด" เพื่อจัดการข้อมูล',
+            'กดปุ่ม "เพิ่มข้อมูล" เพื่อเพิ่มยานพาหนะ',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],
@@ -664,7 +699,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
           ),
           const SizedBox(height: 32),
           ElevatedButton.icon(
-            onPressed: () => _navigateToVehicleEdit(),
+            onPressed: _navigateToVehicleAdd,
             icon: const Icon(Icons.add),
             label: const Text('เพิ่มยานพาหนะ'),
             style: ElevatedButton.styleFrom(

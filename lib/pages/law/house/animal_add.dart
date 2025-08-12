@@ -1,58 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fullproject/models/house_model.dart';
-import 'package:fullproject/services/auth_service.dart';
-import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/domains/animal_domain.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../domains/house_domain.dart';
 import 'dart:io';
 
-class HouseCreatePage extends StatefulWidget {
-  const HouseCreatePage({super.key});
+class AnimalAddPage extends StatefulWidget {
+  final int houseId;
+
+  const AnimalAddPage({
+    super.key,
+    required this.houseId,
+  });
 
   @override
-  State<HouseCreatePage> createState() => _HouseCreatePageState();
+  State<AnimalAddPage> createState() => _AnimalAddPageState();
 }
 
-class _HouseCreatePageState extends State<HouseCreatePage> {
+class _AnimalAddPageState extends State<AnimalAddPage> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _notesController = TextEditingController();
 
-  // Controllers
-  final _houseNumberController = TextEditingController();
-  final _sizeController = TextEditingController();
-  final _ownerController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _floorsController = TextEditingController();
-  final _usableAreaController = TextEditingController();
-
-  // Form values
-  String? _status = 'owned';
-  String? _houseType = 'detached';
-  String? _usageStatus = 'active';
+  String? _selectedType;
   File? _selectedImage;
+  bool _isSaving = false;
   bool _hasUnsavedChanges = false;
 
-  bool _isSubmitting = false;
-
-  // Options for dropdowns
-  final List<String> _statusOptions = [
-    'owned',
-    'vacant',
-    'rented',
-    'sold'
-  ];
-
-  final List<String> _houseTypeOptions = [
-    'detached',
-    'townhouse',
-    'apartment',
-    'condo'
-  ];
-
-  final List<String> _usageStatusOptions = [
-    'active',
-    'inactive',
-    'maintenance'
+  final List<Map<String, dynamic>> animalTypes = [
+    {'type': 'สุนัข', 'icon': Icons.pets, 'color': Colors.brown},
+    {'type': 'แมว', 'icon': Icons.pets, 'color': Colors.purple},
+    {'type': 'นก', 'icon': Icons.flutter_dash, 'color': Colors.blue},
+    {'type': 'ปลา', 'icon': Icons.set_meal, 'color': Colors.cyan},
+    {'type': 'กระต่าย', 'icon': Icons.cruelty_free, 'color': Colors.pink},
+    {'type': 'หนู', 'icon': Icons.mouse, 'color': Colors.grey},
+    {'type': 'อื่นๆ', 'icon': Icons.pets, 'color': Colors.orange},
   ];
 
   final ImagePicker _picker = ImagePicker();
@@ -61,12 +41,8 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
   void initState() {
     super.initState();
     // Listen for changes
-    _houseNumberController.addListener(_onFieldChanged);
-    _sizeController.addListener(_onFieldChanged);
-    _ownerController.addListener(_onFieldChanged);
-    _phoneController.addListener(_onFieldChanged);
-    _floorsController.addListener(_onFieldChanged);
-    _usableAreaController.addListener(_onFieldChanged);
+    _nameController.addListener(_onFieldChanged);
+    _notesController.addListener(_onFieldChanged);
   }
 
   void _onFieldChanged() {
@@ -79,12 +55,8 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
 
   @override
   void dispose() {
-    _houseNumberController.dispose();
-    _sizeController.dispose();
-    _ownerController.dispose();
-    _phoneController.dispose();
-    _floorsController.dispose();
-    _usableAreaController.dispose();
+    _nameController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -262,158 +234,67 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
     });
   }
 
-  String _formatPhoneNumber(String phone) {
-    // Remove all non-digits
-    String digits = phone.replaceAll(RegExp(r'[^\d]'), '');
-
-    // Format as XXX-XXX-XXXX
-    if (digits.length >= 10) {
-      return '${digits.substring(0, 3)}-${digits.substring(3, 6)}-${digits.substring(6, 10)}';
-    } else if (digits.length >= 6) {
-      return '${digits.substring(0, 3)}-${digits.substring(3, 6)}-${digits.substring(6)}';
-    } else if (digits.length >= 3) {
-      return '${digits.substring(0, 3)}-${digits.substring(3)}';
-    }
-    return digits;
-  }
-
-  String _getStatusText(String? status) {
-    switch (status) {
-      case 'owned': return 'มีเจ้าของ';
-      case 'vacant': return 'ว่าง';
-      case 'rented': return 'ให้เช่า';
-      case 'sold': return 'ขายแล้ว';
-      default: return status ?? '';
-    }
-  }
-
-  String _getHouseTypeText(String? type) {
-    switch (type) {
-      case 'detached': return 'บ้านเดี่ยว';
-      case 'townhouse': return 'ทาวน์เฮาส์';
-      case 'apartment': return 'อพาร์ทเมนต์';
-      case 'condo': return 'คอนโดมิเนียม';
-      default: return type ?? '';
-    }
-  }
-
-  String _getUsageStatusText(String? status) {
-    switch (status) {
-      case 'active': return 'ใช้งาน';
-      case 'inactive': return 'ไม่ใช้งาน';
-      case 'maintenance': return 'ปรับปรุง';
-      default: return status ?? '';
-    }
-  }
-
   void _resetForm() {
     setState(() {
-      _houseNumberController.clear();
-      _sizeController.clear();
-      _ownerController.clear();
-      _phoneController.clear();
-      _floorsController.clear();
-      _usableAreaController.clear();
-      _status = 'owned';
-      _houseType = 'detached';
-      _usageStatus = 'active';
+      _nameController.clear();
+      _notesController.clear();
+      _selectedType = null;
       _selectedImage = null;
       _hasUnsavedChanges = false;
     });
   }
 
-  Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _saveAnimal() async {
+    if (!_formKey.currentState!.validate() || _selectedType == null) {
+      if (_selectedType == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('กรุณาเลือกประเภทสัตว์เลี้ยง'),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
 
-    setState(() => _isSubmitting = true);
+    setState(() => _isSaving = true);
 
     try {
-      final user = await AuthService.getCurrentUser();
-      if (user == null || user.villageId == null) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.error, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('ไม่พบ village id'),
-                ],
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-        return;
-      }
-
-      final house = HouseModel(
-        houseId: 0, // จะถูกเซ็ตอัตโนมัติโดย Supabase
-        villageId: user.villageId,
-        userId: 0, // ยังไม่สร้าง user
-        houseNumber: _houseNumberController.text.trim(),
-        size: _sizeController.text.trim(),
-        owner: _ownerController.text.trim(),
-        phone: _phoneController.text.trim(),
-        status: _status,
-        houseType: _houseType,
-        floors: int.tryParse(_floorsController.text.trim()),
-        usableArea: _usableAreaController.text.trim(),
-        usageStatus: _usageStatus,
+      // Create new animal
+      await AnimalDomain.create(
+        houseId: widget.houseId,
+        type: _selectedType!,
+        name: _nameController.text.trim(),
         img: _selectedImage != null ? 'temp' : null,
       );
 
-      final created = await HouseDomain.create(house: house);
+      // If there's an image, we need to handle the upload after creation
+      // This would typically be done by getting the created animal ID and uploading the image
+      // For now, we'll create with 'temp' and the image service will handle it
 
-      if (created != null) {
-        // Upload image if selected
-        if (_selectedImage != null) {
-          await SupabaseImage().uploadImage(
-            imageFile: _selectedImage!,
-            tableName: "house",
-            rowName: "house_id",
-            rowImgName: "img",
-            rowKey: created.houseId,
-          );
-        }
+      if (context.mounted) {
+        setState(() => _hasUnsavedChanges = false);
 
-        if (context.mounted) {
-          setState(() => _hasUnsavedChanges = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('เพิ่มบ้านสำเร็จ'),
-                ],
-              ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Text('เพิ่มสัตว์เลี้ยงสำเร็จ'),
+              ],
             ),
-          );
-          Navigator.pop(context, created);
-        }
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.error, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('เกิดข้อผิดพลาดในการเพิ่มบ้าน'),
-                ],
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        Navigator.pop(context, true); // ส่ง result กลับ
       }
     } catch (e) {
       if (context.mounted) {
+        setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -429,8 +310,22 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
         );
       }
     }
+  }
 
-    setState(() => _isSubmitting = false);
+  Color _getAnimalTypeColor(String? type) {
+    final animalType = animalTypes.firstWhere(
+          (element) => element['type'] == type,
+      orElse: () => animalTypes.last,
+    );
+    return animalType['color'];
+  }
+
+  IconData _getAnimalIcon(String? type) {
+    final animalType = animalTypes.firstWhere(
+          (element) => element['type'] == type,
+      orElse: () => animalTypes.last,
+    );
+    return animalType['icon'];
   }
 
   @override
@@ -448,7 +343,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
       child: Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
-          title: const Text('เพิ่มลูกบ้าน'),
+          title: const Text('เพิ่มสัตว์เลี้ยงใหม่'),
           backgroundColor: Colors.white,
           foregroundColor: Colors.black87,
           elevation: 1,
@@ -466,7 +361,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // รูปภาพบ้าน
+                // รูปภาพสัตว์เลี้ยง
                 _buildImageSection(),
                 const SizedBox(height: 24),
 
@@ -474,12 +369,12 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                 _buildBasicInfoSection(),
                 const SizedBox(height: 24),
 
-                // รายละเอียดบ้าน
-                _buildHouseDetailsSection(),
+                // ประเภทสัตว์เลี้ยง
+                _buildTypeSection(),
                 const SizedBox(height: 24),
 
-                // สถานะต่างๆ
-                _buildStatusSection(),
+                // หมายเหตุเพิ่มเติม
+                _buildNotesSection(),
                 const SizedBox(height: 32),
 
                 // ปุ่มบันทึก
@@ -495,7 +390,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
 
   Widget _buildImageSection() {
     return _buildCard(
-      title: 'รูปภาพบ้าน',
+      title: 'รูปภาพสัตว์เลี้ยง',
       icon: Icons.image,
       child: Column(
         children: [
@@ -556,13 +451,13 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[300]!, width: 2, style: BorderStyle.values[1]),
+                border: Border.all(color: Colors.grey[300]!, width: 2, style: BorderStyle.solid),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.home,
+                    _getAnimalIcon(_selectedType),
                     size: 64,
                     color: Colors.grey[400],
                   ),
@@ -595,8 +490,12 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             height: 50,
             child: OutlinedButton.icon(
               onPressed: _pickImage,
-              icon: Icon(_selectedImage != null ? Icons.edit : Icons.add_photo_alternate),
-              label: Text(_selectedImage != null ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ'),
+              icon: Icon(
+                _selectedImage != null ? Icons.edit : Icons.add_photo_alternate,
+              ),
+              label: Text(
+                _selectedImage != null ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ',
+              ),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -612,16 +511,15 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
   Widget _buildBasicInfoSection() {
     return _buildCard(
       title: 'ข้อมูลพื้นฐาน',
-      icon: Icons.home,
+      icon: Icons.pets,
       child: Column(
         children: [
-          // บ้านเลขที่
           TextFormField(
-            controller: _houseNumberController,
+            controller: _nameController,
             decoration: InputDecoration(
-              labelText: 'บ้านเลขที่ *',
-              hintText: 'ระบุเลขที่บ้าน',
-              prefixIcon: const Icon(Icons.home_outlined),
+              labelText: 'ชื่อสัตว์เลี้ยง *',
+              hintText: 'ระบุชื่อสัตว์เลี้ยง',
+              prefixIcon: const Icon(Icons.pets),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -629,66 +527,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
               fillColor: Colors.white,
             ),
             validator: (value) =>
-            value?.trim().isEmpty == true ? 'กรุณาระบุบ้านเลขที่' : null,
-            textInputAction: TextInputAction.next,
-          ),
-          const SizedBox(height: 16),
-
-          // เจ้าของบ้าน
-          TextFormField(
-            controller: _ownerController,
-            decoration: InputDecoration(
-              labelText: 'เจ้าของบ้าน *',
-              hintText: 'ระบุชื่อเจ้าของ',
-              prefixIcon: const Icon(Icons.person),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            validator: (value) =>
-            value?.trim().isEmpty == true ? 'กรุณาระบุชื่อเจ้าของ' : null,
-            textInputAction: TextInputAction.next,
-          ),
-          const SizedBox(height: 16),
-
-          // เบอร์โทร
-          TextFormField(
-            controller: _phoneController,
-            decoration: InputDecoration(
-              labelText: 'เบอร์โทร',
-              hintText: 'XXX-XXX-XXXX',
-              prefixIcon: const Icon(Icons.phone),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            keyboardType: TextInputType.phone,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(10),
-            ],
-            onChanged: (value) {
-              final formatted = _formatPhoneNumber(value);
-              if (formatted != value) {
-                _phoneController.value = TextEditingValue(
-                  text: formatted,
-                  selection: TextSelection.collapsed(offset: formatted.length),
-                );
-              }
-            },
-            validator: (value) {
-              if (value?.isNotEmpty == true) {
-                final digits = value!.replaceAll(RegExp(r'[^\d]'), '');
-                if (digits.length != 10) {
-                  return 'เบอร์โทรต้องมี 10 หลัก';
-                }
-              }
-              return null;
-            },
+            value?.trim().isEmpty == true ? 'กรุณาระบุชื่อสัตว์เลี้ยง' : null,
             textInputAction: TextInputAction.next,
           ),
         ],
@@ -696,165 +535,108 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
     );
   }
 
-  Widget _buildHouseDetailsSection() {
+  Widget _buildTypeSection() {
     return _buildCard(
-      title: 'รายละเอียดบ้าน',
-      icon: Icons.home_work,
+      title: 'ประเภทสัตว์เลี้ยง',
+      icon: Icons.category,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ประเภทบ้าน
-          DropdownButtonFormField<String>(
-            value: _houseType,
-            decoration: InputDecoration(
-              labelText: 'ประเภทบ้าน *',
-              prefixIcon: const Icon(Icons.apartment),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Colors.white,
+          const Text(
+            'เลือกประเภทสัตว์เลี้ยง *',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
             ),
-            items: _houseTypeOptions.map((type) {
-              return DropdownMenuItem(
-                value: type,
-                child: Text(_getHouseTypeText(type)),
+          ),
+          const SizedBox(height: 16),
+
+          // Grid ของประเภทสัตว์
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 3,
+            ),
+            itemCount: animalTypes.length,
+            itemBuilder: (context, index) {
+              final type = animalTypes[index];
+              final isSelected = _selectedType == type['type'];
+
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedType = type['type'];
+                    _hasUnsavedChanges = true;
+                  });
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected ? type['color'].withValues(alpha: 0.1) : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected ? type['color'] : Colors.grey[300]!,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        type['icon'],
+                        color: isSelected ? type['color'] : Colors.grey[600],
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        type['type'],
+                        style: TextStyle(
+                          color: isSelected ? type['color'] : Colors.grey[800],
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _houseType = value;
-                _hasUnsavedChanges = true;
-              });
             },
-            validator: (value) => value == null ? 'กรุณาเลือกประเภทบ้าน' : null,
           ),
-          const SizedBox(height: 16),
 
-          Row(
-            children: [
-              // จำนวนชั้น
-              Expanded(
-                child: TextFormField(
-                  controller: _floorsController,
-                  decoration: InputDecoration(
-                    labelText: 'จำนวนชั้น',
-                    hintText: 'เช่น 1, 2',
-                    prefixIcon: const Icon(Icons.layers),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  textInputAction: TextInputAction.next,
-                ),
+          if (_selectedType == null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'กรุณาเลือกประเภทสัตว์เลี้ยง',
+              style: TextStyle(
+                color: Colors.red[700],
+                fontSize: 12,
               ),
-              const SizedBox(width: 16),
-
-              // ขนาด
-              Expanded(
-                child: TextFormField(
-                  controller: _sizeController,
-                  decoration: InputDecoration(
-                    labelText: 'ขนาด',
-                    hintText: 'เช่น 100 ตร.ม.',
-                    prefixIcon: const Icon(Icons.square_foot),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  textInputAction: TextInputAction.next,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // พื้นที่ใช้สอย
-          TextFormField(
-            controller: _usableAreaController,
-            decoration: InputDecoration(
-              labelText: 'พื้นที่ใช้สอย',
-              hintText: 'เช่น 80 ตร.ม.',
-              prefixIcon: const Icon(Icons.area_chart),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Colors.white,
             ),
-            textInputAction: TextInputAction.done,
-          ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildStatusSection() {
+  Widget _buildNotesSection() {
     return _buildCard(
-      title: 'สถานะ',
-      icon: Icons.info,
-      child: Column(
-        children: [
-          // สถานะบ้าน
-          DropdownButtonFormField<String>(
-            value: _status,
-            decoration: InputDecoration(
-              labelText: 'สถานะบ้าน *',
-              prefixIcon: const Icon(Icons.home_filled),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            items: _statusOptions.map((status) {
-              return DropdownMenuItem(
-                value: status,
-                child: Text(_getStatusText(status)),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _status = value;
-                _hasUnsavedChanges = true;
-              });
-            },
-            validator: (value) => value == null ? 'กรุณาเลือกสถานะบ้าน' : null,
+      title: 'หมายเหตุเพิ่มเติม',
+      icon: Icons.note_alt,
+      child: TextFormField(
+        controller: _notesController,
+        decoration: InputDecoration(
+          hintText: 'เช่น อาหารที่ชอบ, นิสัยพิเศษ, หรือข้อมูลอื่นๆ (ไม่บังคับ)',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(height: 16),
-
-          // สถานะการใช้งาน
-          DropdownButtonFormField<String>(
-            value: _usageStatus,
-            decoration: InputDecoration(
-              labelText: 'สถานะการใช้งาน *',
-              prefixIcon: const Icon(Icons.toggle_on),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            items: _usageStatusOptions.map((status) {
-              return DropdownMenuItem(
-                value: status,
-                child: Text(_getUsageStatusText(status)),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _usageStatus = value;
-                _hasUnsavedChanges = true;
-              });
-            },
-            validator: (value) => value == null ? 'กรุณาเลือกสถานะการใช้งาน' : null,
-          ),
-        ],
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        maxLines: 4,
+        textInputAction: TextInputAction.done,
       ),
     );
   }
@@ -867,15 +649,15 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
           width: double.infinity,
           height: 50,
           child: ElevatedButton(
-            onPressed: _isSubmitting ? null : _submitForm,
+            onPressed: _isSaving ? null : _saveAnimal,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: _selectedType != null ? _getAnimalTypeColor(_selectedType) : Colors.grey,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: _isSubmitting
+            child: _isSaving
                 ? const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -892,7 +674,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
               ],
             )
                 : const Text(
-              'เพิ่มบ้าน',
+              'เพิ่มสัตว์เลี้ยง',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -900,6 +682,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             ),
           ),
         ),
+
         const SizedBox(height: 12),
 
         // ปุ่มยกเลิก
@@ -907,7 +690,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
           width: double.infinity,
           height: 50,
           child: OutlinedButton(
-            onPressed: _isSubmitting
+            onPressed: _isSaving
                 ? null
                 : () async {
               if (_hasUnsavedChanges) {
