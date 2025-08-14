@@ -4,7 +4,6 @@ import 'package:fullproject/navigation/app_navigation.dart';
 import 'package:fullproject/pages/law/profile/profile_page.dart';
 import 'package:fullproject/routes/app_routes.dart';
 import 'package:fullproject/pages/law/bill/bill_page.dart';
-
 import 'package:fullproject/services/auth_service.dart';
 
 class LawDashboardPage extends StatefulWidget {
@@ -65,7 +64,6 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     );
 
     if (confirm == true && mounted) {
-      // เพิ่ม logout logic ตรงนี้
       AppNavigation.navigateTo(AppRoutes.login);
     }
   }
@@ -98,11 +96,21 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         icon: Icons.receipt_long,
         label: 'ค่าส่วนกลาง',
         color: Colors.blue,
-        onTap: () {
-          Navigator.push(
+        onTap: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const BillPage()),
           );
+          // Refresh หน้า dashboard เมื่อกลับมา
+          if (mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  // Force rebuild after frame is complete
+                });
+              }
+            });
+          }
         },
       ),
       _DashboardItem(
@@ -158,95 +166,78 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         title: const Text('แดชบอร์ดนิติ'),
         backgroundColor: Colors.blue.shade600,
         foregroundColor: Colors.white,
-        elevation: 0,
         actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'profile':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => LawProfilePage(lawId: lawModel!.lawId),
-                    ),
-                  );
-                  break;
-                case 'logout':
-                  _logout();
-                  break;
-              }
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LawProfilePage(lawId: lawModel!.lawId),
+                ),
+              );
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'profile',
-                child: Row(
-                  children: [
-                    Icon(Icons.person),
-                    SizedBox(width: 8),
-                    Text('โปรไฟล์'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('ออกจากระบบ', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-            ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
           ),
         ],
       ),
       body: RefreshIndicator(
         onRefresh: loadCurrentUser,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header Card
-                _buildWelcomeCard(),
-                const SizedBox(height: 20),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Card
+                    _buildWelcomeCard(),
+                    const SizedBox(height: 20),
 
-                // Quick Stats
-                _buildQuickStats(),
-                const SizedBox(height: 20),
+                    // Quick Stats
+                    _buildQuickStats(),
+                    const SizedBox(height: 20),
 
-                // Menu Grid
-                const Text(
-                  'เมนูหลัก',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                    // Menu Grid Title
+                    const Text(
+                      'เมนูหลัก',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: items.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.1,
-                  ),
-                  itemBuilder: (context, index) {
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.1,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                      (context, index) {
                     final item = items[index];
                     return _buildDashboardCard(item);
                   },
+                  childCount: items.length,
                 ),
-                const SizedBox(height: 100), // เผื่อ scroll
-              ],
+              ),
             ),
-          ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 100), // เผื่อ FloatingActionButton
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -294,15 +285,14 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Text(
-                            lawModel!.initials,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      errorBuilder: (context, error, stackTrace) => Text(
+                        lawModel!.initials,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   )
                       : Text(

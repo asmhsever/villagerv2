@@ -17,31 +17,70 @@ class _BillAddPageState extends State<BillAddPage> {
   final _amountController = TextEditingController();
   DateTime? _dueDate;
   int? _selectedHouseId;
+  int? _selectedServiceId; // เพิ่มสำหรับเลือกประเภทบริการ
+
   List<Map<String, dynamic>> _houses = [];
+  List<Map<String, dynamic>> _services = []; // เพิ่มสำหรับเก็บประเภทบริการ
+  bool _isLoading = false;
+
+  // แมปประเภทบริการให้เป็นภาษาไทย
+  final Map<String, String> _serviceTranslations = {
+    'Area Fee': 'ค่าพื้นที่ส่วนกลาง',
+    'Trash Fee': 'ค่าขยะ',
+    'water Fee': 'ค่าน้ำ',
+    'enegy Fee': 'ค่าไฟ',
+  };
 
   @override
   void initState() {
     super.initState();
-    _fetchHouses();
+    _fetchInitialData();
   }
 
-  Future<void> _fetchHouses() async {
-    final law = await AuthService.getCurrentUser();
-    final response = await SupabaseConfig.client
-        .from('house')
-        .select('house_id, house_number')
-        .eq('village_id', law.villageId);
+  Future<void> _fetchInitialData() async {
+    setState(() => _isLoading = true);
 
-    setState(() {
-      _houses = List<Map<String, dynamic>>.from(response);
-    });
+    try {
+      final law = await AuthService.getCurrentUser();
+
+      // ดึงข้อมูลบ้าน
+      final housesResponse = await SupabaseConfig.client
+          .from('house')
+          .select('house_id, house_number')
+          .eq('village_id', law.villageId);
+
+      // ดึงข้อมูลประเภทบริการ
+      final servicesResponse = await SupabaseConfig.client
+          .from('service')
+          .select('service_id, name');
+
+      setState(() {
+        _houses = List<Map<String, dynamic>>.from(housesResponse);
+        _services = List<Map<String, dynamic>>.from(servicesResponse);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('เกิดข้อผิดพลาดในการโหลดข้อมูล: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  String _getServiceNameTh(String? englishName) {
+    return _serviceTranslations[englishName] ?? englishName ?? 'ไม่ระบุ';
   }
 
   Future<void> _submit() async {
-    print("ลองเพิ่ม1");
     if (!_formKey.currentState!.validate() ||
         _dueDate == null ||
-        _selectedHouseId == null) {
+        _selectedHouseId == null ||
+        _selectedServiceId == null) { // เพิ่มเช็ค service
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('กรุณากรอกข้อมูลให้ครบถ้วน'),
@@ -50,7 +89,9 @@ class _BillAddPageState extends State<BillAddPage> {
       );
       return;
     }
-    print("ลองเพิ่ม");
+
+    setState(() => _isLoading = true);
+
     try {
       final bill = BillModel(
         billId: 0,
@@ -60,16 +101,14 @@ class _BillAddPageState extends State<BillAddPage> {
         paidStatus: 0,
         billDate: DateTime.now(),
         paidMethod: null,
-        // เปลี่ยนเป็น null แทน empty string
         paidDate: null,
-        service: 0,
+        service: _selectedServiceId!, // ใช้ service ที่เลือก
         referenceNo: 'REF${DateTime.now().millisecondsSinceEpoch}',
       );
 
       final result = await BillDomain.create(bill: bill);
 
       if (result != null) {
-        // สำเร็จ
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('เพิ่มบิลสำเร็จ'),
@@ -79,14 +118,12 @@ class _BillAddPageState extends State<BillAddPage> {
         );
 
         if (mounted) {
-          Navigator.pop(context, true); // ส่งค่า true กลับไปเพื่อ refresh
+          Navigator.pop(context, true);
         }
       } else {
-        // Domain return null แปลว่าเกิดข้อผิดพลาด
         throw Exception('ไม่สามารถเพิ่มบิลได้');
       }
     } catch (e) {
-      // แสดงข้อความ error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('เกิดข้อผิดพลาด: เพิ่มบิลไม่สำเร็จ\n${e.toString()}'),
@@ -95,13 +132,13 @@ class _BillAddPageState extends State<BillAddPage> {
           action: SnackBarAction(
             label: 'ลองใหม่',
             textColor: Colors.white,
-            onPressed: () => _submit(), // ลองส่งใหม่
+            onPressed: () => _submit(),
           ),
         ),
       );
       print('Error creating bill: $e');
     } finally {
-      // ซ่อน loading เสมอ
+      setState(() => _isLoading = false);
     }
   }
 
@@ -109,83 +146,163 @@ class _BillAddPageState extends State<BillAddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('เพิ่มค่าส่วนกลาง')),
-      body: _houses.isEmpty
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
+          : _houses.isEmpty || _services.isEmpty
+          ? const Center(
+        child: Text('ไม่พบข้อมูลบ้านหรือประเภทบริการ'),
+      )
           : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    DropdownButtonFormField<int>(
-                      value:
-                          _houses.any((h) => h['house_id'] == _selectedHouseId)
-                          ? _selectedHouseId
-                          : null,
-                      items: _houses.map((house) {
-                        return DropdownMenuItem<int>(
-                          value: house['house_id'],
-                          child: Text(house['house_number']),
-                        );
-                      }).toList(),
-                      onChanged: (val) =>
-                          setState(() => _selectedHouseId = val),
-                      decoration: const InputDecoration(
-                        labelText: 'บ้านเลขที่',
-                      ),
-                      validator: (value) =>
-                          value == null ? 'กรุณาเลือกบ้าน' : null,
-                    ),
-                    TextFormField(
-                      controller: _amountController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'จำนวนเงิน'),
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'กรุณากรอกจำนวนเงิน'
-                          : null,
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView( // เพิ่มเพื่อป้องกัน overflow
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Dropdown เลือกบ้าน
+                DropdownButtonFormField<int>(
+                  value: _houses.any((h) => h['house_id'] == _selectedHouseId)
+                      ? _selectedHouseId
+                      : null,
+                  items: _houses.map((house) {
+                    return DropdownMenuItem<int>(
+                      value: house['house_id'],
+                      child: Text('บ้านเลขที่ ${house['house_number']}'),
+                    );
+                  }).toList(),
+                  onChanged: (val) => setState(() => _selectedHouseId = val),
+                  decoration: const InputDecoration(
+                    labelText: 'บ้านเลขที่',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                  value == null ? 'กรุณาเลือกบ้าน' : null,
+                ),
+
+                const SizedBox(height: 16),
+
+                // Dropdown เลือกประเภทบริการ
+                DropdownButtonFormField<int>(
+                  value: _selectedServiceId,
+                  items: _services.map((service) {
+                    return DropdownMenuItem<int>(
+                      value: service['service_id'],
+                      child: Text(_getServiceNameTh(service['name'])),
+                    );
+                  }).toList(),
+                  onChanged: (val) => setState(() => _selectedServiceId = val),
+                  decoration: const InputDecoration(
+                    labelText: 'ประเภทบริการ',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                  value == null ? 'กรุณาเลือกประเภทบริการ' : null,
+                ),
+
+                const SizedBox(height: 16),
+
+                // ช่องกรอกจำนวนเงิน
+                TextFormField(
+                  controller: _amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'จำนวนเงิน (บาท)',
+                    border: OutlineInputBorder(),
+                    suffixText: 'บาท',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'กรุณากรอกจำนวนเงิน';
+                    }
+                    final amount = double.tryParse(value);
+                    if (amount == null || amount <= 0) {
+                      return 'กรุณากรอกจำนวนเงินที่ถูกต้อง';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // เลือกวันครบกำหนด
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            _dueDate == null
-                                ? 'เลือกวันครบกำหนด'
-                                : 'ครบกำหนด: ${DateFormat('dd/MM/yyyy').format(_dueDate!)}',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'วันครบกำหนดชำระ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _dueDate == null
+                                    ? 'ยังไม่ได้เลือกวันที่'
+                                    : DateFormat('dd/MM/yyyy').format(_dueDate!),
+                                style: TextStyle(
+                                  color: _dueDate == null ? Colors.red : Colors.black87,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: () async {
                             final picked = await showDatePicker(
                               context: context,
-                              initialDate: _dueDate ?? DateTime.now(),
-                              firstDate: DateTime.now().subtract(
-                                const Duration(days: 365),
-                              ),
-                              lastDate: DateTime.now().add(
-                                const Duration(days: 365),
-                              ),
+                              initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 30)),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(const Duration(days: 365)),
                             );
                             if (picked != null) {
                               setState(() => _dueDate = picked);
                             }
                           },
-                          child: const Text('เลือกวันที่'),
+                          icon: const Icon(Icons.calendar_today),
+                          label: const Text('เลือกวันที่'),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () {
-                        print("ปุ่มถูกกด!"); // ✅ เพิ่ม debug นี้ก่อน
-                        _submit();
-                      },
-                      child: const Text('เพิ่มรายการ'),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+
+                const SizedBox(height: 24),
+
+                // ปุ่มเพิ่มรายการ
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: _isLoading ? null : _submit,
+                    icon: _isLoading
+                        ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                        : const Icon(Icons.add),
+                    label: Text(_isLoading ? 'กำลังเพิ่มรายการ...' : 'เพิ่มรายการ'),
+                    style: ElevatedButton.styleFrom(
+                      textStyle: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
             ),
+          ),
+        ),
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
   }
 }
