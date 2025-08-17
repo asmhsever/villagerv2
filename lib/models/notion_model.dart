@@ -6,6 +6,7 @@ class NotionModel {
   final String? description;
   final DateTime? createDate;
   final String? img;
+  final String? type;
 
   NotionModel({
     required this.notionId,
@@ -15,6 +16,7 @@ class NotionModel {
     this.description,
     this.createDate,
     this.img,
+    this.type,
   });
 
   factory NotionModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class NotionModel {
           ? DateTime.tryParse(json['created_at'])
           : null,
       img: json['img'] ?? "",
+      type: json['type'] ?? "",
     );
   }
 
@@ -40,6 +43,7 @@ class NotionModel {
       'description': description,
       'created_at': createDate?.toIso8601String(),
       'img': img,
+      'type': type,
     };
   }
 }

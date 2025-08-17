@@ -17,6 +17,16 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
   LawModel? lawModel;
   bool isLoading = true;
 
+  // ธีมสี
+  static const Color _softBrown = Color(0xFFA47551);
+  static const Color _ivoryWhite = Color(0xFFFFFDF6);
+  static const Color _sandyTan = Color(0xFFD8CAB8);
+  static const Color _earthClay = Color(0xFFBFA18F);
+  static const Color _warmStone = Color(0xFFC7B9A5);
+  static const Color _oliveGreen = Color(0xFFA3B18A);
+  static const Color _burntOrange = Color(0xFFE08E45);
+  static const Color _softTerracotta = Color(0xFFD48B5C);
+
   @override
   void initState() {
     super.initState();
@@ -47,16 +57,38 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ยืนยันการออกจากระบบ'),
-        content: const Text('คุณต้องการออกจากระบบใช่หรือไม่?'),
+        backgroundColor: _ivoryWhite,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          'ยืนยันการออกจากระบบ',
+          style: TextStyle(
+            color: _softBrown,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'คุณต้องการออกจากระบบใช่หรือไม่?',
+          style: TextStyle(color: _earthClay),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: _warmStone,
+            ),
             child: const Text('ยกเลิก'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade400,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: const Text('ออกจากระบบ'),
           ),
         ],
@@ -71,14 +103,23 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
+      return Scaffold(
+        backgroundColor: _ivoryWhite,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('กำลังโหลดข้อมูล...'),
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(_softBrown),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'กำลังโหลดข้อมูล...',
+                style: TextStyle(
+                  color: _earthClay,
+                  fontSize: 16,
+                ),
+              ),
             ],
           ),
         ),
@@ -86,8 +127,17 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     }
 
     if (lawModel == null) {
-      return const Scaffold(
-        body: Center(child: Text('ไม่พบข้อมูลผู้ใช้')),
+      return Scaffold(
+        backgroundColor: _ivoryWhite,
+        body: Center(
+          child: Text(
+            'ไม่พบข้อมูลผู้ใช้',
+            style: TextStyle(
+              color: _earthClay,
+              fontSize: 16,
+            ),
+          ),
+        ),
       );
     }
 
@@ -95,36 +145,30 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
       _DashboardItem(
         icon: Icons.receipt_long,
         label: 'ค่าส่วนกลาง',
-        color: Colors.blue,
+        color: _burntOrange,
         onTap: () async {
-          final result = await Navigator.push(
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const BillPage()),
           );
-          // Refresh หน้า dashboard เมื่อกลับมา
           if (mounted) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                setState(() {
-                  // Force rebuild after frame is complete
-                });
-              }
-            });
+            setState(() {});
           }
         },
       ),
       _DashboardItem(
         icon: Icons.report_problem,
         label: 'คำร้องเรียน',
-        color: Colors.red,
+        color: Colors.red.shade400,
         onTap: () {
-          AppNavigation.navigateTo(AppRoutes.notFound);
+          // ✨ เปลี่ยนให้ไปหน้า complaint แทน notFound
+          AppNavigation.navigateTo(AppRoutes.complaint);
         },
       ),
       _DashboardItem(
         icon: Icons.announcement,
         label: 'ข่าวสาร',
-        color: Colors.orange,
+        color: _softTerracotta,
         onTap: () {
           AppNavigation.navigateTo(AppRoutes.notion);
         },
@@ -132,7 +176,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
       _DashboardItem(
         icon: Icons.pets,
         label: 'สัตว์เลี้ยง',
-        color: Colors.green,
+        color: _oliveGreen,
         onTap: () {
           AppNavigation.navigateTo(AppRoutes.notFound);
         },
@@ -140,7 +184,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
       _DashboardItem(
         icon: Icons.people,
         label: 'ลูกบ้าน',
-        color: Colors.purple,
+        color: _softBrown,
         onTap: () async {
           if (lawModel != null) {
             AppNavigation.navigateTo(
@@ -153,7 +197,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
       _DashboardItem(
         icon: Icons.meeting_room,
         label: 'ประชุม',
-        color: Colors.teal,
+        color: _warmStone,
         onTap: () {
           AppNavigation.navigateTo(AppRoutes.notFound);
         },
@@ -161,11 +205,18 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: _ivoryWhite,
       appBar: AppBar(
-        title: const Text('แดชบอร์ดนิติ'),
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
+        title: const Text(
+          'แดชบอร์ดนิติ',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: _softBrown,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
@@ -186,58 +237,52 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
       ),
       body: RefreshIndicator(
         onRefresh: loadCurrentUser,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header Card
-                    _buildWelcomeCard(),
-                    const SizedBox(height: 20),
+        color: _softBrown,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Card
+              _buildWelcomeCard(),
+              const SizedBox(height: 20),
 
-                    // Quick Stats
-                    _buildQuickStats(),
-                    const SizedBox(height: 20),
+              // Quick Stats
+              _buildQuickStats(),
+              const SizedBox(height: 24),
 
-                    // Menu Grid Title
-                    const Text(
-                      'เมนูหลัก',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+              // Menu Grid Title
+              Text(
+                'เมนูหลัก',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: _softBrown,
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverGrid(
+              const SizedBox(height: 16),
+
+              // Menu Grid
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                   childAspectRatio: 1.1,
                 ),
-                delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                    final item = items[index];
-                    return _buildDashboardCard(item);
-                  },
-                  childCount: items.length,
-                ),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return _buildDashboardCard(item);
+                },
               ),
-            ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100), // เผื่อ FloatingActionButton
-            ),
-          ],
+
+              const SizedBox(height: 100), // เผื่อ FloatingActionButton
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -249,92 +294,109 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
             ),
           );
         },
-        backgroundColor: Colors.blue.shade600,
-        child: const Icon(Icons.person, color: Colors.white),
+        backgroundColor: _burntOrange,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        child: const Icon(Icons.person),
       ),
     );
   }
 
   Widget _buildWelcomeCard() {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade600, Colors.blue.shade400],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [_softBrown, _burntOrange],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
-                  child: lawModel!.hasProfileImage
-                      ? ClipOval(
-                    child: Image.network(
-                      lawModel!.profileImageUrl!,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Text(
-                        lawModel!.initials,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+        boxShadow: [
+          BoxShadow(
+            color: _warmStone.withValues(alpha: 0.3),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 32,
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                child: lawModel!.img != null && lawModel!.img!.isNotEmpty
+                    ? ClipOval(
+                  child: Image.network(
+                    lawModel!.img!,
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Text(
+                      lawModel!.fullName.isNotEmpty
+                          ? lawModel!.fullName.substring(0, 1).toUpperCase()
+                          : 'N',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  )
-                      : Text(
-                    lawModel!.initials,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  ),
+                )
+                    : Text(
+                  lawModel!.fullName.isNotEmpty
+                      ? lawModel!.fullName.substring(0, 1).toUpperCase()
+                      : 'N',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'สวัสดี',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
+                    Text(
+                      lawModel!.fullName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Text(
+                      'นิติบุคคลหมู่บ้าน',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'สวัสดี',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        lawModel!.fullName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Text(
-                        'นิติบุคคลหมู่บ้าน',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                IconButton(
+                child: IconButton(
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -345,10 +407,10 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
                   },
                   icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -361,7 +423,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
             icon: Icons.location_on,
             title: 'หมู่บ้าน',
             value: 'ID: ${lawModel!.villageId}',
-            color: Colors.green,
+            color: _oliveGreen,
           ),
         ),
         const SizedBox(width: 12),
@@ -370,7 +432,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
             icon: Icons.badge,
             title: 'รหัสผู้ใช้',
             value: 'ID: ${lawModel!.userId}',
-            color: Colors.orange,
+            color: _softTerracotta,
           ),
         ),
       ],
@@ -383,81 +445,112 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     required String value,
     required Color color,
   }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _sandyTan.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: _warmStone.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: _warmStone,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: _earthClay,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildDashboardCard(_DashboardItem item) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: item.onTap,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              colors: [
-                item.color.withValues(alpha: 0.1),
-                item.color.withValues(alpha: 0.05),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+        border: Border.all(color: _sandyTan.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: _warmStone.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 6,
+            offset: const Offset(0, 3),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: item.color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Icon(
-                  item.icon,
-                  size: 40,
-                  color: item.color,
-                ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: item.onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                colors: [
+                  item.color.withValues(alpha: 0.05),
+                  item.color.withValues(alpha: 0.02),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(height: 12),
-              Text(
-                item.label,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: item.color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Icon(
+                    item.icon,
+                    size: 36,
+                    color: item.color,
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+                const SizedBox(height: 12),
+                Text(
+                  item.label,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: _earthClay,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       ),

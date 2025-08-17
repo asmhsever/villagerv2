@@ -1,24 +1,140 @@
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:fullproject/models/complaint_model.dart';
+import 'package:fullproject/services/image_service.dart';
 
 class ComplaintDomain {
   static final _client = SupabaseConfig.client;
   static const String _tableName = 'complaint';
 
   // Create - เพิ่มร้องเรียนใหม่
-  static Future<ComplaintModel?> create(ComplaintModel complaint) async {
+  static Future<ComplaintModel?> create({
+    required int houseId,
+    required int typeComplaint,
+    required String header,
+    required String description,
+    required String level,
+    required bool isPrivate,
+    dynamic imageFile, // รองรับทั้ง File และ Uint8List
+  }) async {
     try {
-      final data = complaint.toJson();
-      data.remove('complaint_id'); // เอา complaint_id ออก
+      // 1. สร้าง complaint ก่อน (ยังไม่มีรูป)
       final response = await _client
           .from(_tableName)
-          .insert(data)
+          .insert({
+        'house_id': houseId,
+        'type_complaint': typeComplaint,
+        'create_at': DateTime.now().toIso8601String(),
+        'header': header,
+        'description': description,
+        'level': level,
+        'is_private': isPrivate,
+        'img': null,
+        'status': null,
+        'update_at': null,
+      })
           .select()
           .single();
-      return ComplaintModel.fromJson(response);
+
+      final createdComplaint = ComplaintModel.fromJson(response);
+
+      // 2. อัปโหลดรูป (ถ้ามี)
+      if (imageFile != null &&
+          createdComplaint.complaintId != null &&
+          createdComplaint.complaintId != 0) {
+        final imageUrl = await SupabaseImage().uploadImage(
+          imageFile: imageFile,
+          tableName: "complaint",
+          rowName: "complaint_id",
+          rowImgName: "img",
+          rowKey: createdComplaint.complaintId!,
+        );
+
+        // 3. อัปเดต complaint ด้วย imageUrl
+        if (imageUrl != null) {
+          await _client
+              .from(_tableName)
+              .update({'img': imageUrl})
+              .eq('complaint_id', createdComplaint.complaintId!);
+
+          // Return complaint ที่มี imageUrl
+          return ComplaintModel(
+            complaintId: createdComplaint.complaintId,
+            houseId: createdComplaint.houseId,
+            typeComplaint: createdComplaint.typeComplaint,
+            createAt: createdComplaint.createAt,
+            header: createdComplaint.header,
+            description: createdComplaint.description,
+            level: createdComplaint.level,
+            isPrivate: createdComplaint.isPrivate,
+            img: imageUrl,
+            status: createdComplaint.status,
+            updateAt: createdComplaint.updateAt,
+          );
+        }
+      }
+
+      return createdComplaint;
     } catch (e) {
       print('Error creating complaint: $e');
       return null;
+    }
+  }
+
+  // Update - อัพเดทร้องเรียน
+  static Future<void> update({
+    required int complaintId,
+    required int houseId,
+    required int typeComplaint,
+    required String header,
+    required String description,
+    required String level,
+    required bool isPrivate,
+    String? status,
+    dynamic imageFile, // รองรับทั้ง File และ Uint8List
+    bool removeImage = false, // flag สำหรับลบรูป
+  }) async {
+    try {
+      String? finalImageUrl;
+
+      if (removeImage) {
+        // ลบรูปภาพ
+        finalImageUrl = null;
+      } else if (imageFile != null) {
+        // อัปโหลดรูปใหม่
+        finalImageUrl = await SupabaseImage().uploadImage(
+          imageFile: imageFile,
+          tableName: "complaint",
+          rowName: "complaint_id",
+          rowImgName: "img",
+          rowKey: complaintId,
+        );
+      }
+      // ถ้า imageFile เป็น null และ removeImage เป็น false = ไม่แก้ไขรูป
+
+      // อัปเดตข้อมูล
+      final Map<String, dynamic> updateData = {
+        'house_id': houseId,
+        'type_complaint': typeComplaint,
+        'header': header,
+        'description': description,
+        'level': level,
+        'is_private': isPrivate,
+        'status': status,
+        'update_at': DateTime.now().toIso8601String(),
+      };
+
+      // เพิ่ม img field เฉพาะเมื่อต้องการเปลี่ยนรูป
+      if (removeImage || imageFile != null) {
+        updateData['img'] = finalImageUrl;
+      }
+
+      await _client
+          .from(_tableName)
+          .update(updateData)
+          .eq('complaint_id', complaintId);
+    } catch (e) {
+      print('Error updating complaint: $e');
+      throw Exception('Failed to update complaint: $e');
     }
   }
 
@@ -94,9 +210,9 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามประเภทในหมู่บ้าน
   static Future<List<ComplaintModel>> getByTypeInVillage(
-    int villageId,
-    int typeComplaint,
-  ) async {
+      int villageId,
+      int typeComplaint,
+      ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -117,10 +233,10 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามประเภทของบ้าน
   static Future<List<ComplaintModel>> getByTypeInHouse(
-    int villageId,
-    int houseId,
-    int typeComplaint,
-  ) async {
+      int villageId,
+      int houseId,
+      int typeComplaint,
+      ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -141,9 +257,9 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามระดับความสำคัญในหมู่บ้าน
   static Future<List<ComplaintModel>> getByLevelInVillage(
-    int villageId,
-    int level,
-  ) async {
+      int villageId,
+      int level,
+      ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -164,9 +280,9 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามระดับความสำคัญของบ้าน
   static Future<List<ComplaintModel>> getByLevelInHouse(
-    int houseId,
-    int level,
-  ) async {
+      int houseId,
+      int level,
+      ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -186,9 +302,9 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามสถานะในหมู่บ้าน
   static Future<List<ComplaintModel>> getByStatusInVillage(
-    int villageId,
-    String status,
-  ) async {
+      int villageId,
+      String status,
+      ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -209,10 +325,10 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามสถานะของบ้าน
   static Future<List<ComplaintModel>> getByStatusInHouse(
-    int villageId,
-    int houseId,
-    String status,
-  ) async {
+      int villageId,
+      int houseId,
+      String status,
+      ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -274,8 +390,8 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนที่เสร็จสิ้นแล้วในหมู่บ้าน
   static Future<List<ComplaintModel>> getResolvedInVillage(
-    int villageId,
-  ) async {
+      int villageId,
+      ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -315,8 +431,8 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนที่มีระดับความสำคัญสูงในหมู่บ้าน
   static Future<List<ComplaintModel>> getHighPriorityInVillage(
-    int villageId,
-  ) async {
+      int villageId,
+      ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -333,26 +449,6 @@ class ComplaintDomain {
     } catch (e) {
       print('Error getting high priority complaints in village: $e');
       return [];
-    }
-  }
-
-  // Update - อัพเดทร้องเรียน
-  static Future<ComplaintModel?> update({
-    required int complaintId,
-    required ComplaintModel updatedComplaint,
-  }) async {
-    try {
-      final response = await _client
-          .from(_tableName)
-          .update(updatedComplaint.toJson())
-          .eq('complaint_id', complaintId)
-          .select()
-          .single();
-
-      return ComplaintModel.fromJson(response);
-    } catch (e) {
-      print('Error updating complaint: $e');
-      return null;
     }
   }
 
@@ -389,9 +485,9 @@ class ComplaintDomain {
       await _client
           .from(_tableName)
           .update({
-            'level': level,
-            'update_at': DateTime.now().toIso8601String(),
-          })
+        'level': level,
+        'update_at': DateTime.now().toIso8601String(),
+      })
           .eq('complaint_id', complaintId);
 
       return true;
@@ -415,9 +511,9 @@ class ComplaintDomain {
 
   // Utility - สถิติร้องเรียนของบ้าน
   static Future<Map<String, dynamic>> getHouseComplaintStats(
-    int villageId,
-    int houseId,
-  ) async {
+      int villageId,
+      int houseId,
+      ) async {
     try {
       final allComplaints = await _client
           .from(_tableName)
@@ -461,8 +557,8 @@ class ComplaintDomain {
 
   // Utility - สถิติร้องเรียนของหมู่บ้าน
   static Future<Map<String, dynamic>> getVillageComplaintStats(
-    int villageId,
-  ) async {
+      int villageId,
+      ) async {
     try {
       final allComplaints = await _client
           .from(_tableName)

@@ -5,7 +5,7 @@ class ComplaintModel {
   final String createAt;
   final String header;
   final String description;
-  final int level;
+  final String level;
   final bool isPrivate;
   late final String? img;
   final String? status;
@@ -33,7 +33,7 @@ class ComplaintModel {
       createAt: json['create_at'] ?? "",
       header: json['header'] ?? "",
       description: json['description'] ?? "",
-      level: json['level'] ?? 0,
+      level: json['level'] ?? "",
       isPrivate: json['private'] ?? false,
       img: (json['img'] == "null" || json['img'] == null) ? null : json['img'],
       status: (json['status'] == "null" || json['status'] == null)
