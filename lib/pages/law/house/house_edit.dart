@@ -234,7 +234,7 @@ class _EditHousePageState extends State<EditHousePage> {
           tableName: "house",
           rowName: "house_id",
           rowImgName: "img",
-          rowKey: widget.house.houseId,
+          rowKey: widget.house.houseId, bucketPath: '', imgName: '',
         );
       } else if (_removeCurrentImage) {
         finalImageUrl = null;

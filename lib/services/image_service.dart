@@ -82,8 +82,11 @@ class SupabaseImage {
   Future<String?> uploadImage({
     dynamic imageFile,
     required String tableName,
+    required String bucketPath,
+    required String imgName,
     required String rowName,
     required String rowImgName,
+
     dynamic rowKey,
     int maxWidth = 800,
     int maxHeight = 600,
@@ -103,7 +106,7 @@ class SupabaseImage {
         return null;
       }
 
-      final filePath = '$tableName/${tableName}_$rowKey.jpg';
+      final filePath = '$bucketPath/${imgName}_$rowKey.jpg';
 
       // Check and delete old file if exists
       try {
@@ -126,7 +129,7 @@ class SupabaseImage {
           .from('images')
           .uploadBinary(filePath, processedImageBytes);
 
-      return "${tableName}_${rowKey}.jpg";
+      return "${imgName}_${rowKey}.jpg";
     } catch (e) {
       print('Error uploading image: $e');
       return null;
@@ -139,6 +142,8 @@ class SupabaseImage {
     required String tableName,
     required String rowName,
     required String rowImgName,
+    required String imgName,
+    required String bucketPath,
     dynamic rowKey,
     ImageProcessingOptions? options,
   }) async {
@@ -150,6 +155,8 @@ class SupabaseImage {
       rowName: rowName,
       rowImgName: rowImgName,
       rowKey: rowKey,
+      bucketPath: bucketPath,
+      imgName: imgName,
       maxWidth: opts.maxWidth,
       maxHeight: opts.maxHeight,
       quality: opts.quality,
@@ -356,7 +363,7 @@ class _BuildImageState extends State<BuildImage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.broken_image, color: Colors.grey, size: 50),
+                    Icon(Icons.broken_image, color: Colors.grey, size: 20),
                     Text('Failed to load image'),
                   ],
                 ),

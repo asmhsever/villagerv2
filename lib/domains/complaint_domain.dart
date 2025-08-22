@@ -27,7 +27,7 @@ class ComplaintDomain {
         'header': header,
         'description': description,
         'level': level,
-        'is_private': isPrivate,
+        'private': isPrivate,
         'img': null,
         'status': null,
         'update_at': null,
@@ -47,6 +47,8 @@ class ComplaintDomain {
           rowName: "complaint_id",
           rowImgName: "img",
           rowKey: createdComplaint.complaintId!,
+          bucketPath: "complaint",
+          imgName: "complaint",
         );
 
         // 3. อัปเดต complaint ด้วย imageUrl
@@ -107,6 +109,8 @@ class ComplaintDomain {
           rowName: "complaint_id",
           rowImgName: "img",
           rowKey: complaintId,
+          bucketPath: "complaint",
+          imgName: "complaint",
         );
       }
       // ถ้า imageFile เป็น null และ removeImage เป็น false = ไม่แก้ไขรูป

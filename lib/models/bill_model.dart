@@ -9,7 +9,11 @@ class BillModel {
   final int service;
   final DateTime dueDate;
   final String? referenceNo;
-  final String? paidImg; // เพิ่มฟิลด์นี้
+  final String? slipImg;
+  final String? billImg;
+  final String? receiptImg;
+  final String status;
+  final DateTime? slipDate;
 
   BillModel({
     required this.billId,
@@ -22,35 +26,12 @@ class BillModel {
     required this.service,
     required this.dueDate,
     this.referenceNo,
-    this.paidImg, // เพิ่มใน constructor
+    this.slipImg, // เพิ่มใน constructor
+    this.billImg,
+    this.receiptImg,
+    required this.status,
+    this.slipDate,
   });
-
-  BillModel copyWith({
-    int? billId,
-    int? houseId,
-    DateTime? billDate,
-    double? amount,
-    int? paidStatus,
-    DateTime? paidDate,
-    String? paidMethod,
-    int? service,
-    Map<String, dynamic>? serviceObj,
-    DateTime? dueDate,
-    String? referenceNo,
-  }) {
-    return BillModel(
-      billId: billId ?? this.billId,
-      houseId: houseId ?? this.houseId,
-      billDate: billDate ?? this.billDate,
-      amount: amount ?? this.amount,
-      paidStatus: paidStatus ?? this.paidStatus,
-      paidDate: paidDate ?? this.paidDate,
-      paidMethod: paidMethod ?? this.paidMethod,
-      service: service ?? this.service,
-      dueDate: dueDate ?? this.dueDate,
-      referenceNo: referenceNo ?? this.referenceNo,
-    );
-  }
 
   factory BillModel.fromJson(Map<String, dynamic> json) {
     return BillModel(
@@ -63,8 +44,8 @@ class BillModel {
       paidStatus: json['paid_status'] ?? 0,
       paidDate: json['paid_date'] != null
           ? (json['paid_date'] is String
-                ? DateTime.parse(json['paid_date'])
-                : json['paid_date'] as DateTime)
+          ? DateTime.parse(json['paid_date'])
+          : json['paid_date'] as DateTime)
           : null,
       paidMethod: json['paid_method'],
       service: json['service'] ?? 0,
@@ -72,7 +53,15 @@ class BillModel {
           ? DateTime.parse(json['due_date'])
           : json['due_date'] as DateTime,
       referenceNo: json['reference_no'],
-      paidImg: json['paid_img'],
+      slipImg: json['slip_img'],
+      billImg: json['bill_img'],
+      receiptImg: json['receipt_img'],
+      status: json['status'],
+      slipDate: json['slip_date'] != null
+          ? (json['slip_date'] is String
+          ? DateTime.parse(json['slip_date'])
+          : json['slip_date'] as DateTime)
+          : null,
     );
   }
 
@@ -88,7 +77,11 @@ class BillModel {
       'service': service,
       'due_date': dueDate.toIso8601String(),
       'reference_no': referenceNo,
-      'paid_img': paidImg,
+      'slip_img': slipImg,
+      'bill_img': billImg,
+      'receipt_img': receiptImg,
+      'status': status,
+      'slip_date': slipDate,
     };
   }
 }

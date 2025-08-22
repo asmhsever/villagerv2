@@ -283,7 +283,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
             tableName: "animal",
             rowName: "animal_id",
             rowImgName: "img",
-            rowKey: widget.animal!.animalId,
+            rowKey: widget.animal!.animalId, bucketPath: '', imgName: '',
           );
         }
       } else if (_removeCurrentImage) {

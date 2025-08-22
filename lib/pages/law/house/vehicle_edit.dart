@@ -329,7 +329,7 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
             tableName: "vehicle",
             rowName: "vehicle_id",
             rowImgName: "img",
-            rowKey: widget.vehicle!.vehicleId,
+            rowKey: widget.vehicle!.vehicleId, bucketPath: '', imgName: '',
           );
         }
       } else if (_removeCurrentImage) {

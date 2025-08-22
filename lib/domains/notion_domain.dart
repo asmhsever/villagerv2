@@ -36,7 +36,7 @@ class NotionDomain {
       final notions = response
           .map((json) => NotionModel.fromJson(json))
           .toList();
-      print(notions);
+      // print(notions);
       return {'success': true, 'notions': notions, 'count': notions.length};
     } catch (e) {
       print("error getRecenNotion : ${e}");
@@ -60,7 +60,7 @@ class NotionDomain {
       final notions = response
           .map((json) => NotionModel.fromJson(json))
           .toList();
-      print(notions);
+      // print(notions);
       return {'success': true, 'notions': notions, 'count': notions.length};
     } catch (e) {
       print("error getRecenNotion : ${e}");
@@ -122,6 +122,8 @@ class NotionDomain {
           rowName: "notion_id",
           rowImgName: "img",
           rowKey: createdNotion.notionId,
+          bucketPath: "notion",
+          imgName: "notion",
         );
 
         // 3. อัปเดต notion ด้วย imageUrl
@@ -177,6 +179,8 @@ class NotionDomain {
           rowName: "notion_id",
           rowImgName: "img",
           rowKey: notionId,
+          bucketPath: "notion",
+          imgName: "notion",
         );
       }
       // ถ้า imageFile เป็น null และ removeImage เป็น false = ไม่แก้ไขรูป

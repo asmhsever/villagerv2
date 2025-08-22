@@ -46,30 +46,61 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
     setState(() => isLoading = true);
 
     try {
-      // โหลดข้อมูลบ้าน
-      final house = await SupabaseConfig.client
-          .from('house')
-          .select('house_number')
-          .eq('house_id', currentComplaint.houseId)
-          .maybeSingle();
+      // โหลดข้อมูลพร้อมกัน - แก้ไข type inference
+      final List<Future<dynamic>> futures = [
+        // โหลดข้อมูลบ้าน
+        SupabaseConfig.client
+            .from('house')
+            .select('house_number')
+            .eq('house_id', currentComplaint.houseId)
+            .maybeSingle(),
 
-      // โหลดข้อมูลประเภทร้องเรียน
-      final complaintType = await ComplaintTypeDomain.getById(currentComplaint.typeComplaint);
+        // โหลดข้อมูลประเภทร้องเรียน
+        ComplaintTypeDomain.getById(currentComplaint.typeComplaint),
 
-      // โหลดข้อมูลการดำเนินการเสร็จสิ้น
-      final success = await SuccessComplaintDomain.getByComplaintId(currentComplaint.complaintId!);
+        // โหลดข้อมูลการดำเนินการเสร็จสิ้น (คืนค่าเป็น List)
+        SuccessComplaintDomain.getByComplaintId(currentComplaint.complaintId!),
+      ];
+
+      final results = await Future.wait(futures);
+
+      final house = results[0] as Map<String, dynamic>?;
+      final complaintType = results[1] as ComplaintTypeModel?;
+      final successList = results[2] as List<SuccessComplaintModel>;
+
+      // เลือกข้อมูลการดำเนินการล่าสุด (ถ้ามีหลายรายการ)
+      SuccessComplaintModel? latestSuccess;
+      if (successList.isNotEmpty) {
+        // เรียงตามวันที่ล่าสุด (ถ้ามี successAt) หรือ id ล่าสุด
+        successList.sort((a, b) {
+          // ถ้ามี successAt ให้เรียงตามวันที่
+          if (a.successAt != null && b.successAt != null) {
+            return b.successAt!.compareTo(a.successAt!);
+          }
+          // ถ้าไม่มี successAt ให้เรียงตาม id
+          if (a.id != null && b.id != null) {
+            return b.id!.compareTo(a.id!);
+          }
+          return 0;
+        });
+        latestSuccess = successList.first;
+      }
 
       // โหลดชื่อนิติกร (ถ้ามีข้อมูลการดำเนินการ)
       String? lawName;
-      if (success != null) {
-        final law = await SupabaseConfig.client
-            .from('law')
-            .select('first_name, last_name')
-            .eq('law_id', success.lawId)
-            .maybeSingle();
+      if (latestSuccess?.lawId != null) {
+        try {
+          final law = await SupabaseConfig.client
+              .from('law')
+              .select('first_name, last_name')
+              .eq('law_id', latestSuccess!.lawId!)
+              .maybeSingle();
 
-        if (law != null) {
-          lawName = '${law['first_name']} ${law['last_name']}';
+          if (law != null) {
+            lawName = '${law['first_name']} ${law['last_name']}';
+          }
+        } catch (e) {
+          debugPrint('Error loading law data: $e');
         }
       }
 
@@ -77,17 +108,38 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
         setState(() {
           houseNumber = house?['house_number']?.toString() ?? 'ไม่ทราบ';
           complaintTypeName = complaintType?.type ?? 'ไม่ระบุ';
-          successComplaint = success;
+          successComplaint = latestSuccess;
           this.lawName = lawName;
         });
       }
     } catch (e) {
-      print('Error loading additional data: $e');
+      debugPrint('Error loading additional data: $e');
+      if (mounted) {
+        _showErrorSnackBar('เกิดข้อผิดพลาดในการโหลดข้อมูล: $e');
+      }
     } finally {
       if (mounted) {
         setState(() => isLoading = false);
       }
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: burntOrange,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   String formatDateFromString(String? dateString) {
@@ -98,6 +150,29 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
     } catch (e) {
       return dateString;
     }
+  }
+
+  String formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return '-';
+    return DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
+  }
+
+  String formatDateString(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return '-';
+    try {
+      final dateTime = DateTime.parse(dateString);
+      return DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  // Unified format function that handles both DateTime and String
+  String formatAnyDate(dynamic date) {
+    if (date == null) return '-';
+    if (date is DateTime) return formatDateTime(date);
+    if (date is String) return formatDateString(date);
+    return '-';
   }
 
   String getStatusLabel(String? status) {
@@ -163,8 +238,6 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
   }
 
   Future<void> _refreshData() async {
-    setState(() => isLoading = true);
-
     try {
       final updatedComplaint = await ComplaintDomain.getById(currentComplaint.complaintId!);
       if (updatedComplaint != null && mounted) {
@@ -175,16 +248,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('เกิดข้อผิดพลาดในการโหลดข้อมูล: $e'),
-            backgroundColor: burntOrange,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
+        _showErrorSnackBar('เกิดข้อผิดพลาดในการโหลดข้อมูล: $e');
       }
     }
   }
@@ -245,7 +309,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
             width: 120,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: earthClay,
                 fontWeight: FontWeight.w500,
               ),
@@ -266,6 +330,52 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
     );
   }
 
+  Widget _buildImageWidget(String imageUrl, String emptyMessage) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        imageUrl,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            height: 200,
+            color: beige,
+            child: Center(
+              child: CircularProgressIndicator(
+                color: oliveGreen,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => Container(
+          height: 200,
+          color: beige,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.broken_image, color: earthClay, size: 48),
+                const SizedBox(height: 8),
+                Text(
+                  emptyMessage,
+                  style: const TextStyle(color: earthClay),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isHighPriority = currentComplaint.level == '3' || currentComplaint.level == '4';
@@ -282,9 +392,15 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: isLoading ? null : _refreshData,
             tooltip: 'รีเฟรชข้อมูล',
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ],
       ),
@@ -295,7 +411,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
           children: [
             CircularProgressIndicator(color: oliveGreen),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'กำลังโหลด...',
               style: TextStyle(color: earthClay),
             ),
@@ -319,6 +435,13 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                 decoration: BoxDecoration(
                   color: oliveGreen,
                   borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: oliveGreen.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
@@ -359,6 +482,13 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                   decoration: BoxDecoration(
                     color: Colors.red,
                     borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -406,7 +536,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                               children: [
                                 Text(
                                   currentComplaint.header,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: softBrown,
@@ -414,7 +544,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                                 ),
                                 Text(
                                   'บ้านเลขที่ ${houseNumber ?? currentComplaint.houseId}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     color: earthClay,
                                   ),
@@ -445,7 +575,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                           Expanded(
                             child: Column(
                               children: [
-                                Text(
+                                const Text(
                                   'ระดับความสำคัญ',
                                   style: TextStyle(
                                     fontSize: 12,
@@ -475,7 +605,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                           Expanded(
                             child: Column(
                               children: [
-                                Text(
+                                const Text(
                                   'ประเภท',
                                   style: TextStyle(
                                     fontSize: 12,
@@ -485,7 +615,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                                 const SizedBox(height: 4),
                                 Text(
                                   complaintTypeName ?? 'ไม่ระบุ',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: softBrown,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
@@ -519,7 +649,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'รายละเอียดปัญหา:',
                     style: TextStyle(
                       color: earthClay,
@@ -536,7 +666,7 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                     ),
                     child: Text(
                       currentComplaint.description,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: softBrown,
                         height: 1.5,
@@ -552,31 +682,9 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                   title: 'รูปภาพปัญหา',
                   icon: Icons.image,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        currentComplaint.img!,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(
-                              height: 200,
-                              color: beige,
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.broken_image, color: earthClay, size: 48),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'ไม่สามารถโหลดรูปภาพได้',
-                                      style: TextStyle(color: earthClay),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                      ),
+                    _buildImageWidget(
+                      currentComplaint.img!,
+                      'ไม่สามารถโหลดรูปภาพปัญหาได้',
                     ),
                   ],
                 ),
@@ -590,9 +698,9 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                   iconColor: oliveGreen,
                   children: [
                     _buildInfoRow('ผู้ดำเนินการ:', lawName ?? 'ไม่ระบุ', valueColor: oliveGreen),
-                    _buildInfoRow('วันที่เสร็จสิ้น:', formatDateFromString(successComplaint!.successAt), valueColor: oliveGreen),
+                    _buildInfoRow('วันที่เสร็จสิ้น:', formatDateTime(successComplaint!.successAt), valueColor: oliveGreen),
                     const SizedBox(height: 8),
-                    Text(
+                    const Text(
                       'รายละเอียดการดำเนินการ:',
                       style: TextStyle(
                         color: earthClay,
@@ -609,12 +717,8 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                         border: Border.all(color: oliveGreen.withValues(alpha: 0.3)),
                       ),
                       child: Text(
-                        successComplaint!.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: oliveGreen,
-                          height: 1.5,
-                        ),
+                             successComplaint!.description ?? 'ไม่มีรายละเอียด'
+
                       ),
                     ),
                   ],
@@ -628,33 +732,46 @@ class _ComplaintDetailSuccessPageState extends State<ComplaintDetailSuccessPage>
                   backgroundColor: oliveGreen.withValues(alpha: 0.05),
                   iconColor: oliveGreen,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        successComplaint!.img!,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(
-                              height: 200,
-                              color: beige,
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.broken_image, color: earthClay, size: 48),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'ไม่สามารถโหลดรูปภาพได้',
-                                      style: TextStyle(color: earthClay),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                      ),
+                    _buildImageWidget(
+                      successComplaint!.img!,
+                      'ไม่สามารถโหลดรูปภาพหลักฐานได้',
                     ),
                   ],
+                ),
+
+              // ข้อความหากไม่มีข้อมูลการดำเนินการ
+              if (successComplaint == null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: warmStone.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: warmStone.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.info_outline, color: warmStone, size: 48),
+                      const SizedBox(height: 12),
+                      Text(
+                        'ยังไม่มีข้อมูลการดำเนินการ',
+                        style: TextStyle(
+                          color: warmStone,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'รอการอัปเดตจากเจ้าหน้าที่',
+                        style: TextStyle(
+                          color: warmStone,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
               const SizedBox(height: 32),

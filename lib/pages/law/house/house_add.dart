@@ -374,7 +374,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             tableName: "house",
             rowName: "house_id",
             rowImgName: "img",
-            rowKey: created.houseId,
+            rowKey: created.houseId, bucketPath: '', imgName: '',
           );
         }
 

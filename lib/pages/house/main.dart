@@ -31,7 +31,6 @@ class _HouseMainPageState extends State<HouseMainPage> {
 
     return [
 
-      HouseBillPage(houseId: houseModel!.houseId),
       HouseMyHousePage(houseId: houseModel!.houseId),
     ];
   }

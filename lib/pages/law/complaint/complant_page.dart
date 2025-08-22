@@ -217,7 +217,7 @@ class _ComplaintPageState extends State<ComplaintPage> {
       targetPage = ComplaintDetailSuccessPage(complaint: complaint);
     } else {
       // ถ้ายังไม่เสร็จสิ้น ไปหน้า detail ปกติ
-      targetPage = ComplaintDetailPage(complaint: complaint);
+      targetPage = SuccessComplaintFormPage(complaint: complaint);
     }
 
     final result = await Navigator.push(

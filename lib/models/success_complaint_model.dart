@@ -1,32 +1,35 @@
-// lib/models/success_complaint_model.dart
 class SuccessComplaintModel {
   final int? id;
-  final int lawId;
-  final int complaintId;
-  final String description;
+  final int? lawId;
+  final int? complaintId;
+  final String? description;
   final String? img;
-  final String successAt;
+  final DateTime? successAt;
 
   SuccessComplaintModel({
     this.id,
-    required this.lawId,
-    required this.complaintId,
-    required this.description,
+    this.lawId,
+    this.complaintId,
+    this.description,
     this.img,
-    required this.successAt,
+    this.successAt,
   });
 
+  // Factory constructor for creating from JSON
   factory SuccessComplaintModel.fromJson(Map<String, dynamic> json) {
     return SuccessComplaintModel(
-      id: json['id'] ?? 0,
-      lawId: json['law_id'] ?? 0,
-      complaintId: json['complaint_id'] ?? 0,
-      description: json['description'] ?? "",
-      img: (json['img'] == "null" || json['img'] == null) ? null : json['img'],
-      successAt: json['success_at'] ?? "", // ใช้ success_at ที่ถูกต้อง
+      id: json['id'] as int?,
+      lawId: json['law_id'] as int?,
+      complaintId: json['complaint_id'] as int?,
+      description: json['description'] as String?,
+      img: json['img'] as String?,
+      successAt: json['success_at'] != null
+          ? DateTime.parse(json['success_at'])
+          : null,
     );
   }
 
+  // Method for converting to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -34,7 +37,7 @@ class SuccessComplaintModel {
       'complaint_id': complaintId,
       'description': description,
       'img': img,
-      'success_at': successAt, // ใช้ success_at ที่ถูกต้อง
+      'success_at': successAt?.toIso8601String(),
     };
   }
 }
