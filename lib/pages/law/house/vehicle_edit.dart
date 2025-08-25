@@ -1,48 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:fullproject/models/vehicle_model.dart';
 import 'package:fullproject/domains/vehicle_domain.dart';
-import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/models/vehicle_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-class VehicleEditSinglePage extends StatefulWidget {
-  final int houseId;
-  final VehicleModel? vehicle; // null = create new, not null = edit existing
+class VehicleEditPage extends StatefulWidget {
+  final VehicleModel vehicle;
 
-  const VehicleEditSinglePage({
+  const VehicleEditPage({
     super.key,
-    required this.houseId,
-    this.vehicle,
+    required this.vehicle,
   });
 
   @override
-  State<VehicleEditSinglePage> createState() => _VehicleEditSinglePageState();
+  State<VehicleEditPage> createState() => _VehicleEditPageState();
 }
 
-class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
+class _VehicleEditPageState extends State<VehicleEditPage> {
   final _formKey = GlobalKey<FormState>();
   final _brandController = TextEditingController();
   final _modelController = TextEditingController();
   final _numberController = TextEditingController();
-  final _yearController = TextEditingController(); // เพิ่มปี
-  final _colorController = TextEditingController(); // เพิ่มสี
-  final _notesController = TextEditingController(); // เพิ่มหมายเหตุ
+  final _yearController = TextEditingController();
+  final _colorController = TextEditingController();
+  final _notesController = TextEditingController();
 
-  File? _selectedImage;
-  String? _currentImageUrl;
-  bool _removeCurrentImage = false;
+  // ✨ รองรับทั้ง Web และ Mobile
+  File? _selectedImage;        // สำหรับ Mobile
+  Uint8List? _webImage;        // สำหรับ Web
   bool _isSaving = false;
   bool _hasUnsavedChanges = false;
-  String? _selectedVehicleType; // เพิ่มประเภทยานพาหนะ
+  String? _selectedVehicleType = 'รถยนต์'; // Default
+  String? _originalImageUrl;   // เก็บ URL รูปเดิม
+
+  // 🌾 ธีมสีใหม่ - แก้ไข withOpacity เป็น withValues
+  static const Color _softBrown = Color(0xFFA47551);
+  static const Color _ivoryWhite = Color(0xFFFFFDF6);
+  static const Color _beige = Color(0xFFF5F0E1);
+  static const Color _earthClay = Color(0xFFBFA18F);
+  static const Color _warmStone = Color(0xFFC7B9A5);
+  static const Color _oliveGreen = Color(0xFFA3B18A);
+  static const Color _burntOrange = Color(0xFFE08E45);
+  static const Color _softTerracotta = Color(0xFFD48B5C);
+  static const Color _clayOrange = Color(0xFFCC7748);
+  static const Color _warmAmber = Color(0xFFDA9856);
+  static const Color _softerBurntOrange = Color(0xFFDB8142);
+  static const Color _softBorder = Color(0xFFD0C4B0);
+  static const Color _focusedBrown = Color(0xFF916846);
+  static const Color _inputFill = Color(0xFFFBF9F3);
+  static const Color _disabledGrey = Color(0xFFDCDCDC);
 
   final List<Map<String, dynamic>> vehicleTypes = [
-    {'type': 'รถยนต์', 'icon': Icons.directions_car, 'color': Colors.blue},
-    {'type': 'รถจักรยานยนต์', 'icon': Icons.two_wheeler, 'color': Colors.orange},
-    {'type': 'รถบรรทุก', 'icon': Icons.local_shipping, 'color': Colors.green},
-    {'type': 'รถตู้', 'icon': Icons.airport_shuttle, 'color': Colors.purple},
-    {'type': 'รถสปอร์ต', 'icon': Icons.sports_bar, 'color': Colors.red},
-    {'type': 'อื่นๆ', 'icon': Icons.directions_car, 'color': Colors.grey},
+    {'type': 'รถยนต์', 'icon': Icons.directions_car, 'color': _softBrown},
+    {'type': 'รถจักรยานยนต์', 'icon': Icons.two_wheeler, 'color': _clayOrange},
+    {'type': 'รถบรรทุก', 'icon': Icons.local_shipping, 'color': _oliveGreen},
+    {'type': 'รถตู้', 'icon': Icons.airport_shuttle, 'color': _softTerracotta},
+    {'type': 'รถสปอร์ต', 'icon': Icons.sports_bar, 'color': _burntOrange},
+    {'type': 'อื่นๆ', 'icon': Icons.directions_car, 'color': _warmAmber},
   ];
 
   final List<String> popularBrands = [
@@ -62,7 +78,7 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
   @override
   void initState() {
     super.initState();
-    _initializeForm();
+    _loadVehicleData();
 
     // Listen for changes
     _brandController.addListener(_onFieldChanged);
@@ -73,16 +89,20 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
     _notesController.addListener(_onFieldChanged);
   }
 
-  void _initializeForm() {
-    if (widget.vehicle != null) {
-      _brandController.text = widget.vehicle!.brand ?? '';
-      _modelController.text = widget.vehicle!.model ?? '';
-      _numberController.text = widget.vehicle!.number ?? '';
-      _currentImageUrl = widget.vehicle!.img;
-      _selectedVehicleType = 'รถยนต์'; // Default หรือจาก database
-    } else {
-      _selectedVehicleType = 'รถยนต์'; // Default for new vehicle
-    }
+  void _loadVehicleData() {
+    // โหลดข้อมูลยานพาหนะเดิมลงในฟอร์ม - ใช้ properties จาก VehicleModel
+    _brandController.text = widget.vehicle.brand ?? '';
+    _modelController.text = widget.vehicle.model ?? '';
+    _numberController.text = widget.vehicle.number ?? '';
+
+    // VehicleModel ไม่มี year, color, notes, type fields ดังนั้นใช้ค่า default
+    _yearController.text = '';
+    _colorController.text = '';
+    _notesController.text = '';
+    _selectedVehicleType = 'รถยนต์'; // default
+
+    // สำหรับ imageUrl - ใช้ img field จาก VehicleModel
+    _originalImageUrl = widget.vehicle.img;
   }
 
   void _onFieldChanged() {
@@ -113,20 +133,28 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange[600], size: 28),
+            Icon(Icons.warning_amber_rounded, color: _warmAmber, size: 28),
             const SizedBox(width: 12),
-            const Text('ยืนยันการออก'),
+            Text(
+              'ยืนยันการออก',
+              style: TextStyle(color: _earthClay),
+            ),
           ],
         ),
-        content: const Text('คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?'),
+        content: Text(
+          'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?',
+          style: TextStyle(color: _earthClay),
+        ),
+        backgroundColor: _ivoryWhite,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(foregroundColor: _warmStone),
             child: const Text('ยกเลิก'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: _clayOrange),
             child: const Text('ออก'),
           ),
         ],
@@ -158,9 +186,17 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: _ivoryWhite,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                color: _warmStone.withValues(alpha: 0.3),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
           ),
           child: SafeArea(
             child: Column(
@@ -172,61 +208,71 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
                   height: 4,
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: _softBorder,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
 
-                const Text(
+                Text(
                   'เลือกรูปภาพ',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: _softBrown,
                   ),
                 ),
 
                 const SizedBox(height: 20),
 
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.photo_camera, color: Colors.blue),
-                  ),
-                  title: const Text('ถ่ายรูป'),
-                  subtitle: const Text('ใช้กล้องถ่ายรูปใหม่'),
-                  onTap: () => Navigator.pop(context, 'camera'),
-                ),
-
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.green[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.photo_library, color: Colors.green),
-                  ),
-                  title: const Text('เลือกจากแกลเลอรี่'),
-                  subtitle: const Text('เลือกรูปจากคลังภาพ'),
-                  onTap: () => Navigator.pop(context, 'gallery'),
-                ),
-
-                if (_selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage))
+                // ✨ แสดงปุ่มถ่ายรูปเฉพาะบน Mobile
+                if (!kIsWeb) ...[
                   ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.red[100],
+                        color: _oliveGreen.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.delete, color: Colors.red),
+                      child: Icon(Icons.photo_camera, color: _oliveGreen),
                     ),
-                    title: const Text('ลบรูปภาพ', style: TextStyle(color: Colors.red)),
-                    subtitle: const Text('ลบรูปภาพปัจจุบัน'),
+                    title: Text('ถ่ายรูป', style: TextStyle(color: _earthClay)),
+                    subtitle: Text('ใช้กล้องถ่ายรูปใหม่', style: TextStyle(color: _warmStone)),
+                    onTap: () => Navigator.pop(context, 'camera'),
+                  ),
+                ],
+
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _burntOrange.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.photo_library, color: _burntOrange),
+                  ),
+                  title: Text(
+                    kIsWeb ? 'เลือกรูปภาพ' : 'เลือกจากแกลเลอรี่',
+                    style: TextStyle(color: _earthClay),
+                  ),
+                  subtitle: Text(
+                    kIsWeb ? 'เลือกรูปจากเครื่อง' : 'เลือกรูปจากคลังภาพ',
+                    style: TextStyle(color: _warmStone),
+                  ),
+                  onTap: () => Navigator.pop(context, 'gallery'),
+                ),
+
+                if (_hasImage())
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _clayOrange.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.delete, color: _clayOrange),
+                    ),
+                    title: Text('ลบรูปภาพ', style: TextStyle(color: _clayOrange)),
+                    subtitle: Text('ลบรูปภาพปัจจุบัน', style: TextStyle(color: _warmStone)),
                     onTap: () => Navigator.pop(context, 'delete'),
                   ),
 
@@ -241,7 +287,7 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
     if (result != null) {
       switch (result) {
         case 'camera':
-          _getImage(ImageSource.camera);
+          if (!kIsWeb) _getImage(ImageSource.camera);
           break;
         case 'gallery':
           _getImage(ImageSource.gallery);
@@ -263,24 +309,44 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
       );
 
       if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-          _removeCurrentImage = false;
-          _hasUnsavedChanges = true;
-        });
+        if (kIsWeb) {
+          // ✨ Web: แปลงเป็น bytes
+          final bytes = await image.readAsBytes();
+          if (mounted) {
+            setState(() {
+              _webImage = bytes;
+              _selectedImage = null;
+              _hasUnsavedChanges = true;
+            });
+          }
+        } else {
+          // ✨ Mobile: ใช้ File
+          if (mounted) {
+            setState(() {
+              _selectedImage = File(image.path);
+              _webImage = null;
+              _hasUnsavedChanges = true;
+            });
+          }
+        }
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error, color: Colors.white),
+                Icon(Icons.error, color: _ivoryWhite),
                 const SizedBox(width: 12),
-                Expanded(child: Text('เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e')),
+                Expanded(
+                  child: Text(
+                    'เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e',
+                    style: TextStyle(color: _ivoryWhite),
+                  ),
+                ),
               ],
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: _clayOrange,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -291,23 +357,17 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
   void _removeImage() {
     setState(() {
       _selectedImage = null;
-      _removeCurrentImage = true;
+      _webImage = null;
+      // ไม่ต้องเคลียร์ _originalImageUrl เพราะจะทำให้ _hasImage() return false
       _hasUnsavedChanges = true;
     });
   }
 
   void _resetForm() {
     setState(() {
-      _brandController.text = widget.vehicle?.brand ?? '';
-      _modelController.text = widget.vehicle?.model ?? '';
-      _numberController.text = widget.vehicle?.number ?? '';
-      _yearController.text = '';
-      _colorController.text = '';
-      _notesController.text = '';
-      _selectedVehicleType = widget.vehicle != null ? 'รถยนต์' : 'รถยนต์';
+      _loadVehicleData(); // โหลดข้อมูลเดิมกลับมา
       _selectedImage = null;
-      _currentImageUrl = widget.vehicle?.img;
-      _removeCurrentImage = false;
+      _webImage = null;
       _hasUnsavedChanges = false;
     });
   }
@@ -315,86 +375,149 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
   Future<void> _saveVehicle() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // ✅ เพิ่ม validation เพิ่มเติม
+    if (_brandController.text.trim().isEmpty) {
+      _showErrorSnackBar('กรุณาระบุยี่ห้อยานพาหนะ');
+      return;
+    }
+
+    if (_modelController.text.trim().isEmpty) {
+      _showErrorSnackBar('กรุณาระบุรุ่นยานพาหนะ');
+      return;
+    }
+
     setState(() => _isSaving = true);
 
     try {
-      String? finalImageUrl;
+      // ✨ เตรียมข้อมูลรูปภาพ - รองรับทั้ง Web และ Mobile
+      dynamic imageFile;
+      bool removeImage = false;
 
-      // Handle image updates
-      if (_selectedImage != null) {
-        if (widget.vehicle != null) {
-          // Update existing vehicle
-          finalImageUrl = await SupabaseImage().uploadImage(
-            imageFile: _selectedImage!,
-            tableName: "vehicle",
-            rowName: "vehicle_id",
-            rowImgName: "img",
-            rowKey: widget.vehicle!.vehicleId, bucketPath: '', imgName: '',
-          );
-        }
-      } else if (_removeCurrentImage) {
-        finalImageUrl = null;
-      } else {
-        finalImageUrl = _currentImageUrl;
+      if (_selectedImage != null || _webImage != null) {
+        // มีรูปใหม่
+        imageFile = kIsWeb ? _webImage : _selectedImage;
+      } else if (_isImageRemoved()) {
+        // ลบรูปเดิม
+        removeImage = true;
       }
 
-      if (widget.vehicle != null) {
-        // Update existing vehicle
-        await VehicleDomain.update(
-          vehicleId: widget.vehicle!.vehicleId,
-          brand: _brandController.text.trim(),
-          model: _modelController.text.trim(),
-          number: _numberController.text.trim(),
-          img: finalImageUrl,
-        );
-      } else {
-        // Create new vehicle
-        await VehicleDomain.create(
-          houseId: widget.houseId,
-          brand: _brandController.text.trim(),
-          model: _modelController.text.trim(),
-          number: _numberController.text.trim(),
-          img: _selectedImage != null ? 'temp' : null,
-        );
-      }
+      // ✨ เรียกใช้ VehicleDomain.update ตาม method signature ที่มี
+      await VehicleDomain.update(
+        vehicleId: widget.vehicle.vehicleId,
+        brand: _brandController.text.trim(),
+        model: _modelController.text.trim(),
+        number: _numberController.text.trim(),
+        imageFile: imageFile,
+        removeImage: removeImage,
+      );
 
-      if (context.mounted) {
-        setState(() => _hasUnsavedChanges = false);
+      if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                Text(widget.vehicle != null ? 'แก้ไขยานพาหนะสำเร็จ' : 'เพิ่มยานพาหนะสำเร็จ'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-
-        Navigator.pop(context, true); // ส่ง result กลับ
-      }
+      setState(() => _hasUnsavedChanges = false);
+      _showSuccessSnackBar('อัปเดตยานพาหนะ "${widget.vehicle.displayName}" สำเร็จแล้ว');
+      Navigator.pop(context, true); // ส่ง result กลับ
     } catch (e) {
-      if (context.mounted) {
+      if (!mounted) return;
+      _showErrorSnackBar('เกิดข้อผิดพลาด: $e');
+    } finally {
+      if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(child: Text('เกิดข้อผิดพลาด: $e')),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
       }
     }
+  }
+
+  Future<void> _deleteVehicle() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.delete_forever, color: _clayOrange, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'ยืนยันการลบ',
+              style: TextStyle(color: _earthClay),
+            ),
+          ],
+        ),
+        content: Text(
+          'คุณต้องการลบยานพาหนะ "${widget.vehicle.displayName}" หรือไม่?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้',
+          style: TextStyle(color: _earthClay),
+        ),
+        backgroundColor: _ivoryWhite,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(foregroundColor: _warmStone),
+            child: const Text('ยกเลิก'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: _clayOrange),
+            child: const Text('ลบ'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      await VehicleDomain.delete(widget.vehicle.vehicleId);
+
+      if (!mounted) return;
+
+      _showSuccessSnackBar('ลบยานพาหนะ "${widget.vehicle.displayName}" สำเร็จแล้ว');
+      Navigator.pop(context, 'deleted'); // ส่ง special result เพื่อบอกว่าลบแล้ว
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('เกิดข้อผิดพลาดในการลบ: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.error, color: _ivoryWhite),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(message, style: TextStyle(color: _ivoryWhite)),
+            ),
+          ],
+        ),
+        backgroundColor: _clayOrange,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: _ivoryWhite),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(message, style: TextStyle(color: _ivoryWhite)),
+            ),
+          ],
+        ),
+        backgroundColor: _oliveGreen,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   Color _getVehicleTypeColor(String? type) {
@@ -413,31 +536,121 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
     return vehicleType['icon'];
   }
 
+  bool _hasImage() {
+    // มีรูปใหม่
+    if (_selectedImage != null || _webImage != null) return true;
+    // มีรูปเดิม
+    if (_originalImageUrl != null && _originalImageUrl!.isNotEmpty) return true;
+    return false;
+  }
+
+  bool _isImageRemoved() {
+    // รูปเดิมมีอยู่แต่ไม่มีรูปใหม่และไม่ได้แสดงรูปเดิม
+    return _originalImageUrl != null &&
+        _originalImageUrl!.isNotEmpty &&
+        _selectedImage == null &&
+        _webImage == null;
+  }
+
+  Widget _getCurrentImage() {
+    if (kIsWeb && _webImage != null) {
+      return Image.memory(
+        _webImage!,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+      );
+    } else if (_selectedImage != null) {
+      return Image.file(
+        _selectedImage!,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+      );
+    } else if (_originalImageUrl != null && _originalImageUrl!.isNotEmpty) {
+      return Image.network(
+        _originalImageUrl!,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: double.infinity,
+            height: 200,
+            color: _warmStone,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error, color: _ivoryWhite, size: 48),
+                const SizedBox(height: 8),
+                Text(
+                  'ไม่สามารถโหลดรูปภาพได้',
+                  style: TextStyle(color: _ivoryWhite),
+                ),
+              ],
+            ),
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            width: double.infinity,
+            height: 200,
+            color: _inputFill,
+            child: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(_softBrown),
+              ),
+            ),
+          );
+        },
+      );
+    } else {
+      return Container(
+        width: double.infinity,
+        height: 200,
+        color: _warmStone,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.vehicle != null;
-
     return PopScope(
       canPop: !_hasUnsavedChanges,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
         final shouldPop = await _onWillPop();
-        if (shouldPop && context.mounted) {
+        if (shouldPop && mounted) {
           Navigator.of(context).pop();
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: _beige,
         appBar: AppBar(
-          title: Text(isEditing ? 'แก้ไขยานพาหนะ' : 'เพิ่มยานพาหนะใหม่'),
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          elevation: 1,
+          title: Text(
+            'แก้ไขยานพาหนะ',
+            style: TextStyle(
+              color: _ivoryWhite,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          backgroundColor: _softBrown,
+          foregroundColor: _ivoryWhite,
+          elevation: 2,
+          shadowColor: _warmStone.withValues(alpha: 0.5),
           actions: [
+            // ปุ่มลบ
+            IconButton(
+              onPressed: _isSaving ? null : _deleteVehicle,
+              icon: const Icon(Icons.delete),
+              tooltip: 'ลบยานพาหนะ',
+            ),
             if (_hasUnsavedChanges)
               TextButton(
                 onPressed: _resetForm,
+                style: TextButton.styleFrom(foregroundColor: _ivoryWhite),
                 child: const Text('รีเซ็ต'),
               ),
           ],
@@ -479,40 +692,88 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
     );
   }
 
+  Widget _buildCard({
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _ivoryWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _softBorder),
+        boxShadow: [
+          BoxShadow(
+            color: _warmStone.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _getVehicleTypeColor(_selectedVehicleType).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: _getVehicleTypeColor(_selectedVehicleType),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: _earthClay,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+
   Widget _buildImageSection() {
     return _buildCard(
       title: 'รูปภาพยานพาหนะ',
       icon: Icons.image,
       child: Column(
         children: [
-          // แสดงรูปปัจจุบัน
-          if (_selectedImage != null) ...[
+          // แสดงรูปปัจจุบัน (รูปใหม่หรือรูปเดิม)
+          if (_hasImage() && !_isImageRemoved()) ...[
             Stack(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.file(
-                    _selectedImage!,
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  ),
+                  child: _getCurrentImage(),
                 ),
                 Positioned(
                   top: 12,
                   right: 12,
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.black54,
+                    decoration: BoxDecoration(
+                      color: _earthClay.withValues(alpha: 0.8),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: Icon(Icons.close, color: _ivoryWhite),
                       onPressed: () {
-                        setState(() {
-                          _selectedImage = null;
-                          _hasUnsavedChanges = true;
-                        });
+                        _removeImage();
                       },
                     ),
                   ),
@@ -523,59 +784,14 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: _selectedImage != null || _webImage != null
+                          ? _softerBurntOrange
+                          : _oliveGreen,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
-                      'รูปใหม่',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ] else if (_currentImageUrl != null && !_removeCurrentImage) ...[
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: BuildImage(
-                    imagePath: _currentImageUrl!,
-                    tablePath: 'vehicle',
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
-                    errorWidget: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.broken_image, size: 48, color: Colors.grey),
-                            SizedBox(height: 8),
-                            Text('ไม่สามารถโหลดรูปภาพได้'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'รูปเดิม',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    child: Text(
+                      _selectedImage != null || _webImage != null ? 'รูปใหม่' : 'รูปเดิม',
+                      style: TextStyle(color: _ivoryWhite, fontSize: 12),
                     ),
                   ),
                 ),
@@ -587,9 +803,9 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
               width: double.infinity,
               height: 200,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: _inputFill,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[300]!, width: 2, style: BorderStyle.values[1]),
+                border: Border.all(color: _softBorder, width: 2),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -597,13 +813,13 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
                   Icon(
                     _getVehicleIcon(_selectedVehicleType),
                     size: 64,
-                    color: Colors.grey[400],
+                    color: _warmStone,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'ยังไม่มีรูปภาพ',
+                    'ไม่มีรูปภาพ',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: _earthClay,
                       fontSize: 16,
                     ),
                   ),
@@ -611,7 +827,7 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
                   Text(
                     'กดปุ่มด้านล่างเพื่อเพิ่มรูป',
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: _warmStone,
                       fontSize: 14,
                     ),
                   ),
@@ -629,16 +845,16 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
             child: OutlinedButton.icon(
               onPressed: _pickImage,
               icon: Icon(
-                _selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage)
-                    ? Icons.edit
-                    : Icons.add_photo_alternate,
+                _hasImage() ? Icons.edit : Icons.add_photo_alternate,
+                color: _burntOrange,
               ),
               label: Text(
-                _selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage)
-                    ? 'เปลี่ยนรูปภาพ'
-                    : 'เพิ่มรูปภาพ',
+                _hasImage() ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ',
+                style: TextStyle(color: _earthClay),
               ),
               style: OutlinedButton.styleFrom(
+                side: BorderSide(color: _softBorder),
+                backgroundColor: _ivoryWhite,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -657,11 +873,12 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'เลือกประเภทยานพาหนะ *',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
+              color: _earthClay,
             ),
           ),
           const SizedBox(height: 16),
@@ -691,26 +908,34 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? type['color'].withValues(alpha: 0.1) : Colors.white,
+                    color: isSelected ? type['color'].withValues(alpha: 0.1) : _ivoryWhite,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? type['color'] : Colors.grey[300]!,
+                      color: isSelected ? type['color'] : _softBorder,
                       width: isSelected ? 2 : 1,
                     ),
+                    boxShadow: isSelected ? [
+                      BoxShadow(
+                        color: type['color'].withValues(alpha: 0.2),
+                        spreadRadius: 1,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ] : null,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         type['icon'],
-                        color: isSelected ? type['color'] : Colors.grey[600],
+                        color: isSelected ? type['color'] : _warmStone,
                         size: 24,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         type['type'],
                         style: TextStyle(
-                          color: isSelected ? type['color'] : Colors.grey[800],
+                          color: isSelected ? type['color'] : _earthClay,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           fontSize: 12,
                         ),
@@ -741,7 +966,8 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
                 return const Iterable<String>.empty();
               }
               return popularBrands.where((String option) {
-                return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                return option.toLowerCase().contains(
+                    textEditingValue.text.toLowerCase());
               });
             },
             onSelected: (String selection) {
@@ -755,21 +981,67 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
                 onEditingComplete: onEditingComplete,
                 decoration: InputDecoration(
                   labelText: 'ยี่ห้อ *',
+                  labelStyle: TextStyle(color: _earthClay),
                   hintText: 'เช่น Toyota, Honda',
-                  prefixIcon: const Icon(Icons.branding_watermark),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  hintStyle: TextStyle(color: _warmStone),
+                  prefixIcon: Icon(Icons.branding_watermark, color: _burntOrange),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: _inputFill,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: _softBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: _focusedBrown, width: 2),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: _clayOrange),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: _clayOrange, width: 2),
+                  ),
                 ),
-                validator: (value) =>
-                value?.trim().isEmpty == true ? 'กรุณาระบุยี่ห้อ' : null,
-                textInputAction: TextInputAction.next,
-                onChanged: (value) {
-                  _brandController.text = value;
-                  _onFieldChanged();
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'กรุณาใส่ยี่ห้อยานพาหนะ';
+                  }
+                  return null;
                 },
+                onChanged: (value) => _onFieldChanged(),
+              );
+            },
+            optionsViewBuilder: (context, onSelected, options) {
+              return Align(
+                alignment: Alignment.topLeft,
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width - 32,
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    decoration: BoxDecoration(
+                      color: _ivoryWhite,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _softBorder),
+                    ),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (context, index) {
+                        final option = options.elementAt(index);
+                        return ListTile(
+                          title: Text(option, style: TextStyle(color: _earthClay)),
+                          onTap: () => onSelected(option),
+                          hoverColor: _beige,
+                        );
+                      },
+                    ),
+                  ),
+                ),
               );
             },
           ),
@@ -781,33 +1053,67 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
             controller: _modelController,
             decoration: InputDecoration(
               labelText: 'รุ่น *',
-              hintText: 'เช่น Corolla, Civic',
-              prefixIcon: const Icon(Icons.directions_car),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              labelStyle: TextStyle(color: _earthClay),
+              hintText: 'เช่น Camry, Civic',
+              hintStyle: TextStyle(color: _warmStone),
+              prefixIcon: Icon(Icons.model_training, color: _burntOrange),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: _inputFill,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _softBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _focusedBrown, width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _clayOrange),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _clayOrange, width: 2),
+              ),
             ),
-            validator: (value) =>
-            value?.trim().isEmpty == true ? 'กรุณาระบุรุ่น' : null,
-            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'กรุณาใส่รุ่นยานพาหนะ';
+              }
+              return null;
+            },
+            onChanged: (value) => _onFieldChanged(),
           ),
 
           const SizedBox(height: 16),
 
-          // ทะเบียน
+          // หมายเลขทะเบียน
           TextFormField(
             controller: _numberController,
             decoration: InputDecoration(
-              labelText: 'ทะเบียน',
-              hintText: 'เช่น กข 1234',
-              prefixIcon: const Icon(Icons.confirmation_number),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              labelText: 'หมายเลขทะเบียน',
+              labelStyle: TextStyle(color: _earthClay),
+              hintText: 'เช่น กข 1234 กรุงเทพฯ',
+              hintStyle: TextStyle(color: _warmStone),
+              prefixIcon: Icon(Icons.confirmation_number, color: _burntOrange),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: _inputFill,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _softBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _focusedBrown, width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _clayOrange),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _clayOrange, width: 2),
+              ),
             ),
             onChanged: (value) {
               final formatted = _formatLicensePlate(value);
@@ -819,7 +1125,12 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
               }
               _onFieldChanged();
             },
-            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value != null && value.trim().isNotEmpty && value.trim().length < 2) {
+                return 'หมายเลขทะเบียนต้องมีอย่างน้อย 2 ตัวอักษร';
+              }
+              return null;
+            },
           ),
         ],
       ),
@@ -832,74 +1143,134 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
       icon: Icons.info_outline,
       child: Column(
         children: [
-          Row(
-            children: [
-              // ปี
-              Expanded(
-                child: TextFormField(
-                  controller: _yearController,
-                  decoration: InputDecoration(
-                    labelText: 'ปี',
-                    hintText: 'เช่น 2023',
-                    prefixIcon: const Icon(Icons.calendar_today),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(4),
-                  ],
-                  textInputAction: TextInputAction.next,
-                ),
+          // ปี
+          TextFormField(
+            controller: _yearController,
+            decoration: InputDecoration(
+              labelText: 'ปี',
+              labelStyle: TextStyle(color: _earthClay),
+              hintText: 'เช่น 2023',
+              hintStyle: TextStyle(color: _warmStone),
+              prefixIcon: Icon(Icons.calendar_today, color: _burntOrange),
+              filled: true,
+              fillColor: _inputFill,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _softBorder),
               ),
-
-              const SizedBox(width: 16),
-
-              // สี
-              Expanded(
-                child: Autocomplete<String>(
-                  initialValue: TextEditingValue(text: _colorController.text),
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<String>.empty();
-                    }
-                    return popularColors.where((String option) {
-                      return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  onSelected: (String selection) {
-                    _colorController.text = selection;
-                    _onFieldChanged();
-                  },
-                  fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                    return TextFormField(
-                      controller: controller,
-                      focusNode: focusNode,
-                      onEditingComplete: onEditingComplete,
-                      decoration: InputDecoration(
-                        labelText: 'สี',
-                        hintText: 'เช่น ขาว, ดำ',
-                        prefixIcon: const Icon(Icons.palette),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                      textInputAction: TextInputAction.next,
-                      onChanged: (value) {
-                        _colorController.text = value;
-                        _onFieldChanged();
-                      },
-                    );
-                  },
-                ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _focusedBrown, width: 2),
               ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _clayOrange),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _clayOrange, width: 2),
+              ),
+            ),
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(4),
             ],
+            validator: (value) {
+              if (value != null && value.isNotEmpty) {
+                final year = int.tryParse(value);
+                final currentYear = DateTime.now().year;
+                if (year == null || year < 1900 || year > currentYear + 1) {
+                  return 'กรุณาใส่ปีที่ถูกต้อง (1900-${currentYear + 1})';
+                }
+              }
+              return null;
+            },
+            onChanged: (value) => _onFieldChanged(),
+          ),
+
+          const SizedBox(height: 16),
+
+          // สี
+          Autocomplete<String>(
+            initialValue: TextEditingValue(text: _colorController.text),
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text == '') {
+                return popularColors;
+              }
+              return popularColors.where((String option) {
+                return option.toLowerCase().contains(
+                    textEditingValue.text.toLowerCase());
+              });
+            },
+            onSelected: (String selection) {
+              _colorController.text = selection;
+              _onFieldChanged();
+            },
+            fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+              return TextFormField(
+                controller: controller,
+                focusNode: focusNode,
+                onEditingComplete: onEditingComplete,
+                decoration: InputDecoration(
+                  labelText: 'สี',
+                  labelStyle: TextStyle(color: _earthClay),
+                  hintText: 'เช่น ขาว, ดำ',
+                  hintStyle: TextStyle(color: _warmStone),
+                  prefixIcon: Icon(Icons.palette, color: _burntOrange),
+                  filled: true,
+                  fillColor: _inputFill,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: _softBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: _focusedBrown, width: 2),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: _clayOrange),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: _clayOrange, width: 2),
+                  ),
+                ),
+                onChanged: (value) => _onFieldChanged(),
+              );
+            },
+            optionsViewBuilder: (context, onSelected, options) {
+              return Align(
+                alignment: Alignment.topLeft,
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width - 32,
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    decoration: BoxDecoration(
+                      color: _ivoryWhite,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _softBorder),
+                    ),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (context, index) {
+                        final option = options.elementAt(index);
+                        return ListTile(
+                          title: Text(option, style: TextStyle(color: _earthClay)),
+                          onTap: () => onSelected(option),
+                          hoverColor: _beige,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -908,20 +1279,30 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
 
   Widget _buildNotesSection() {
     return _buildCard(
-      title: 'หมายเหตุเพิ่มเติม',
-      icon: Icons.note_alt,
+      title: 'หมายเหตุ',
+      icon: Icons.note,
       child: TextFormField(
         controller: _notesController,
         decoration: InputDecoration(
-          hintText: 'เช่น ข้อมูลการประกัน, การดัดแปลง, หรือข้อมูลอื่นๆ (ไม่บังคับ)',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          labelText: 'หมายเหตุเพิ่มเติม',
+          labelStyle: TextStyle(color: _earthClay),
+          hintText: 'ระบุรายละเอียดเพิ่มเติมเกี่ยวกับยานพาหนะ...',
+          hintStyle: TextStyle(color: _warmStone),
+          prefixIcon: Icon(Icons.edit_note, color: _burntOrange),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: _inputFill,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _softBorder),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _focusedBrown, width: 2),
+          ),
+          alignLabelWithHint: true,
         ),
-        maxLines: 4,
-        textInputAction: TextInputAction.done,
+        maxLines: 3,
+        onChanged: (value) => _onFieldChanged(),
       ),
     );
   }
@@ -932,38 +1313,56 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
         // ปุ่มบันทึก
         SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 56,
           child: ElevatedButton(
             onPressed: _isSaving ? null : _saveVehicle,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _getVehicleTypeColor(_selectedVehicleType),
-              foregroundColor: Colors.white,
+              backgroundColor: _softBrown,
+              foregroundColor: _ivoryWhite,
+              disabledBackgroundColor: _disabledGrey,
+              disabledForegroundColor: _warmStone,
+              elevation: 2,
+              shadowColor: _warmStone.withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
             child: _isSaving
-                ? const Row(
+                ? Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
                     strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(_ivoryWhite),
                   ),
                 ),
-                SizedBox(width: 12),
-                Text('กำลังบันทึก...'),
+                const SizedBox(width: 12),
+                Text(
+                  'กำลังบันทึก...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: _ivoryWhite,
+                  ),
+                ),
               ],
             )
-                : Text(
-              widget.vehicle != null ? 'บันทึกการแก้ไข' : 'เพิ่มยานพาหนะ',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+                : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.save, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'บันทึกการเปลี่ยนแปลง',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -973,71 +1372,38 @@ class _VehicleEditSinglePageState extends State<VehicleEditSinglePage> {
         // ปุ่มยกเลิก
         SizedBox(
           width: double.infinity,
-          height: 50,
-          child: OutlinedButton(
-            onPressed: _isSaving
-                ? null
-                : () async {
+          height: 48,
+          child: TextButton(
+            onPressed: _isSaving ? null : () async {
               if (_hasUnsavedChanges) {
-                final shouldPop = await _onWillPop();
-                if (shouldPop && context.mounted) {
-                  Navigator.pop(context);
+                final shouldExit = await _onWillPop();
+                if (shouldExit && mounted) {
+                  Navigator.of(context).pop();
                 }
               } else {
-                Navigator.pop(context);
+                Navigator.of(context).pop();
               }
             },
-            style: OutlinedButton.styleFrom(
+            style: TextButton.styleFrom(
+              foregroundColor: _earthClay,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('ยกเลิก'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCard({
-    required String title,
-    required IconData icon,
-    required Widget child,
-  }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[100],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, color: Colors.blue, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
+                Icon(Icons.close, size: 18),
+                const SizedBox(width: 8),
+                const Text(
+                  'ยกเลิก',
+                  style: TextStyle(fontSize: 16),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            child,
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

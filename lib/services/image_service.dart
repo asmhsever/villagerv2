@@ -77,6 +77,23 @@ class SupabaseImage {
     }
   }
 
+  //delete
+  Future<bool> deleteImage({
+    required String bucketPath,
+    required String imageUrl,
+  }) async {
+    try {
+      // ลบไฟล์จาก storage bucket
+      final response = await _client.storage.from('images').remove([imageUrl]);
+
+      print('Image deleted from bucket: $imageUrl');
+      return true;
+    } catch (e) {
+      print('Error deleting image from bucket: $e');
+      return false;
+    }
+  }
+
   /// Upload processed image to database and bucket
 
   Future<String?> uploadImage({

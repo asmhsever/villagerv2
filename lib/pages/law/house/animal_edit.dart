@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fullproject/models/animal_model.dart';
 import 'package:fullproject/domains/animal_domain.dart';
@@ -23,10 +24,12 @@ class AnimalEditSinglePage extends StatefulWidget {
 class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _notesController = TextEditingController(); // เพิ่มหมายเหตุ
+  final _notesController = TextEditingController();
 
   String? _selectedType;
-  File? _selectedImage;
+  // ✨ รองรับทั้ง Web และ Mobile
+  File? _selectedImage;        // สำหรับ Mobile
+  Uint8List? _webImage;        // สำหรับ Web
   String? _currentImageUrl;
   bool _removeCurrentImage = false;
   bool _isSaving = false;
@@ -145,19 +148,22 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
 
                 const SizedBox(height: 20),
 
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[100],
-                      borderRadius: BorderRadius.circular(8),
+                // ✨ แสดงปุ่มถ่ายรูปเฉพาะบน Mobile
+                if (!kIsWeb) ...[
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.photo_camera, color: Colors.blue),
                     ),
-                    child: const Icon(Icons.photo_camera, color: Colors.blue),
+                    title: const Text('ถ่ายรูป'),
+                    subtitle: const Text('ใช้กล้องถ่ายรูปใหม่'),
+                    onTap: () => Navigator.pop(context, 'camera'),
                   ),
-                  title: const Text('ถ่ายรูป'),
-                  subtitle: const Text('ใช้กล้องถ่ายรูปใหม่'),
-                  onTap: () => Navigator.pop(context, 'camera'),
-                ),
+                ],
 
                 ListTile(
                   leading: Container(
@@ -168,12 +174,13 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                     ),
                     child: const Icon(Icons.photo_library, color: Colors.green),
                   ),
-                  title: const Text('เลือกจากแกลเลอรี่'),
-                  subtitle: const Text('เลือกรูปจากคลังภาพ'),
+                  title: Text(kIsWeb ? 'เลือกรูปภาพ' : 'เลือกจากแกลเลอรี่'),
+                  subtitle: Text(kIsWeb ? 'เลือกรูปจากเครื่อง' : 'เลือกรูปจากคลังภาพ'),
                   onTap: () => Navigator.pop(context, 'gallery'),
                 ),
 
-                if (_selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage))
+                // แสดงปุ่มลบเมื่อมีรูปแล้ว
+                if (_hasAnyImage())
                   ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
@@ -199,7 +206,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
     if (result != null) {
       switch (result) {
         case 'camera':
-          _getImage(ImageSource.camera);
+          if (!kIsWeb) _getImage(ImageSource.camera);
           break;
         case 'gallery':
           _getImage(ImageSource.gallery);
@@ -221,14 +228,31 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
       );
 
       if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-          _removeCurrentImage = false;
-          _hasUnsavedChanges = true;
-        });
+        if (kIsWeb) {
+          // ✨ Web: แปลงเป็น bytes
+          final bytes = await image.readAsBytes();
+          if (mounted) {
+            setState(() {
+              _webImage = bytes;
+              _selectedImage = null;
+              _removeCurrentImage = false;
+              _hasUnsavedChanges = true;
+            });
+          }
+        } else {
+          // ✨ Mobile: ใช้ File
+          if (mounted) {
+            setState(() {
+              _selectedImage = File(image.path);
+              _webImage = null;
+              _removeCurrentImage = false;
+              _hasUnsavedChanges = true;
+            });
+          }
+        }
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -249,6 +273,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
   void _removeImage() {
     setState(() {
       _selectedImage = null;
+      _webImage = null;
       _removeCurrentImage = true;
       _hasUnsavedChanges = true;
     });
@@ -260,92 +285,110 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
       _notesController.text = '';
       _selectedType = widget.animal?.type;
       _selectedImage = null;
+      _webImage = null;
       _currentImageUrl = widget.animal?.img;
       _removeCurrentImage = false;
       _hasUnsavedChanges = false;
     });
   }
 
+  // ✨ ปรับปรุงให้ใช้ AnimalDomain ที่ถูกต้อง
   Future<void> _saveAnimal() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate() || _selectedType == null) {
+      if (_selectedType == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('กรุณาเลือกประเภทสัตว์เลี้ยง'),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
 
     setState(() => _isSaving = true);
 
     try {
-      String? finalImageUrl;
-
-      // Handle image updates
-      if (_selectedImage != null) {
-        if (widget.animal != null) {
-          // Update existing animal
-          finalImageUrl = await SupabaseImage().uploadImage(
-            imageFile: _selectedImage!,
-            tableName: "animal",
-            rowName: "animal_id",
-            rowImgName: "img",
-            rowKey: widget.animal!.animalId, bucketPath: '', imgName: '',
-          );
-        }
-      } else if (_removeCurrentImage) {
-        finalImageUrl = null;
-      } else {
-        finalImageUrl = _currentImageUrl;
-      }
-
       if (widget.animal != null) {
-        // Update existing animal
+        // ✨ แก้ไขสัตว์เลี้ยงที่มีอยู่
+
+        // เตรียมข้อมูลรูปภาพ
+        dynamic imageFile;
+        if (kIsWeb && _webImage != null) {
+          imageFile = _webImage;
+        } else if (_selectedImage != null) {
+          imageFile = _selectedImage;
+        }
+
         await AnimalDomain.update(
           animalId: widget.animal!.animalId,
           type: _selectedType!,
           name: _nameController.text.trim(),
-          img: finalImageUrl,
+          imageFile: imageFile,
+          removeImage: _removeCurrentImage,
         );
       } else {
-        // Create new animal
+        // ✨ สร้างสัตว์เลี้ยงใหม่
+
+        // เตรียมข้อมูลรูปภาพ
+        dynamic imageFile;
+        if (kIsWeb && _webImage != null) {
+          imageFile = _webImage;
+        } else if (_selectedImage != null) {
+          imageFile = _selectedImage;
+        }
+
         await AnimalDomain.create(
           houseId: widget.houseId,
           type: _selectedType!,
           name: _nameController.text.trim(),
-          img: _selectedImage != null ? 'temp' : null,
+          imageFile: imageFile,
         );
       }
 
-      if (context.mounted) {
-        setState(() => _hasUnsavedChanges = false);
+      if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                Text(widget.animal != null ? 'แก้ไขสัตว์เลี้ยงสำเร็จ' : 'เพิ่มสัตว์เลี้ยงสำเร็จ'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
+      setState(() => _hasUnsavedChanges = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Text(
+                  widget.animal != null
+                      ? 'แก้ไขสัตว์เลี้ยง "${_nameController.text}" สำเร็จแล้ว'
+                      : 'เพิ่มสัตว์เลี้ยง "${_nameController.text}" สำเร็จแล้ว'
+              ),
+            ],
           ),
-        );
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
 
-        Navigator.pop(context, true); // ส่ง result กลับ
-      }
+      Navigator.pop(context, true); // ส่ง result กลับ
     } catch (e) {
-      if (context.mounted) {
-        setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(child: Text('เกิดข้อผิดพลาด: $e')),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
+      if (!mounted) return;
+
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text('เกิดข้อผิดพลาด: $e')),
+            ],
           ),
-        );
-      }
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ),
+      );
     }
   }
 
@@ -365,6 +408,11 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
     return animalType['icon'];
   }
 
+  // ✨ Helper methods
+  bool _hasNewImage() => _selectedImage != null || _webImage != null;
+  bool _hasCurrentImage() => _currentImageUrl != null && !_removeCurrentImage;
+  bool _hasAnyImage() => _hasNewImage() || _hasCurrentImage();
+
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.animal != null;
@@ -375,7 +423,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
         if (didPop) return;
 
         final shouldPop = await _onWillPop();
-        if (shouldPop && context.mounted) {
+        if (shouldPop && mounted) {
           Navigator.of(context).pop();
         }
       },
@@ -427,6 +475,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
     );
   }
 
+  // ✨ ปรับปรุง _buildImageSection ให้รองรับ Web
   Widget _buildImageSection() {
     return _buildCard(
       title: 'รูปภาพสัตว์เลี้ยง',
@@ -434,16 +483,30 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
       child: Column(
         children: [
           // แสดงรูปปัจจุบัน
-          if (_selectedImage != null) ...[
+          if (_hasNewImage()) ...[
+            // รูปใหม่ที่เลือก
             Stack(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.file(
+                  child: kIsWeb && _webImage != null
+                      ? Image.memory(
+                    _webImage!,
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  )
+                      : _selectedImage != null
+                      ? Image.file(
                     _selectedImage!,
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
+                  )
+                      : Container(
+                    width: double.infinity,
+                    height: 200,
+                    color: Colors.grey[300],
                   ),
                 ),
                 Positioned(
@@ -459,6 +522,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                       onPressed: () {
                         setState(() {
                           _selectedImage = null;
+                          _webImage = null;
                           _hasUnsavedChanges = true;
                         });
                       },
@@ -482,7 +546,8 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                 ),
               ],
             ),
-          ] else if (_currentImageUrl != null && !_removeCurrentImage) ...[
+          ] else if (_hasCurrentImage()) ...[
+            // รูปเดิมที่มีอยู่
             Stack(
               children: [
                 ClipRRect(
@@ -537,13 +602,13 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[300]!, width: 2, style: BorderStyle.values[1]),
+                border: Border.all(color: Colors.grey[300]!, width: 2),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.pets,
+                    _getAnimalIcon(_selectedType),
                     size: 64,
                     color: Colors.grey[400],
                   ),
@@ -577,14 +642,10 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
             child: OutlinedButton.icon(
               onPressed: _pickImage,
               icon: Icon(
-                _selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage)
-                    ? Icons.edit
-                    : Icons.add_photo_alternate,
+                _hasAnyImage() ? Icons.edit : Icons.add_photo_alternate,
               ),
               label: Text(
-                _selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage)
-                    ? 'เปลี่ยนรูปภาพ'
-                    : 'เพิ่มรูปภาพ',
+                _hasAnyImage() ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ',
               ),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
@@ -741,7 +802,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
           child: ElevatedButton(
             onPressed: _isSaving || _selectedType == null ? null : _saveAnimal,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _getAnimalTypeColor(_selectedType),
+              backgroundColor: _selectedType != null ? _getAnimalTypeColor(_selectedType) : Colors.grey,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -785,7 +846,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                 : () async {
               if (_hasUnsavedChanges) {
                 final shouldPop = await _onWillPop();
-                if (shouldPop && context.mounted) {
+                if (shouldPop && mounted) {
                   Navigator.pop(context);
                 }
               } else {

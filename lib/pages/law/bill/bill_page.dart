@@ -41,6 +41,12 @@ class _BillPageState extends State<BillPage> {
   static const Color neutralText = earthClay;
   static const Color primaryBorder = softBorder;
 
+  // 🌸 Deeper Card Background Colors
+  static const Color lightCream = Color(0xFFF5F1EC);
+  static const Color softBeige = Color(0xFFF2EDE6);
+  static const Color paleIvory = Color(0xFFF0EBE4);
+  static const Color whisperTan = Color(0xFFEDE7E0);
+
   @override
   void initState() {
     super.initState();
@@ -365,16 +371,9 @@ class _BillPageState extends State<BillPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: sandyTan,
+        color: lightCream, // เปลี่ยนเป็นสีอ่อนขึ้น
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: primaryBorder, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -479,7 +478,7 @@ class _BillPageState extends State<BillPage> {
           margin: const EdgeInsets.all(24),
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: sandyTan,
+            color: softBeige, // เปลี่ยนเป็นสีอ่อนขึ้น
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: primaryBorder),
           ),
@@ -581,16 +580,9 @@ class _BillPageState extends State<BillPage> {
                   // ช่องค้นหา
                   Container(
                     decoration: BoxDecoration(
-                      color: sandyTan,
+                      color: paleIvory, // เปลี่ยนเป็นสีอ่อนขึ้น
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: primaryBorder),
-                      boxShadow: [
-                        BoxShadow(
-                          color: earthClay.withValues(alpha: 0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
                     child: TextField(
                       controller: _searchController,
@@ -633,7 +625,7 @@ class _BillPageState extends State<BillPage> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: sandyTan,
+                      color: whisperTan, // เปลี่ยนเป็นสีอ่อนขึ้น
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: primaryBorder),
                     ),
@@ -678,10 +670,6 @@ class _BillPageState extends State<BillPage> {
                                 DropdownMenuItem(
                                   value: 'paid',
                                   child: Text('ชำระแล้ว'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'PENDING',
-                                  child: Text('รอชำระ'),
                                 ),
                                 DropdownMenuItem(
                                   value: 'UNDER_REVIEW',
@@ -740,16 +728,9 @@ class _BillPageState extends State<BillPage> {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12.0),
                     decoration: BoxDecoration(
-                      color: sandyTan,
+                      color: lightCream, // เปลี่ยนเป็นสีอ่อนขึ้น
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: primaryBorder),
-                      boxShadow: [
-                        BoxShadow(
-                          color: earthClay.withValues(alpha: 0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
@@ -850,28 +831,17 @@ class _BillPageState extends State<BillPage> {
           ],
         ),
       ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: burntOrange.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _navigateToAddForm,
+        backgroundColor: burntOrange,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_rounded),
+        label: const Text(
+          'เพิ่มค่าส่วนกลาง',
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
-        child: FloatingActionButton.extended(
-          onPressed: _navigateToAddForm,
-          backgroundColor: burntOrange,
-          foregroundColor: Colors.white,
-          icon: const Icon(Icons.add_rounded),
-          label: const Text(
-            'เพิ่มค่าส่วนกลาง',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
     );

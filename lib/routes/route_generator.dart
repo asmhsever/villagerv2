@@ -12,6 +12,9 @@ import 'package:fullproject/pages/law/profile/profile_page.dart';
 
 import 'package:fullproject/pages/law/complaint/complant_page.dart';
 
+import '../pages/law/committee/committee.dart';
+import '../pages/law/fund/fund_page.dart';
+import '../pages/law/guard/guard_page.dart';
 import 'app_routes.dart';
 
 class RouteGenerator {
@@ -46,6 +49,7 @@ class RouteGenerator {
         final args = settings.arguments as Map<String, dynamic>;
         final villageId = args['villageId'] as int;
         return _createRoute(LawHouseManagePage(villageId: villageId));
+
       case AppRoutes.LawProfilePage:
         final args = settings.arguments as Map<String, dynamic>?;
         final lawId = args?['lawId'] as int?;
@@ -56,11 +60,34 @@ class RouteGenerator {
 
         return _createRoute(LawProfilePage(lawId: lawId));
 
+      case AppRoutes.committeeList:
+        final args = settings.arguments as Map<String, dynamic>;
+        final villageId = args['villageId'] as int;
+        return _createRoute(CommitteeListPage(villageId: villageId));
+
+      case AppRoutes.lawGuardList:
+
+        final args = settings.arguments as Map<String, dynamic>?;
+        final villageId = args?['villageId'];
+        if (villageId is int) {
+          return _createRoute(HouseGuardListPage(villageId: villageId));
+        }
+
+        return _createRoute(const NotFoundPage());
+
+
+      case AppRoutes.houseFund:
+        final args = settings.arguments as Map<String, dynamic>;
+        final villageId = args['villageId'] as int;
+        return _createRoute(HouseFundPage(villageId: villageId));
+
     /*case AppRoutes.animal:
         return _createRoute(const NotFoundPage());
 
       case AppRoutes.meeting:
         return _createRoute(const NotFoundPage());*/
+
+
       default:
         return _createRoute(const NotFoundPage());
     }

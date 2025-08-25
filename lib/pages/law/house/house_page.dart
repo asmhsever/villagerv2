@@ -24,6 +24,27 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
 
   final TextEditingController _searchController = TextEditingController();
 
+  // Enhanced Earthy Theme Colors
+  static const Color softBrown = Color(0xFFA47551);
+  static const Color ivoryWhite = Color(0xFFFFFDF6);
+  static const Color beige = Color(0xFFF5F0E1);
+  static const Color sandyTan = Color(0xFFD8CAB8);
+  static const Color earthClay = Color(0xFFBFA18F);
+  static const Color warmStone = Color(0xFFC7B9A5);
+  static const Color oliveGreen = Color(0xFFA3B18A);
+  static const Color burntOrange = Color(0xFFE08E45);
+
+  // New Enhanced Colors
+  static const Color softBorder = Color(0xFFD0C4B0);
+  static const Color focusedBrown = Color(0xFF916846);
+  static const Color inputFill = Color(0xFFFBF9F3);
+  static const Color clickHighlight = Color(0xFFDC7633);
+  static const Color hoverButton = Color(0xFFF3A664);
+  static const Color disabledGrey = Color(0xFFDCDCDC);
+  static const Color softTerracotta = Color(0xFFD48B5C);
+  static const Color clayOrange = Color(0xFFCC7748);
+  static const Color warmAmber = Color(0xFFDA9856);
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +72,34 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
       setState(() => _loading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('เกิดข้อผิดพลาดในการโหลดข้อมูล: $e')),
+          SnackBar(
+            content: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.error_outline, color: Colors.white, size: 18),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'เกิดข้อผิดพลาดในการโหลดข้อมูล: $e',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            backgroundColor: clayOrange,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
         );
       }
     }
@@ -78,17 +126,89 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ยืนยันการลบ'),
-        content: const Text('คุณแน่ใจหรือไม่ว่าต้องการลบบ้านนี้?\nการดำเนินการนี้ไม่สามารถยกเลิกได้'),
+        backgroundColor: ivoryWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: clayOrange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.delete_forever_rounded, color: clayOrange, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'ยืนยันการลบ',
+              style: TextStyle(
+                color: clayOrange,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: clayOrange.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: clayOrange.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_rounded, color: clayOrange, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'การดำเนินการนี้ไม่สามารถยกเลิกได้',
+                      style: TextStyle(
+                        color: clayOrange,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลบ้านนี้?',
+              style: TextStyle(color: earthClay, fontSize: 15),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('ยกเลิก'),
+            style: TextButton.styleFrom(
+              foregroundColor: warmStone,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text('ยกเลิก', style: TextStyle(fontWeight: FontWeight.w600)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('ลบ', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: clayOrange,
+              foregroundColor: ivoryWhite,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_rounded, size: 16),
+                const SizedBox(width: 4),
+                const Text('ลบ', style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
         ],
       ),
@@ -99,17 +219,61 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('ลบข้อมูลสำเร็จ'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'ลบข้อมูลสำเร็จ',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+              backgroundColor: oliveGreen,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.all(16),
             ),
           );
           _loadHouses();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('เกิดข้อผิดพลาดในการลบ'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.error_outline, color: Colors.white, size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'เกิดข้อผิดพลาดในการลบ',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+              backgroundColor: clayOrange,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.all(16),
             ),
           );
         }
@@ -134,13 +298,13 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
   Color _getStatusColor(String? status) {
     switch (status?.toLowerCase()) {
       case 'owned':
-        return Colors.green;
+        return oliveGreen;
       case 'vacant':
-        return Colors.orange;
+        return warmAmber;
       case 'rented':
-        return Colors.blue;
+        return softTerracotta;
       default:
-        return Colors.grey;
+        return warmStone;
     }
   }
 
@@ -162,131 +326,320 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
     final stats = _getStatistics();
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: inputFill,
       body: SafeArea(
         child: _loading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: ivoryWhite,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: softBrown.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: CircularProgressIndicator(
+                  color: softBrown,
+                  strokeWidth: 3,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'กำลังโหลดข้อมูลบ้าน...',
+                style: TextStyle(
+                  color: earthClay,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        )
             : Column(
           children: [
-            // Custom Header (แทน AppBar)
+            // Enhanced Header
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                gradient: LinearGradient(
+                  colors: [softBrown, focusedBrown],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
-                    spreadRadius: 1,
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+                    color: softBrown.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back, size: 24),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Text(
-                      'จัดการลูกบ้าน',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            size: 24,
+                            color: ivoryWhite,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Text(
+                          'จัดการลูกบ้าน',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: ivoryWhite,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.home_work_rounded,
+                          size: 24,
+                          color: ivoryWhite,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            // Statistics Card
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
-                    spreadRadius: 1,
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStatItem('ทั้งหมด', stats['total']!, Colors.blue),
-                  _buildStatItem('มีเจ้าของ', stats['owned']!, Colors.green),
-                  _buildStatItem('ว่าง', stats['vacant']!, Colors.orange),
-                  _buildStatItem('ให้เช่า', stats['rented']!, Colors.purple),
                 ],
               ),
             ),
 
-            // Search and Filter
+            // Enhanced Statistics Card
+            Container(
+              margin: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: ivoryWhite,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: softBrown.withValues(alpha: 0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: sandyTan,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.analytics_rounded, color: softBrown, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'สรุปข้อมูลบ้าน',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: softBrown,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(child: _buildStatItem('ทั้งหมด', stats['total']!, softBrown)),
+                      Container(width: 1, height: 60, color: softBorder),
+                      Expanded(child: _buildStatItem('มีเจ้าของ', stats['owned']!, oliveGreen)),
+                      Container(width: 1, height: 60, color: softBorder),
+                      Expanded(child: _buildStatItem('ว่าง', stats['vacant']!, warmAmber)),
+                      Container(width: 1, height: 60, color: softBorder),
+                      Expanded(child: _buildStatItem('ให้เช่า', stats['rented']!, softTerracotta)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Enhanced Search and Filter
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  // Search TextField
+                  // Enhanced Search TextField
                   Expanded(
                     flex: 2,
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'ค้นหาเลขที่บ้านหรือชื่อเจ้าของ...',
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            _searchQuery = '';
-                            _filterHouses();
-                          },
-                        )
-                            : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: softBrown.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      onChanged: (value) {
-                        _searchQuery = value;
-                        _filterHouses();
-                      },
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'ค้นหาเลขที่บ้านหรือชื่อเจ้าของ...',
+                          hintStyle: TextStyle(color: earthClay, fontSize: 14),
+                          prefixIcon: Container(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(Icons.search_rounded, color: softBrown, size: 20),
+                          ),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                            icon: Icon(Icons.clear_rounded, color: earthClay),
+                            onPressed: () {
+                              _searchController.clear();
+                              _searchQuery = '';
+                              _filterHouses();
+                            },
+                          )
+                              : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: focusedBrown, width: 2),
+                          ),
+                          filled: true,
+                          fillColor: ivoryWhite,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                        ),
+                        style: TextStyle(color: softBrown, fontWeight: FontWeight.w500),
+                        onChanged: (value) {
+                          _searchQuery = value;
+                          _filterHouses();
+                        },
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
 
-                  // Status Filter
+                  // Enhanced Status Filter
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.shade300),
+                      color: ivoryWhite,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: softBorder, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: softBrown.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: _selectedStatus,
-                        icon: const Icon(Icons.filter_alt, size: 20),
-                        items: const [
-                          DropdownMenuItem(value: 'all', child: Text('ทั้งหมด')),
-                          DropdownMenuItem(value: 'owned', child: Text('มีเจ้าของ')),
-                          DropdownMenuItem(value: 'vacant', child: Text('ว่าง')),
-                          DropdownMenuItem(value: 'rented', child: Text('ให้เช่า')),
+                        icon: Icon(Icons.tune_rounded, size: 20, color: softBrown),
+                        style: TextStyle(color: softBrown, fontWeight: FontWeight.w600),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'all',
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: softBrown,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('ทั้งหมด'),
+                              ],
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'owned',
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: oliveGreen,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('มีเจ้าของ'),
+                              ],
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'vacant',
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: warmAmber,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('ว่าง'),
+                              ],
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'rented',
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: softTerracotta,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('ให้เช่า'),
+                              ],
+                            ),
+                          ),
                         ],
                         onChanged: (value) {
                           setState(() {
@@ -301,55 +654,84 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Results Count
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  Text(
-                    'พบ ${_filteredHouses.length} รายการ',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: softBrown.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: softBrown.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      'พบ ${_filteredHouses.length} รายการ',
+                      style: TextStyle(
+                        color: softBrown,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
 
-            // Houses List
+            // Enhanced Houses List
             Expanded(
               child: _filteredHouses.isEmpty
                   ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.home_outlined,
-                      size: 64,
-                      color: Colors.grey[400],
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: warmStone.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.home_outlined,
+                        size: 64,
+                        color: warmStone,
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Text(
                       _searchQuery.isNotEmpty || _selectedStatus != 'all'
                           ? 'ไม่พบข้อมูลที่ค้นหา'
                           : 'ยังไม่มีข้อมูลบ้าน',
                       style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
+                        fontSize: 18,
+                        color: earthClay,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _searchQuery.isNotEmpty || _selectedStatus != 'all'
+                          ? 'ลองเปลี่ยนเงื่อนไขการค้นหา'
+                          : 'เริ่มต้นด้วยการเพิ่มข้อมูลบ้านใหม่',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: warmStone,
                       ),
                     ),
                   ],
                 ),
               )
                   : RefreshIndicator(
+                color: softBrown,
+                backgroundColor: ivoryWhite,
                 onRefresh: _loadHouses,
                 child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                   itemCount: _filteredHouses.length,
                   itemBuilder: (context, index) {
                     final house = _filteredHouses[index];
@@ -365,14 +747,18 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           // Refresh Button
-          FloatingActionButton(
-            heroTag: "refresh",
-            mini: true,
-            onPressed: _loadHouses,
-            child: const Icon(Icons.refresh),
-            backgroundColor: Colors.grey[600],
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: FloatingActionButton(
+              heroTag: "refresh",
+              mini: true,
+              onPressed: _loadHouses,
+              backgroundColor: warmStone,
+              foregroundColor: ivoryWhite,
+              elevation: 4,
+              child: const Icon(Icons.refresh_rounded),
+            ),
           ),
-          const SizedBox(height: 8),
           // Add Button
           FloatingActionButton.extended(
             heroTag: "add",
@@ -383,10 +769,15 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
               );
               if (result != null && mounted) _loadHouses();
             },
-            icon: const Icon(Icons.add),
-            label: const Text('เพิ่มบ้าน'),
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
+            icon: const Icon(Icons.add_home_rounded),
+            label: const Text(
+              'เพิ่มบ้าน',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: oliveGreen,
+            foregroundColor: ivoryWhite,
+            elevation: 6,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
         ],
       ),
@@ -397,27 +788,28 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
           ),
           child: Text(
             value.toString(),
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: color,
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
+            fontSize: 13,
+            color: earthClay,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -426,12 +818,14 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
 
   Widget _buildHouseCard(HouseModel house) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
-        elevation: 2,
+        elevation: 4,
+        color: ivoryWhite,
+        shadowColor: softBrown.withValues(alpha: 0.2),
         child: InkWell(
           onTap: () async {
             final updated = await Navigator.push(
@@ -442,34 +836,48 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
             );
             if (updated == true && mounted) _loadHouses();
           },
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          splashColor: clickHighlight.withValues(alpha: 0.1),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // House Image or Icon
+                // Enhanced House Image or Icon
                 Container(
-                  width: 60,
-                  height: 60,
+                  width: 70,
+                  height: 70,
                   decoration: BoxDecoration(
-                    color: _getStatusColor(house.status).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      colors: [
+                        _getStatusColor(house.status),
+                        _getStatusColor(house.status).withValues(alpha: 0.7),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _getStatusColor(house.status).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Icon(
-                    Icons.home,
-                    color: _getStatusColor(house.status),
-                    size: 30,
+                    Icons.home_rounded,
+                    color: ivoryWhite,
+                    size: 32,
                   ),
                 ),
 
-                const SizedBox(width: 16),
+                const SizedBox(width: 20),
 
-                // House Info
+                // Enhanced House Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
                         children: [
@@ -477,49 +885,69 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                             child: Text(
                               'บ้านเลขที่ ${house.houseNumber ?? "-"}',
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                color: softBrown,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 12),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
+                              horizontal: 12,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: _getStatusColor(house.status),
-                              borderRadius: BorderRadius.circular(12),
+                              gradient: LinearGradient(
+                                colors: [
+                                  _getStatusColor(house.status),
+                                  _getStatusColor(house.status).withValues(alpha: 0.8),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _getStatusColor(house.status).withValues(alpha: 0.3),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: Text(
                               _getStatusText(house.status),
                               style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
+                                color: ivoryWhite,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ],
                       ),
 
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
 
                       if (house.owner != null && house.owner!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: inputFill,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: softBorder),
+                          ),
                           child: Row(
                             children: [
-                              Icon(Icons.person, size: 14, color: Colors.grey[600]),
-                              const SizedBox(width: 4),
+                              Icon(Icons.person_rounded, size: 16, color: earthClay),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   house.owner!,
                                   style: TextStyle(
-                                    color: Colors.grey[700],
+                                    color: softBrown,
                                     fontSize: 14,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -529,18 +957,25 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                         ),
 
                       if (house.phone != null && house.phone!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: inputFill,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: softBorder),
+                          ),
                           child: Row(
                             children: [
-                              Icon(Icons.phone, size: 14, color: Colors.grey[600]),
-                              const SizedBox(width: 4),
+                              Icon(Icons.phone_rounded, size: 16, color: earthClay),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   house.phone!,
                                   style: TextStyle(
-                                    color: Colors.grey[700],
+                                    color: softBrown,
                                     fontSize: 14,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -550,60 +985,104 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                         ),
 
                       if (house.houseType != null && house.houseType!.isNotEmpty)
-                        Row(
-                          children: [
-                            Icon(Icons.home_work, size: 14, color: Colors.grey[600]),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                house.houseType!,
-                                style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontSize: 14,
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: inputFill,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: softBorder),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.home_work_rounded, size: 16, color: earthClay),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  house.houseType!,
+                                  style: TextStyle(
+                                    color: softBrown,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                     ],
                   ),
                 ),
 
-                const SizedBox(width: 8),
+                const SizedBox(width: 16),
 
-                // Action Buttons
+                // Enhanced Action Buttons
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Call Button
                     if (house.phone != null && house.phone!.isNotEmpty)
                       Container(
-                        width: 40,
-                        height: 40,
                         margin: const EdgeInsets.only(bottom: 8),
-                        child: IconButton(
-                          icon: const Icon(Icons.phone, color: Colors.green, size: 20),
-                          onPressed: () {
-                            // TODO: Implement call functionality
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('โทร: ${house.phone}')),
-                              );
-                            }
-                          },
-                          padding: EdgeInsets.zero,
+                        child: Material(
+                          color: oliveGreen,
+                          borderRadius: BorderRadius.circular(12),
+                          child: InkWell(
+                            onTap: () {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(alpha: 0.2),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: const Icon(Icons.phone_rounded, color: Colors.white, size: 16),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            'โทร: ${house.phone}',
+                                            style: const TextStyle(fontWeight: FontWeight.w500),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    backgroundColor: oliveGreen,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                );
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              padding: const EdgeInsets.all(8),
+                              child: const Icon(Icons.phone_rounded, color: ivoryWhite, size: 20),
+                            ),
+                          ),
                         ),
                       ),
 
                     // Delete Button
-                    Container(
-                      width: 40,
-                      height: 40,
-                      child: IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                        onPressed: () => _deleteHouse(house.houseId),
-                        padding: EdgeInsets.zero,
+                    Material(
+                      color: clayOrange,
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        onTap: () => _deleteHouse(house.houseId),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          padding: const EdgeInsets.all(8),
+                          child: const Icon(Icons.delete_rounded, color: ivoryWhite, size: 20),
+                        ),
                       ),
                     ),
                   ],

@@ -162,21 +162,18 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     }
   }
 
-  Future<void> _navigateToVehicleEdit({VehicleModel? vehicle}) async {
+  Future<void> _navigateToVehicleEdit({required VehicleModel vehicle}) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => VehicleEditSinglePage(
-          houseId: widget.houseId,
-          vehicle: vehicle,
+        builder: (context) => VehicleEditPage(
+          vehicle: vehicle, // ส่งเฉพาะ vehicle เท่านั้น
         ),
       ),
     );
 
-    // Refresh vehicles data when returning
-    if (result == true && mounted) {
-      loadVehicles();
-    }
+
+
   }
 
   // Quick delete methods

@@ -1,3 +1,4 @@
+// lib/pages/edit_house_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fullproject/models/house_model.dart';
@@ -18,6 +19,7 @@ class _EditHousePageState extends State<EditHousePage> {
   final _formKey = GlobalKey<FormState>();
 
   // Controllers
+  late TextEditingController _houseNumberController;
   late TextEditingController _ownerController;
   late TextEditingController _phoneController;
   late TextEditingController _floorsController;
@@ -26,6 +28,7 @@ class _EditHousePageState extends State<EditHousePage> {
 
   // Form values
   String? _status;
+  String? _ownershipType;
   String? _houseType;
   String? _usageStatus;
   File? _selectedImage;
@@ -41,6 +44,12 @@ class _EditHousePageState extends State<EditHousePage> {
     'vacant',
     'rented',
     'sold'
+  ];
+
+  final List<String> _ownershipTypeOptions = [
+    'owned',
+    'rented',
+    'company'
   ];
 
   final List<String> _houseTypeOptions = [
@@ -65,6 +74,7 @@ class _EditHousePageState extends State<EditHousePage> {
   }
 
   void _initializeForm() {
+    _houseNumberController = TextEditingController(text: widget.house.houseNumber);
     _ownerController = TextEditingController(text: widget.house.owner);
     _phoneController = TextEditingController(text: widget.house.phone);
     _floorsController = TextEditingController(text: widget.house.floors?.toString());
@@ -72,11 +82,13 @@ class _EditHousePageState extends State<EditHousePage> {
     _sizeController = TextEditingController(text: widget.house.size);
 
     _status = widget.house.status;
+    _ownershipType = 'owned'; // Default; adjust if model has this field
     _houseType = widget.house.houseType;
     _usageStatus = widget.house.usageStatus ?? 'active';
     _currentImageUrl = widget.house.img;
 
     // Listen for changes
+    _houseNumberController.addListener(_onFieldChanged);
     _ownerController.addListener(_onFieldChanged);
     _phoneController.addListener(_onFieldChanged);
     _floorsController.addListener(_onFieldChanged);
@@ -94,6 +106,7 @@ class _EditHousePageState extends State<EditHousePage> {
 
   @override
   void dispose() {
+    _houseNumberController.dispose();
     _ownerController.dispose();
     _phoneController.dispose();
     _floorsController.dispose();
@@ -107,17 +120,24 @@ class _EditHousePageState extends State<EditHousePage> {
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('ยืนยันการออก'),
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: const Color(0xFFE08E45), size: 28),
+            const SizedBox(width: 12),
+            const Text('ยืนยันการออก'),
+          ],
+        ),
         content: const Text('คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('ยกเลิก'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('ยกเลิก', style: TextStyle(color: const Color(0xFFA47551))),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(foregroundColor: const Color(0xFFE08E45)),
             child: const Text('ออก'),
           ),
         ],
@@ -128,42 +148,105 @@ class _EditHousePageState extends State<EditHousePage> {
   }
 
   Future<void> _pickImage() async {
-    showModalBottomSheet(
+    final result = await showModalBottomSheet<String>(
       context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('ถ่ายรูป'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _getImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('เลือกจากแกลเลอรี่'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _getImage(ImageSource.gallery);
-                },
-              ),
-              if (_selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage))
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text('ลบรูปภาพ', style: TextStyle(color: Colors.red)),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    _removeImage();
-                  },
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFFFDF6),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD8CAB8).withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-            ],
+
+                Text(
+                  'เลือกรูปภาพ',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFA47551),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD8CAB8).withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.photo_camera, color: const Color(0xFFA47551)),
+                  ),
+                  title: Text('ถ่ายรูป', style: TextStyle(color: const Color(0xFFA47551))),
+                  subtitle: Text('ใช้กล้องถ่ายรูปใหม่', style: TextStyle(color: const Color(0xFFBFA18F))),
+                  onTap: () => Navigator.pop(sheetContext, 'camera'),
+                ),
+
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFA3B18A).withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.photo_library, color: const Color(0xFFA3B18A)),
+                  ),
+                  title: Text('เลือกจากแกลเลอรี่', style: TextStyle(color: const Color(0xFFA47551))),
+                  subtitle: Text('เลือกรูปจากคลังภาพ', style: TextStyle(color: const Color(0xFFBFA18F))),
+                  onTap: () => Navigator.pop(sheetContext, 'gallery'),
+                ),
+
+                if (_selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage))
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE08E45).withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.delete, color: const Color(0xFFE08E45)),
+                    ),
+                    title: Text('ลบรูปภาพ', style: TextStyle(color: const Color(0xFFE08E45))),
+                    subtitle: Text('ลบรูปภาพปัจจุบัน', style: TextStyle(color: const Color(0xFFBFA18F))),
+                    onTap: () => Navigator.pop(sheetContext, 'delete'),
+                  ),
+
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         );
       },
     );
+
+    if (result != null) {
+      switch (result) {
+        case 'camera':
+          _getImage(ImageSource.camera);
+          break;
+        case 'gallery':
+          _getImage(ImageSource.gallery);
+          break;
+        case 'delete':
+          _removeImage();
+          break;
+      }
+    }
   }
 
   Future<void> _getImage(ImageSource source) async {
@@ -183,14 +266,21 @@ class _EditHousePageState extends State<EditHousePage> {
         });
       }
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e'),
-            backgroundColor: Colors.red,
+      if (!mounted) return; // why: avoid using context after dispose
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text('เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e')),
+            ],
           ),
-        );
-      }
+          backgroundColor: const Color(0xFFE08E45),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -204,12 +294,14 @@ class _EditHousePageState extends State<EditHousePage> {
 
   void _resetForm() {
     setState(() {
+      _houseNumberController.text = widget.house.houseNumber ?? '';
       _ownerController.text = widget.house.owner ?? '';
       _phoneController.text = widget.house.phone ?? '';
       _floorsController.text = widget.house.floors?.toString() ?? '';
       _usableAreaController.text = widget.house.usableArea ?? '';
       _sizeController.text = widget.house.size ?? '';
       _status = widget.house.status;
+      _ownershipType = 'owned'; // Reset to default
       _houseType = widget.house.houseType;
       _usageStatus = widget.house.usageStatus ?? 'active';
       _selectedImage = null;
@@ -222,80 +314,81 @@ class _EditHousePageState extends State<EditHousePage> {
   Future<void> _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
+    FocusScope.of(context).unfocus(); // why: dismiss keyboard for better UX
     setState(() => _isSaving = true);
 
     try {
-      String? finalImageUrl;
-
-      // Handle image updates
-      if (_selectedImage != null) {
-        finalImageUrl = await SupabaseImage().uploadImage(
-          imageFile: _selectedImage!,
-          tableName: "house",
-          rowName: "house_id",
-          rowImgName: "img",
-          rowKey: widget.house.houseId, bucketPath: '', imgName: '',
-        );
-      } else if (_removeCurrentImage) {
-        finalImageUrl = null;
-      } else {
-        finalImageUrl = _currentImageUrl;
-      }
-
-      final updatedHouse = widget.house.copyWith(
-        owner: _ownerController.text.trim(),
-        phone: _phoneController.text.trim(),
-        status: _status,
-        houseType: _houseType,
-        floors: int.tryParse(_floorsController.text.trim()),
-        usableArea: _usableAreaController.text.trim(),
-        usageStatus: _usageStatus,
+      final updatedHouse = await HouseDomain.update(
+        houseId: widget.house.houseId,
+        villageId: widget.house.villageId,
         size: _sizeController.text.trim(),
-        img: finalImageUrl,
+        houseNumber: _houseNumberController.text.trim(),
+        phone: _phoneController.text.trim(),
+        owner: _ownerController.text.trim(),
+        status: _status!,
+        userId: widget.house.userId,
+        ownershipType: _ownershipType!,
+        houseType: _houseType!,
+        floors: int.tryParse(_floorsController.text.trim()) ?? 1,
+        usableArea: _usableAreaController.text.trim(),
+        usageStatus: _usageStatus!,
+        imageFile: _selectedImage,
+        removeImage: _removeCurrentImage,
       );
 
-      final result = await HouseDomain.update(
-        houseId: updatedHouse.houseId,
-        updatedHouse: updatedHouse,
-      );
+      if (!mounted) return; // why: context used below after await
 
-      if (mounted) {
-        setState(() => _isSaving = false);
-
-        if (result != null) {
-          setState(() => _hasUnsavedChanges = false);
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('บันทึกข้อมูลสำเร็จ'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.pop(context, result);
-          }
-        } else {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('เกิดข้อผิดพลาดในการบันทึก'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
+      if (updatedHouse != null) {
+        setState(() => _hasUnsavedChanges = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Text('บันทึกข้อมูลสำเร็จ'),
+              ],
+            ),
+            backgroundColor: Color(0xFFA3B18A),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context, updatedHouse);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error, color: Colors.white),
+                SizedBox(width: 12),
+                Text('เกิดข้อผิดพลาดในการบันทึก'),
+              ],
+            ),
+            backgroundColor: Color(0xFFE08E45),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isSaving = false);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('เกิดข้อผิดพลาด: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
+      if (!mounted) return; // why: context used below after await
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text('เกิดข้อผิดพลาด: $e')),
+            ],
+          ),
+          backgroundColor: const Color(0xFFE08E45),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+
+    if (mounted) {
+      setState(() => _isSaving = false);
     }
   }
 
@@ -316,30 +409,57 @@ class _EditHousePageState extends State<EditHousePage> {
 
   String _getStatusText(String? status) {
     switch (status) {
-      case 'owned': return 'มีเจ้าของ';
-      case 'vacant': return 'ว่าง';
-      case 'rented': return 'ให้เช่า';
-      case 'sold': return 'ขายแล้ว';
-      default: return status ?? '';
+      case 'owned':
+        return 'มีเจ้าของ';
+      case 'vacant':
+        return 'ว่าง';
+      case 'rented':
+        return 'ให้เช่า';
+      case 'sold':
+        return 'ขายแล้ว';
+      default:
+        return status ?? '';
+    }
+  }
+
+  String _getOwnershipTypeText(String? type) {
+    switch (type) {
+      case 'owned':
+        return 'เป็นเจ้าของ';
+      case 'rented':
+        return 'เช่า';
+      case 'company':
+        return 'นิติบุคคล';
+      default:
+        return type ?? '';
     }
   }
 
   String _getHouseTypeText(String? type) {
     switch (type) {
-      case 'detached': return 'บ้านเดี่ยว';
-      case 'townhouse': return 'ทาวน์เฮาส์';
-      case 'apartment': return 'อพาร์ทเมนต์';
-      case 'condo': return 'คอนโดมิเนียม';
-      default: return type ?? '';
+      case 'detached':
+        return 'บ้านเดี่ยว';
+      case 'townhouse':
+        return 'ทาวน์เฮาส์';
+      case 'apartment':
+        return 'อพาร์ทเมนต์';
+      case 'condo':
+        return 'คอนโดมิเนียม';
+      default:
+        return type ?? '';
     }
   }
 
   String _getUsageStatusText(String? status) {
     switch (status) {
-      case 'active': return 'ใช้งาน';
-      case 'inactive': return 'ไม่ใช้งาน';
-      case 'maintenance': return 'ปรับปรุง';
-      default: return status ?? '';
+      case 'active':
+        return 'ใช้งาน';
+      case 'inactive':
+        return 'ไม่ใช้งาน';
+      case 'maintenance':
+        return 'ปรับปรุง';
+      default:
+        return status ?? '';
     }
   }
 
@@ -351,22 +471,24 @@ class _EditHousePageState extends State<EditHousePage> {
         if (didPop) return;
 
         final shouldPop = await _onWillPop();
-        if (shouldPop && context.mounted) {
-          Navigator.of(context).pop();
+        if (!mounted) return; // why: using context after await
+        if (shouldPop) {
+          Navigator.pop(context);
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: const Color(0xFFFFFDF6),
         appBar: AppBar(
-          title: Text('แก้ไขบ้านเลขที่ ${widget.house.houseNumber}'),
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
+          title: Text('แก้ไขบ้านเลขที่ ${widget.house.houseNumber}',
+              style: TextStyle(color: const Color(0xFFA47551))),
+          backgroundColor: const Color(0xFFFFFDF6),
+          foregroundColor: const Color(0xFFA47551),
           elevation: 1,
           actions: [
             if (_hasUnsavedChanges)
               TextButton(
                 onPressed: _resetForm,
-                child: const Text('รีเซ็ต'),
+                child: Text('รีเซ็ต', style: TextStyle(color: const Color(0xFFE08E45))),
               ),
           ],
         ),
@@ -378,19 +500,19 @@ class _EditHousePageState extends State<EditHousePage> {
               children: [
                 // รูปภาพบ้าน
                 _buildImageSection(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
                 // ข้อมูลพื้นฐาน
                 _buildBasicInfoSection(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
                 // รายละเอียดบ้าน
                 _buildHouseDetailsSection(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
                 // สถานะต่างๆ
                 _buildStatusSection(),
-                const SizedBox(height: 30),
+                const SizedBox(height: 32),
 
                 // ปุ่มบันทึก
                 _buildActionButtons(),
@@ -414,7 +536,7 @@ class _EditHousePageState extends State<EditHousePage> {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   child: Image.file(
                     _selectedImage!,
                     width: double.infinity,
@@ -423,15 +545,15 @@ class _EditHousePageState extends State<EditHousePage> {
                   ),
                 ),
                 Positioned(
-                  top: 8,
-                  right: 8,
+                  top: 12,
+                  right: 12,
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.black54,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFA47551).withValues(alpha: 0.8),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: const Icon(Icons.close, color: Color(0xFFFFFDF6)),
                       onPressed: () {
                         setState(() {
                           _selectedImage = null;
@@ -441,13 +563,28 @@ class _EditHousePageState extends State<EditHousePage> {
                     ),
                   ),
                 ),
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFA3B18A),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'รูปใหม่',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ),
               ],
             ),
           ] else if (_currentImageUrl != null && !_removeCurrentImage) ...[
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   child: BuildImage(
                     imagePath: _currentImageUrl!,
                     tablePath: 'house',
@@ -457,22 +594,30 @@ class _EditHousePageState extends State<EditHousePage> {
                     errorWidget: Container(
                       height: 200,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFFF5F0E1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFD8CAB8)),
                       ),
-                      child: const Center(
-                        child: Text('ไม่สามารถโหลดรูปภาพได้'),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error_outline,
+                              color: const Color(0xFFBFA18F), size: 48),
+                          const SizedBox(height: 8),
+                          Text('ไม่สามารถโหลดรูปภาพได้',
+                              style: TextStyle(color: const Color(0xFFA47551))),
+                        ],
                       ),
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 8,
-                  left: 8,
+                  top: 12,
+                  left: 12,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: const Color(0xFFE08E45),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -483,39 +628,65 @@ class _EditHousePageState extends State<EditHousePage> {
                 ),
               ],
             ),
+          ] else ...[
+            // Placeholder เมื่อไม่มีรูปหรือถูกลบ
+            Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F0E1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFD8CAB8), width: 2),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.home,
+                    size: 64,
+                    color: const Color(0xFFBFA18F),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'ไม่มีรูปภาพ',
+                    style: TextStyle(
+                      color: const Color(0xFFA47551),
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'กดปุ่มด้านล่างเพื่อเพิ่มรูป',
+                    style: TextStyle(
+                      color: const Color(0xFFBFA18F),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
 
           const SizedBox(height: 16),
 
           // ปุ่มเลือกรูป
-          InkWell(
-            onTap: _pickImage,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: double.infinity,
-              height: 60,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.white,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    _selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage)
-                        ? Icons.edit
-                        : Icons.add_photo_alternate,
-                    color: Colors.blue,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage)
-                        ? 'เปลี่ยนรูปภาพ'
-                        : 'เพิ่มรูปภาพ',
-                    style: const TextStyle(color: Colors.blue),
-                  ),
-                ],
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: OutlinedButton.icon(
+              onPressed: _pickImage,
+              icon: Icon(_selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage)
+                  ? Icons.edit
+                  : Icons.add_photo_alternate),
+              label: Text(_selectedImage != null || (_currentImageUrl != null && !_removeCurrentImage)
+                  ? 'เปลี่ยนรูปภาพ'
+                  : 'เพิ่มรูปภาพ'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFA47551),
+                side: BorderSide(color: const Color(0xFFD8CAB8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -527,54 +698,102 @@ class _EditHousePageState extends State<EditHousePage> {
   Widget _buildBasicInfoSection() {
     return _buildCard(
       title: 'ข้อมูลพื้นฐาน',
-      icon: Icons.home,
+      icon: Icons.info_outline,
       child: Column(
         children: [
-          // เจ้าของบ้าน
+          // บ้านเลขที่
           TextFormField(
-            controller: _ownerController,
-            decoration: const InputDecoration(
-              labelText: 'เจ้าของบ้าน *',
-              prefixIcon: Icon(Icons.person),
-              border: OutlineInputBorder(),
+            controller: _houseNumberController,
+            decoration: InputDecoration(
+              labelText: 'บ้านเลขที่ *',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              hintText: 'เช่น 123/45',
+              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+              prefixIcon: Icon(Icons.confirmation_number, color: const Color(0xFFA47551)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFFBF9F3),
             ),
-            validator: (value) =>
-            value?.trim().isEmpty == true ? 'กรุณาระบุชื่อเจ้าของ' : null,
+            textInputAction: TextInputAction.next,
+            validator: (v) => (v == null || v.trim().isEmpty) ? 'กรุณากรอกบ้านเลขที่' : null,
           ),
           const SizedBox(height: 16),
 
-          // เบอร์โทร
+          // เจ้าของบ้าน
+          TextFormField(
+            controller: _ownerController,
+            decoration: InputDecoration(
+              labelText: 'ชื่อเจ้าของบ้าน',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              hintText: 'เช่น สมชาย ใจดี',
+              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+              prefixIcon: Icon(Icons.person, color: const Color(0xFFA47551)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFFBF9F3),
+            ),
+            textInputAction: TextInputAction.next,
+          ),
+          const SizedBox(height: 16),
+
+          // เบอร์โทรศัพท์ (ใช้ formatter)
           TextFormField(
             controller: _phoneController,
-            decoration: const InputDecoration(
-              labelText: 'เบอร์โทร',
-              prefixIcon: Icon(Icons.phone),
-              border: OutlineInputBorder(),
-              hintText: 'XXX-XXX-XXXX',
+            decoration: InputDecoration(
+              labelText: 'เบอร์โทรศัพท์',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              hintText: 'เช่น 081-234-5678',
+              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+              prefixIcon: Icon(Icons.phone, color: const Color(0xFFA47551)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             keyboardType: TextInputType.phone,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(10),
-            ],
+            // ไม่ใส่ digitsOnly เพื่อให้มีเครื่องหมาย - ได้
             onChanged: (value) {
               final formatted = _formatPhoneNumber(value);
               if (formatted != value) {
-                _phoneController.value = TextEditingValue(
-                  text: formatted,
-                  selection: TextSelection.collapsed(offset: formatted.length),
-                );
+                final baseOffset = formatted.length;
+                _phoneController
+                  ..text = formatted
+                  ..selection = TextSelection.collapsed(offset: baseOffset);
               }
             },
-            validator: (value) {
-              if (value?.isNotEmpty == true) {
-                final digits = value!.replaceAll(RegExp(r'[^\d]'), '');
-                if (digits.length != 10) {
-                  return 'เบอร์โทรต้องมี 10 หลัก';
-                }
-              }
-              return null;
-            },
+            textInputAction: TextInputAction.next,
           ),
         ],
       ),
@@ -590,15 +809,29 @@ class _EditHousePageState extends State<EditHousePage> {
           // ประเภทบ้าน
           DropdownButtonFormField<String>(
             value: _houseType,
-            decoration: const InputDecoration(
-              labelText: 'ประเภทบ้าน',
-              prefixIcon: Icon(Icons.apartment),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: 'ประเภทบ้าน *',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              prefixIcon: Icon(Icons.apartment, color: const Color(0xFFA47551)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             items: _houseTypeOptions.map((type) {
               return DropdownMenuItem(
                 value: type,
-                child: Text(_getHouseTypeText(type)),
+                child: Text(_getHouseTypeText(type), style: TextStyle(color: const Color(0xFFA47551))),
               );
             }).toList(),
             onChanged: (value) {
@@ -607,6 +840,7 @@ class _EditHousePageState extends State<EditHousePage> {
                 _hasUnsavedChanges = true;
               });
             },
+            validator: (value) => value == null ? 'กรุณาเลือกประเภทบ้าน' : null,
           ),
           const SizedBox(height: 16),
 
@@ -616,13 +850,30 @@ class _EditHousePageState extends State<EditHousePage> {
               Expanded(
                 child: TextFormField(
                   controller: _floorsController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'จำนวนชั้น',
-                    prefixIcon: Icon(Icons.layers),
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(color: const Color(0xFFA47551)),
+                    hintText: 'เช่น 1, 2',
+                    hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+                    prefixIcon: Icon(Icons.layers, color: const Color(0xFFA47551)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFFBF9F3),
                   ),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  textInputAction: TextInputAction.next,
                 ),
               ),
               const SizedBox(width: 16),
@@ -631,11 +882,28 @@ class _EditHousePageState extends State<EditHousePage> {
               Expanded(
                 child: TextFormField(
                   controller: _sizeController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'ขนาด',
-                    prefixIcon: Icon(Icons.square_foot),
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(color: const Color(0xFFA47551)),
+                    hintText: 'เช่น 100 ตร.ม.',
+                    hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+                    prefixIcon: Icon(Icons.square_foot, color: const Color(0xFFA47551)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFFBF9F3),
                   ),
+                  textInputAction: TextInputAction.next,
                 ),
               ),
             ],
@@ -645,11 +913,28 @@ class _EditHousePageState extends State<EditHousePage> {
           // พื้นที่ใช้สอย
           TextFormField(
             controller: _usableAreaController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'พื้นที่ใช้สอย',
-              prefixIcon: Icon(Icons.area_chart),
-              border: OutlineInputBorder(),
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              hintText: 'เช่น 80 ตร.ม.',
+              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+              prefixIcon: Icon(Icons.area_chart, color: const Color(0xFFA47551)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFFBF9F3),
             ),
+            textInputAction: TextInputAction.done,
           ),
         ],
       ),
@@ -665,15 +950,29 @@ class _EditHousePageState extends State<EditHousePage> {
           // สถานะบ้าน
           DropdownButtonFormField<String>(
             value: _status,
-            decoration: const InputDecoration(
-              labelText: 'สถานะบ้าน',
-              prefixIcon: Icon(Icons.home_filled),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: 'สถานะบ้าน *',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              prefixIcon: Icon(Icons.home_filled, color: const Color(0xFFA47551)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             items: _statusOptions.map((status) {
               return DropdownMenuItem(
                 value: status,
-                child: Text(_getStatusText(status)),
+                child: Text(_getStatusText(status), style: TextStyle(color: const Color(0xFFA47551))),
               );
             }).toList(),
             onChanged: (value) {
@@ -682,21 +981,74 @@ class _EditHousePageState extends State<EditHousePage> {
                 _hasUnsavedChanges = true;
               });
             },
+            validator: (value) => value == null ? 'กรุณาเลือกสถานะบ้าน' : null,
+          ),
+          const SizedBox(height: 16),
+
+          // ประเภทความเป็นเจ้าของ
+          DropdownButtonFormField<String>(
+            value: _ownershipType,
+            decoration: InputDecoration(
+              labelText: 'ประเภทความเป็นเจ้าของ *',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              prefixIcon: Icon(Icons.account_balance, color: const Color(0xFFA47551)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFFBF9F3),
+            ),
+            items: _ownershipTypeOptions.map((type) {
+              return DropdownMenuItem(
+                value: type,
+                child: Text(_getOwnershipTypeText(type), style: TextStyle(color: const Color(0xFFA47551))),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _ownershipType = value;
+                _hasUnsavedChanges = true;
+              });
+            },
+            validator: (value) => value == null ? 'กรุณาเลือกประเภทความเป็นเจ้าของ' : null,
           ),
           const SizedBox(height: 16),
 
           // สถานะการใช้งาน
           DropdownButtonFormField<String>(
             value: _usageStatus,
-            decoration: const InputDecoration(
-              labelText: 'สถานะการใช้งาน',
-              prefixIcon: Icon(Icons.toggle_on),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: 'สถานะการใช้งาน *',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              prefixIcon: Icon(Icons.toggle_on, color: const Color(0xFFA47551)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             items: _usageStatusOptions.map((status) {
               return DropdownMenuItem(
                 value: status,
-                child: Text(_getUsageStatusText(status)),
+                child: Text(_getUsageStatusText(status), style: TextStyle(color: const Color(0xFFA47551))),
               );
             }).toList(),
             onChanged: (value) {
@@ -705,6 +1057,7 @@ class _EditHousePageState extends State<EditHousePage> {
                 _hasUnsavedChanges = true;
               });
             },
+            validator: (value) => value == null ? 'กรุณาเลือกสถานะการใช้งาน' : null,
           ),
         ],
       ),
@@ -721,11 +1074,13 @@ class _EditHousePageState extends State<EditHousePage> {
           child: ElevatedButton(
             onPressed: _isSaving ? null : _saveChanges,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: const Color(0xFFE08E45),
               foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFFDCDCDC),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              elevation: 2,
             ),
             child: _isSaving
                 ? const Row(
@@ -745,7 +1100,10 @@ class _EditHousePageState extends State<EditHousePage> {
             )
                 : const Text(
               'บันทึกการเปลี่ยนแปลง',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -761,7 +1119,8 @@ class _EditHousePageState extends State<EditHousePage> {
                 : () async {
               if (_hasUnsavedChanges) {
                 final shouldPop = await _onWillPop();
-                if (shouldPop && context.mounted) {
+                if (!mounted) return; // why: using context after await
+                if (shouldPop) {
                   Navigator.pop(context);
                 }
               } else {
@@ -769,6 +1128,9 @@ class _EditHousePageState extends State<EditHousePage> {
               }
             },
             style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFA47551),
+              side: BorderSide(color: const Color(0xFFD8CAB8)),
+              disabledForegroundColor: const Color(0xFFDCDCDC),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -787,22 +1149,34 @@ class _EditHousePageState extends State<EditHousePage> {
   }) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: const Color(0xFFFFFDF6),
+      shadowColor: const Color(0xFFBFA18F).withValues(alpha: 0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: const Color(0xFFD8CAB8).withValues(alpha: 0.3)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(icon, color: Colors.blue, size: 24),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE08E45).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: const Color(0xFFE08E45), size: 20),
+                ),
+                const SizedBox(width: 12),
                 Text(
                   title,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: Color(0xFFA47551),
                   ),
                 ),
               ],

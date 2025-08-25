@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fullproject/domains/animal_domain.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -21,18 +22,39 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
   final _notesController = TextEditingController();
 
   String? _selectedType;
-  File? _selectedImage;
+  // ✨ รองรับทั้ง Web และ Mobile
+  File? _selectedImage;        // สำหรับ Mobile
+  Uint8List? _webImage;        // สำหรับ Web
   bool _isSaving = false;
   bool _hasUnsavedChanges = false;
 
+  // 🌾 ธีมสีใหม่
+  static const Color _softBrown = Color(0xFFA47551);
+  static const Color _ivoryWhite = Color(0xFFFFFDF6);
+  static const Color _beige = Color(0xFFF5F0E1);
+  static const Color _sandyTan = Color(0xFFD8CAB8);
+  static const Color _earthClay = Color(0xFFBFA18F);
+  static const Color _warmStone = Color(0xFFC7B9A5);
+  static const Color _oliveGreen = Color(0xFFA3B18A);
+  static const Color _burntOrange = Color(0xFFE08E45);
+  static const Color _softTerracotta = Color(0xFFD48B5C);
+  static const Color _clayOrange = Color(0xFFCC7748);
+  static const Color _warmAmber = Color(0xFFDA9856);
+  static const Color _softerBurntOrange = Color(0xFFDB8142);
+  static const Color _softBorder = Color(0xFFD0C4B0);
+  static const Color _focusedBrown = Color(0xFF916846);
+  static const Color _inputFill = Color(0xFFFBF9F3);
+  static const Color _clickHighlight = Color(0xFFDC7633);
+  static const Color _disabledGrey = Color(0xFFDCDCDC);
+
   final List<Map<String, dynamic>> animalTypes = [
-    {'type': 'สุนัข', 'icon': Icons.pets, 'color': Colors.brown},
-    {'type': 'แมว', 'icon': Icons.pets, 'color': Colors.purple},
-    {'type': 'นก', 'icon': Icons.flutter_dash, 'color': Colors.blue},
-    {'type': 'ปลา', 'icon': Icons.set_meal, 'color': Colors.cyan},
-    {'type': 'กระต่าย', 'icon': Icons.cruelty_free, 'color': Colors.pink},
-    {'type': 'หนู', 'icon': Icons.mouse, 'color': Colors.grey},
-    {'type': 'อื่นๆ', 'icon': Icons.pets, 'color': Colors.orange},
+    {'type': 'สุนัข', 'icon': Icons.pets, 'color': _softBrown},
+    {'type': 'แมว', 'icon': Icons.pets, 'color': _clayOrange},
+    {'type': 'นก', 'icon': Icons.flutter_dash, 'color': _oliveGreen},
+    {'type': 'ปลา', 'icon': Icons.set_meal, 'color': _warmAmber},
+    {'type': 'กระต่าย', 'icon': Icons.cruelty_free, 'color': _softTerracotta},
+    {'type': 'หนู', 'icon': Icons.mouse, 'color': _earthClay},
+    {'type': 'อื่นๆ', 'icon': Icons.pets, 'color': _burntOrange},
   ];
 
   final ImagePicker _picker = ImagePicker();
@@ -69,20 +91,28 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange[600], size: 28),
+            Icon(Icons.warning_amber_rounded, color: _warmAmber, size: 28),
             const SizedBox(width: 12),
-            const Text('ยืนยันการออก'),
+            Text(
+              'ยืนยันการออก',
+              style: TextStyle(color: _earthClay),
+            ),
           ],
         ),
-        content: const Text('คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?'),
+        content: Text(
+          'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?',
+          style: TextStyle(color: _earthClay),
+        ),
+        backgroundColor: _ivoryWhite,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(foregroundColor: _warmStone),
             child: const Text('ยกเลิก'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: _clayOrange),
             child: const Text('ออก'),
           ),
         ],
@@ -98,9 +128,17 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: _ivoryWhite,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                color: _warmStone.withValues(alpha: 0.3),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
           ),
           child: SafeArea(
             child: Column(
@@ -112,61 +150,72 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
                   height: 4,
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: _softBorder,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
 
-                const Text(
+                Text(
                   'เลือกรูปภาพ',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: _softBrown,
                   ),
                 ),
 
                 const SizedBox(height: 20),
 
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.photo_camera, color: Colors.blue),
-                  ),
-                  title: const Text('ถ่ายรูป'),
-                  subtitle: const Text('ใช้กล้องถ่ายรูปใหม่'),
-                  onTap: () => Navigator.pop(context, 'camera'),
-                ),
-
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.green[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.photo_library, color: Colors.green),
-                  ),
-                  title: const Text('เลือกจากแกลเลอรี่'),
-                  subtitle: const Text('เลือกรูปจากคลังภาพ'),
-                  onTap: () => Navigator.pop(context, 'gallery'),
-                ),
-
-                if (_selectedImage != null)
+                // ✨ แสดงปุ่มถ่ายรูปเฉพาะบน Mobile
+                if (!kIsWeb) ...[
                   ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.red[100],
+                        color: _oliveGreen.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.delete, color: Colors.red),
+                      child: Icon(Icons.photo_camera, color: _oliveGreen),
                     ),
-                    title: const Text('ลบรูปภาพ', style: TextStyle(color: Colors.red)),
-                    subtitle: const Text('ลบรูปภาพปัจจุบัน'),
+                    title: Text('ถ่ายรูป', style: TextStyle(color: _earthClay)),
+                    subtitle: Text('ใช้กล้องถ่ายรูปใหม่', style: TextStyle(color: _warmStone)),
+                    onTap: () => Navigator.pop(context, 'camera'),
+                  ),
+                ],
+
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _burntOrange.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.photo_library, color: _burntOrange),
+                  ),
+                  title: Text(
+                    kIsWeb ? 'เลือกรูปภาพ' : 'เลือกจากแกลเลอรี่',
+                    style: TextStyle(color: _earthClay),
+                  ),
+                  subtitle: Text(
+                    kIsWeb ? 'เลือกรูปจากเครื่อง' : 'เลือกรูปจากคลังภาพ',
+                    style: TextStyle(color: _warmStone),
+                  ),
+                  onTap: () => Navigator.pop(context, 'gallery'),
+                ),
+
+                // แสดงปุ่มลบเมื่อมีรูปแล้ว
+                if (_selectedImage != null || _webImage != null)
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _clayOrange.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.delete, color: _clayOrange),
+                    ),
+                    title: Text('ลบรูปภาพ', style: TextStyle(color: _clayOrange)),
+                    subtitle: Text('ลบรูปภาพปัจจุบัน', style: TextStyle(color: _warmStone)),
                     onTap: () => Navigator.pop(context, 'delete'),
                   ),
 
@@ -181,7 +230,7 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
     if (result != null) {
       switch (result) {
         case 'camera':
-          _getImage(ImageSource.camera);
+          if (!kIsWeb) _getImage(ImageSource.camera);
           break;
         case 'gallery':
           _getImage(ImageSource.gallery);
@@ -203,23 +252,44 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
       );
 
       if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-          _hasUnsavedChanges = true;
-        });
+        if (kIsWeb) {
+          // ✨ Web: แปลงเป็น bytes
+          final bytes = await image.readAsBytes();
+          if (mounted) {
+            setState(() {
+              _webImage = bytes;
+              _selectedImage = null;
+              _hasUnsavedChanges = true;
+            });
+          }
+        } else {
+          // ✨ Mobile: ใช้ File
+          if (mounted) {
+            setState(() {
+              _selectedImage = File(image.path);
+              _webImage = null;
+              _hasUnsavedChanges = true;
+            });
+          }
+        }
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error, color: Colors.white),
+                Icon(Icons.error, color: _ivoryWhite),
                 const SizedBox(width: 12),
-                Expanded(child: Text('เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e')),
+                Expanded(
+                  child: Text(
+                    'เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e',
+                    style: TextStyle(color: _ivoryWhite),
+                  ),
+                ),
               ],
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: _clayOrange,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -230,6 +300,7 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
   void _removeImage() {
     setState(() {
       _selectedImage = null;
+      _webImage = null;
       _hasUnsavedChanges = true;
     });
   }
@@ -240,17 +311,25 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
       _notesController.clear();
       _selectedType = null;
       _selectedImage = null;
+      _webImage = null;
       _hasUnsavedChanges = false;
     });
   }
 
+  // ✨ ปรับปรุงให้ใช้ AnimalDomain.create ที่มีอยู่
   Future<void> _saveAnimal() async {
     if (!_formKey.currentState!.validate() || _selectedType == null) {
       if (_selectedType == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('กรุณาเลือกประเภทสัตว์เลี้ยง'),
-            backgroundColor: Colors.orange,
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.warning, color: _ivoryWhite),
+                const SizedBox(width: 12),
+                const Text('กรุณาเลือกประเภทสัตว์เลี้ยง'),
+              ],
+            ),
+            backgroundColor: _warmAmber,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -261,54 +340,87 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
     setState(() => _isSaving = true);
 
     try {
-      // Create new animal
-      await AnimalDomain.create(
+      // ✨ เตรียมข้อมูลรูปภาพ - รองรับทั้ง Web และ Mobile
+      dynamic imageFile;
+      if (kIsWeb && _webImage != null) {
+        imageFile = _webImage;
+      } else if (_selectedImage != null) {
+        imageFile = _selectedImage;
+      }
+
+      // ✨ เรียกใช้ AnimalDomain.create ตามที่มีอยู่
+      final createdAnimal = await AnimalDomain.create(
         houseId: widget.houseId,
         type: _selectedType!,
         name: _nameController.text.trim(),
-        img: _selectedImage != null ? 'temp' : null,
+        imageFile: imageFile, // ส่งรูปภาพไปด้วย
       );
 
-      // If there's an image, we need to handle the upload after creation
-      // This would typically be done by getting the created animal ID and uploading the image
-      // For now, we'll create with 'temp' and the image service will handle it
+      // ✨ ใช้ mounted check ก่อน async gap
+      if (!mounted) return;
 
-      if (context.mounted) {
-        setState(() => _hasUnsavedChanges = false);
+      setState(() => _hasUnsavedChanges = false);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 12),
-                Text('เพิ่มสัตว์เลี้ยงสำเร็จ'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-
-        Navigator.pop(context, true); // ส่ง result กลับ
-      }
-    } catch (e) {
-      if (context.mounted) {
-        setState(() => _isSaving = false);
+      if (createdAnimal != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error, color: Colors.white),
+                Icon(Icons.check_circle, color: _ivoryWhite),
                 const SizedBox(width: 12),
-                Expanded(child: Text('เกิดข้อผิดพลาด: $e')),
+                Expanded(
+                  child: Text(
+                    'เพิ่มสัตว์เลี้ยง "${createdAnimal.name}" สำเร็จแล้ว',
+                    style: TextStyle(color: _ivoryWhite),
+                  ),
+                ),
               ],
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: _oliveGreen,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: _ivoryWhite),
+                const SizedBox(width: 12),
+                Text('เพิ่มสัตว์เลี้ยงสำเร็จแล้ว', style: TextStyle(color: _ivoryWhite)),
+              ],
+            ),
+            backgroundColor: _oliveGreen,
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
+
+      Navigator.pop(context, true); // ส่ง result กลับ
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: _ivoryWhite),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'เกิดข้อผิดพลาด: $e',
+                  style: TextStyle(color: _ivoryWhite),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: _clayOrange,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ),
+      );
     }
   }
 
@@ -328,6 +440,9 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
     return animalType['icon'];
   }
 
+  // ✨ ตรวจสอบว่ามีรูปภาพหรือไม่
+  bool get _hasImage => _selectedImage != null || _webImage != null;
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -336,21 +451,29 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
         if (didPop) return;
 
         final shouldPop = await _onWillPop();
-        if (shouldPop && context.mounted) {
+        if (shouldPop && mounted) {
           Navigator.of(context).pop();
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: _beige,
         appBar: AppBar(
-          title: const Text('เพิ่มสัตว์เลี้ยงใหม่'),
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          elevation: 1,
+          title: Text(
+            'เพิ่มสัตว์เลี้ยงใหม่',
+            style: TextStyle(
+              color: _ivoryWhite,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          backgroundColor: _softBrown,
+          foregroundColor: _ivoryWhite,
+          elevation: 2,
+          shadowColor: _warmStone.withValues(alpha: 0.5),
           actions: [
             if (_hasUnsavedChanges)
               TextButton(
                 onPressed: _resetForm,
+                style: TextButton.styleFrom(foregroundColor: _ivoryWhite),
                 child: const Text('รีเซ็ต'),
               ),
           ],
@@ -388,6 +511,7 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
     );
   }
 
+  // ✨ ปรับปรุง _buildImageSection ให้รองรับ Web
   Widget _buildImageSection() {
     return _buildCard(
       title: 'รูปภาพสัตว์เลี้ยง',
@@ -395,31 +519,45 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
       child: Column(
         children: [
           // แสดงรูปปัจจุบัน
-          if (_selectedImage != null) ...[
+          if (_hasImage) ...[
             Stack(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.file(
+                  child: kIsWeb && _webImage != null
+                      ? Image.memory(
+                    _webImage!,
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  )
+                      : _selectedImage != null
+                      ? Image.file(
                     _selectedImage!,
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
+                  )
+                      : Container(
+                    width: double.infinity,
+                    height: 200,
+                    color: _warmStone,
                   ),
                 ),
                 Positioned(
                   top: 12,
                   right: 12,
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.black54,
+                    decoration: BoxDecoration(
+                      color: _earthClay.withValues(alpha: 0.8),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: Icon(Icons.close, color: _ivoryWhite),
                       onPressed: () {
                         setState(() {
                           _selectedImage = null;
+                          _webImage = null;
                           _hasUnsavedChanges = true;
                         });
                       },
@@ -432,12 +570,12 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: _softerBurntOrange,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
+                    child: Text(
                       'รูปใหม่',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
+                      style: TextStyle(color: _ivoryWhite, fontSize: 12),
                     ),
                   ),
                 ),
@@ -449,9 +587,9 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
               width: double.infinity,
               height: 200,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: _inputFill,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[300]!, width: 2, style: BorderStyle.solid),
+                border: Border.all(color: _softBorder, width: 2),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -459,13 +597,13 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
                   Icon(
                     _getAnimalIcon(_selectedType),
                     size: 64,
-                    color: Colors.grey[400],
+                    color: _warmStone,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'ยังไม่มีรูปภาพ',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: _earthClay,
                       fontSize: 16,
                     ),
                   ),
@@ -473,7 +611,7 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
                   Text(
                     'กดปุ่มด้านล่างเพื่อเพิ่มรูป',
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: _warmStone,
                       fontSize: 14,
                     ),
                   ),
@@ -491,12 +629,16 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
             child: OutlinedButton.icon(
               onPressed: _pickImage,
               icon: Icon(
-                _selectedImage != null ? Icons.edit : Icons.add_photo_alternate,
+                _hasImage ? Icons.edit : Icons.add_photo_alternate,
+                color: _burntOrange,
               ),
               label: Text(
-                _selectedImage != null ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ',
+                _hasImage ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ',
+                style: TextStyle(color: _earthClay),
               ),
               style: OutlinedButton.styleFrom(
+                side: BorderSide(color: _softBorder),
+                backgroundColor: _ivoryWhite,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -518,14 +660,30 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
             controller: _nameController,
             decoration: InputDecoration(
               labelText: 'ชื่อสัตว์เลี้ยง *',
+              labelStyle: TextStyle(color: _earthClay),
               hintText: 'ระบุชื่อสัตว์เลี้ยง',
-              prefixIcon: const Icon(Icons.pets),
-              border: OutlineInputBorder(
+              hintStyle: TextStyle(color: _warmStone),
+              prefixIcon: Icon(Icons.pets, color: _burntOrange),
+              enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _softBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _focusedBrown, width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _clayOrange),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: _clayOrange, width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: _inputFill,
             ),
+            style: TextStyle(color: _earthClay),
             validator: (value) =>
             value?.trim().isEmpty == true ? 'กรุณาระบุชื่อสัตว์เลี้ยง' : null,
             textInputAction: TextInputAction.next,
@@ -542,11 +700,12 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'เลือกประเภทสัตว์เลี้ยง *',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
+              color: _earthClay,
             ),
           ),
           const SizedBox(height: 16),
@@ -576,26 +735,34 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? type['color'].withValues(alpha: 0.1) : Colors.white,
+                    color: isSelected ? type['color'].withValues(alpha: 0.1) : _ivoryWhite,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? type['color'] : Colors.grey[300]!,
+                      color: isSelected ? type['color'] : _softBorder,
                       width: isSelected ? 2 : 1,
                     ),
+                    boxShadow: isSelected ? [
+                      BoxShadow(
+                        color: type['color'].withValues(alpha: 0.2),
+                        spreadRadius: 1,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ] : null,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         type['icon'],
-                        color: isSelected ? type['color'] : Colors.grey[600],
+                        color: isSelected ? type['color'] : _warmStone,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         type['type'],
                         style: TextStyle(
-                          color: isSelected ? type['color'] : Colors.grey[800],
+                          color: isSelected ? type['color'] : _earthClay,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
@@ -611,7 +778,7 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
             Text(
               'กรุณาเลือกประเภทสัตว์เลี้ยง',
               style: TextStyle(
-                color: Colors.red[700],
+                color: _clayOrange,
                 fontSize: 12,
               ),
             ),
@@ -629,12 +796,19 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
         controller: _notesController,
         decoration: InputDecoration(
           hintText: 'เช่น อาหารที่ชอบ, นิสัยพิเศษ, หรือข้อมูลอื่นๆ (ไม่บังคับ)',
-          border: OutlineInputBorder(
+          hintStyle: TextStyle(color: _warmStone),
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _softBorder),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: _focusedBrown, width: 2),
           ),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: _inputFill,
         ),
+        style: TextStyle(color: _earthClay),
         maxLines: 4,
         textInputAction: TextInputAction.done,
       ),
@@ -651,33 +825,41 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
           child: ElevatedButton(
             onPressed: _isSaving ? null : _saveAnimal,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _selectedType != null ? _getAnimalTypeColor(_selectedType) : Colors.grey,
-              foregroundColor: Colors.white,
+              backgroundColor: _selectedType != null ? _getAnimalTypeColor(_selectedType) : _disabledGrey,
+              foregroundColor: _ivoryWhite,
+              disabledBackgroundColor: _disabledGrey,
+              disabledForegroundColor: _warmStone,
+              elevation: _selectedType != null ? 4 : 0,
+              shadowColor: _selectedType != null ? _getAnimalTypeColor(_selectedType).withValues(alpha: 0.4) : null,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
             child: _isSaving
-                ? const Row(
+                ? Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: _ivoryWhite,
                     strokeWidth: 2,
                   ),
                 ),
-                SizedBox(width: 12),
-                Text('กำลังบันทึก...'),
+                const SizedBox(width: 12),
+                Text(
+                  'กำลังบันทึก...',
+                  style: TextStyle(color: _ivoryWhite),
+                ),
               ],
             )
-                : const Text(
+                : Text(
               'เพิ่มสัตว์เลี้ยง',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
+                color: _ivoryWhite,
               ),
             ),
           ),
@@ -695,7 +877,7 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
                 : () async {
               if (_hasUnsavedChanges) {
                 final shouldPop = await _onWillPop();
-                if (shouldPop && context.mounted) {
+                if (shouldPop && mounted) {
                   Navigator.pop(context);
                 }
               } else {
@@ -703,11 +885,21 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
               }
             },
             style: OutlinedButton.styleFrom(
+              side: BorderSide(color: _softBorder),
+              backgroundColor: _ivoryWhite,
+              foregroundColor: _earthClay,
+              disabledForegroundColor: _warmStone,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('ยกเลิก'),
+            child: const Text(
+              'ยกเลิก',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
         ),
       ],
@@ -720,8 +912,10 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
     required Widget child,
   }) {
     return Card(
-      elevation: 2,
+      elevation: 3,
+      shadowColor: _warmStone.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: _ivoryWhite,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -732,18 +926,19 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue[100],
+                    color: _burntOrange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: _burntOrange.withValues(alpha: 0.3)),
                   ),
-                  child: Icon(icon, color: Colors.blue, size: 20),
+                  child: Icon(icon, color: _burntOrange, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: _softBrown,
                   ),
                 ),
               ],

@@ -30,6 +30,10 @@ class AppRoutes {
   static const String meeting = '/law/meeting';
   static const String LawProfilePage = '/law/profile';
 
+  static const String committeeList = '/law/committee';
+  static const String lawGuardList = '/law/guard';
+  static const String houseFund = '/law/fund';
+
   static const String notFound = 'not_found';
   static const String splash = 'splash';
 }

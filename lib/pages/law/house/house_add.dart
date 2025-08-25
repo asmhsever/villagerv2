@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fullproject/models/house_model.dart';
 import 'package:fullproject/services/auth_service.dart';
-import 'package:fullproject/services/image_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../domains/house_domain.dart';
 import 'dart:io';
@@ -27,6 +26,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
 
   // Form values
   String? _status = 'owned';
+  String? _ownershipType = 'owned'; // เพิ่มตัวแปรนี้
   String? _houseType = 'detached';
   String? _usageStatus = 'active';
   File? _selectedImage;
@@ -40,6 +40,12 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
     'vacant',
     'rented',
     'sold'
+  ];
+
+  final List<String> _ownershipTypeOptions = [
+    'owned',
+    'rented',
+    'company'
   ];
 
   final List<String> _houseTypeOptions = [
@@ -97,7 +103,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange[600], size: 28),
+            Icon(Icons.warning_amber_rounded, color: const Color(0xFFE08E45), size: 28),
             const SizedBox(width: 12),
             const Text('ยืนยันการออก'),
           ],
@@ -106,11 +112,11 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('ยกเลิก'),
+            child: Text('ยกเลิก', style: TextStyle(color: const Color(0xFFA47551))),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: const Color(0xFFE08E45)),
             child: const Text('ออก'),
           ),
         ],
@@ -127,7 +133,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
       builder: (BuildContext context) {
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: Color(0xFFFFFDF6),
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SafeArea(
@@ -140,16 +146,17 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   height: 4,
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: const Color(0xFFD8CAB8),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
 
-                const Text(
+                Text(
                   'เลือกรูปภาพ',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: const Color(0xFFA47551),
                   ),
                 ),
 
@@ -159,13 +166,13 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.blue[100],
+                      color: const Color(0xFFD8CAB8).withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.photo_camera, color: Colors.blue),
+                    child: Icon(Icons.photo_camera, color: const Color(0xFFA47551)),
                   ),
-                  title: const Text('ถ่ายรูป'),
-                  subtitle: const Text('ใช้กล้องถ่ายรูปใหม่'),
+                  title: Text('ถ่ายรูป', style: TextStyle(color: const Color(0xFFA47551))),
+                  subtitle: Text('ใช้กล้องถ่ายรูปใหม่', style: TextStyle(color: const Color(0xFFBFA18F))),
                   onTap: () => Navigator.pop(context, 'camera'),
                 ),
 
@@ -173,13 +180,13 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.green[100],
+                      color: const Color(0xFFA3B18A).withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.photo_library, color: Colors.green),
+                    child: Icon(Icons.photo_library, color: const Color(0xFFA3B18A)),
                   ),
-                  title: const Text('เลือกจากแกลเลอรี่'),
-                  subtitle: const Text('เลือกรูปจากคลังภาพ'),
+                  title: Text('เลือกจากแกลเลอรี่', style: TextStyle(color: const Color(0xFFA47551))),
+                  subtitle: Text('เลือกรูปจากคลังภาพ', style: TextStyle(color: const Color(0xFFBFA18F))),
                   onTap: () => Navigator.pop(context, 'gallery'),
                 ),
 
@@ -188,13 +195,13 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.red[100],
+                        color: const Color(0xFFE08E45).withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.delete, color: Colors.red),
+                      child: Icon(Icons.delete, color: const Color(0xFFE08E45)),
                     ),
-                    title: const Text('ลบรูปภาพ', style: TextStyle(color: Colors.red)),
-                    subtitle: const Text('ลบรูปภาพปัจจุบัน'),
+                    title: Text('ลบรูปภาพ', style: TextStyle(color: const Color(0xFFE08E45))),
+                    subtitle: Text('ลบรูปภาพปัจจุบัน', style: TextStyle(color: const Color(0xFFBFA18F))),
                     onTap: () => Navigator.pop(context, 'delete'),
                   ),
 
@@ -237,21 +244,21 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
         });
       }
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(child: Text('เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e')),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text('เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e')),
+            ],
           ),
-        );
-      }
+          backgroundColor: const Color(0xFFE08E45),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -287,6 +294,15 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
     }
   }
 
+  String _getOwnershipTypeText(String? type) {
+    switch (type) {
+      case 'owned': return 'เป็นเจ้าของ';
+      case 'rented': return 'เช่า';
+      case 'company': return 'นิติบุคคล';
+      default: return type ?? '';
+    }
+  }
+
   String _getHouseTypeText(String? type) {
     switch (type) {
       case 'detached': return 'บ้านเดี่ยว';
@@ -315,6 +331,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
       _floorsController.clear();
       _usableAreaController.clear();
       _status = 'owned';
+      _ownershipType = 'owned';
       _houseType = 'detached';
       _usageStatus = 'active';
       _selectedImage = null;
@@ -330,107 +347,95 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
     try {
       final user = await AuthService.getCurrentUser();
       if (user == null || user.villageId == null) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.error, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('ไม่พบ village id'),
-                ],
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-        return;
-      }
+        if (!mounted) return;
 
-      final house = HouseModel(
-        houseId: 0, // จะถูกเซ็ตอัตโนมัติโดย Supabase
-        villageId: user.villageId,
-        userId: 0, // ยังไม่สร้าง user
-        houseNumber: _houseNumberController.text.trim(),
-        size: _sizeController.text.trim(),
-        owner: _ownerController.text.trim(),
-        phone: _phoneController.text.trim(),
-        status: _status,
-        houseType: _houseType,
-        floors: int.tryParse(_floorsController.text.trim()),
-        usableArea: _usableAreaController.text.trim(),
-        usageStatus: _usageStatus,
-        img: _selectedImage != null ? 'temp' : null,
-      );
-
-      final created = await HouseDomain.create(house: house);
-
-      if (created != null) {
-        // Upload image if selected
-        if (_selectedImage != null) {
-          await SupabaseImage().uploadImage(
-            imageFile: _selectedImage!,
-            tableName: "house",
-            rowName: "house_id",
-            rowImgName: "img",
-            rowKey: created.houseId, bucketPath: '', imgName: '',
-          );
-        }
-
-        if (context.mounted) {
-          setState(() => _hasUnsavedChanges = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('เพิ่มบ้านสำเร็จ'),
-                ],
-              ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          Navigator.pop(context, created);
-        }
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.error, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('เกิดข้อผิดพลาดในการเพิ่มบ้าน'),
-                ],
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
                 const Icon(Icons.error, color: Colors.white),
                 const SizedBox(width: 12),
-                Expanded(child: Text('เกิดข้อผิดพลาด: $e')),
+                const Text('ไม่พบ village id'),
               ],
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: const Color(0xFFE08E45),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      // ใช้ HouseDomain.create ตาม signature ที่ถูกต้อง
+      final createdHouse = await HouseDomain.create(
+        villageId: user.villageId!,
+        size: _sizeController.text.trim(),
+        houseNumber: _houseNumberController.text.trim(),
+        phone: _phoneController.text.trim(),
+        owner: _ownerController.text.trim(),
+        status: _status!,
+        userId: user.userId ?? 0, // ใช้ userId จาก AuthService
+        ownershipType: _ownershipType!,
+        houseType: _houseType!,
+        floors: int.tryParse(_floorsController.text.trim()) ?? 1,
+        usableArea: _usableAreaController.text.trim(),
+        usageStatus: _usageStatus!,
+        imageFile: _selectedImage, // ส่ง File object โดยตรง
+      );
+
+      if (!mounted) return;
+
+      if (createdHouse != null) {
+        setState(() => _hasUnsavedChanges = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                const Text('เพิ่มบ้านสำเร็จ'),
+              ],
+            ),
+            backgroundColor: const Color(0xFFA3B18A),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context, createdHouse);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 12),
+                const Text('เกิดข้อผิดพลาดในการเพิ่มบ้าน'),
+              ],
+            ),
+            backgroundColor: const Color(0xFFE08E45),
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text('เกิดข้อผิดพลาด: $e')),
+            ],
+          ),
+          backgroundColor: const Color(0xFFE08E45),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
 
-    setState(() => _isSubmitting = false);
+    if (mounted) {
+      setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -441,22 +446,22 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
         if (didPop) return;
 
         final shouldPop = await _onWillPop();
-        if (shouldPop && context.mounted) {
+        if (shouldPop && mounted) {
           Navigator.of(context).pop();
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: const Color(0xFFFFFDF6),
         appBar: AppBar(
-          title: const Text('เพิ่มลูกบ้าน'),
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
+          title: Text('เพิ่มลูกบ้าน', style: TextStyle(color: const Color(0xFFA47551))),
+          backgroundColor: const Color(0xFFFFFDF6),
+          foregroundColor: const Color(0xFFA47551),
           elevation: 1,
           actions: [
             if (_hasUnsavedChanges)
               TextButton(
                 onPressed: _resetForm,
-                child: const Text('รีเซ็ต'),
+                child: Text('รีเซ็ต', style: TextStyle(color: const Color(0xFFE08E45))),
               ),
           ],
         ),
@@ -516,12 +521,12 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   top: 12,
                   right: 12,
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.black54,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFA47551).withValues(alpha: 0.8),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: const Icon(Icons.close, color: Color(0xFFFFFDF6)),
                       onPressed: () {
                         setState(() {
                           _selectedImage = null;
@@ -537,7 +542,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: const Color(0xFFA3B18A),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -554,9 +559,9 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
               width: double.infinity,
               height: 200,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: const Color(0xFFF5F0E1),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[300]!, width: 2, style: BorderStyle.values[1]),
+                border: Border.all(color: const Color(0xFFD8CAB8), width: 2),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -564,13 +569,13 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   Icon(
                     Icons.home,
                     size: 64,
-                    color: Colors.grey[400],
+                    color: const Color(0xFFBFA18F),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'ยังไม่มีรูปภาพ',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: const Color(0xFFA47551),
                       fontSize: 16,
                     ),
                   ),
@@ -578,7 +583,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   Text(
                     'กดปุ่มด้านล่างเพื่อเพิ่มรูป',
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: const Color(0xFFBFA18F),
                       fontSize: 14,
                     ),
                   ),
@@ -598,6 +603,8 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
               icon: Icon(_selectedImage != null ? Icons.edit : Icons.add_photo_alternate),
               label: Text(_selectedImage != null ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ'),
               style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFA47551),
+                side: BorderSide(color: const Color(0xFFD8CAB8)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -620,13 +627,24 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             controller: _houseNumberController,
             decoration: InputDecoration(
               labelText: 'บ้านเลขที่ *',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
               hintText: 'ระบุเลขที่บ้าน',
-              prefixIcon: const Icon(Icons.home_outlined),
+              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+              prefixIcon: Icon(Icons.home_outlined, color: const Color(0xFFA47551)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             validator: (value) =>
             value?.trim().isEmpty == true ? 'กรุณาระบุบ้านเลขที่' : null,
@@ -639,13 +657,24 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             controller: _ownerController,
             decoration: InputDecoration(
               labelText: 'เจ้าของบ้าน *',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
               hintText: 'ระบุชื่อเจ้าของ',
-              prefixIcon: const Icon(Icons.person),
+              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+              prefixIcon: Icon(Icons.person, color: const Color(0xFFA47551)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             validator: (value) =>
             value?.trim().isEmpty == true ? 'กรุณาระบุชื่อเจ้าของ' : null,
@@ -658,13 +687,24 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             controller: _phoneController,
             decoration: InputDecoration(
               labelText: 'เบอร์โทร',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
               hintText: 'XXX-XXX-XXXX',
-              prefixIcon: const Icon(Icons.phone),
+              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+              prefixIcon: Icon(Icons.phone, color: const Color(0xFFA47551)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             keyboardType: TextInputType.phone,
             inputFormatters: [
@@ -707,17 +747,27 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             value: _houseType,
             decoration: InputDecoration(
               labelText: 'ประเภทบ้าน *',
-              prefixIcon: const Icon(Icons.apartment),
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              prefixIcon: Icon(Icons.apartment, color: const Color(0xFFA47551)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             items: _houseTypeOptions.map((type) {
               return DropdownMenuItem(
                 value: type,
-                child: Text(_getHouseTypeText(type)),
+                child: Text(_getHouseTypeText(type), style: TextStyle(color: const Color(0xFFA47551))),
               );
             }).toList(),
             onChanged: (value) {
@@ -738,13 +788,24 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   controller: _floorsController,
                   decoration: InputDecoration(
                     labelText: 'จำนวนชั้น',
+                    labelStyle: TextStyle(color: const Color(0xFFA47551)),
                     hintText: 'เช่น 1, 2',
-                    prefixIcon: const Icon(Icons.layers),
+                    hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+                    prefixIcon: Icon(Icons.layers, color: const Color(0xFFA47551)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
                     ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: const Color(0xFFFBF9F3),
                   ),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -759,13 +820,24 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   controller: _sizeController,
                   decoration: InputDecoration(
                     labelText: 'ขนาด',
+                    labelStyle: TextStyle(color: const Color(0xFFA47551)),
                     hintText: 'เช่น 100 ตร.ม.',
-                    prefixIcon: const Icon(Icons.square_foot),
+                    hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+                    prefixIcon: Icon(Icons.square_foot, color: const Color(0xFFA47551)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
                     ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: const Color(0xFFFBF9F3),
                   ),
                   textInputAction: TextInputAction.next,
                 ),
@@ -779,13 +851,24 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             controller: _usableAreaController,
             decoration: InputDecoration(
               labelText: 'พื้นที่ใช้สอย',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
               hintText: 'เช่น 80 ตร.ม.',
-              prefixIcon: const Icon(Icons.area_chart),
+              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
+              prefixIcon: Icon(Icons.area_chart, color: const Color(0xFFA47551)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             textInputAction: TextInputAction.done,
           ),
@@ -805,17 +888,27 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             value: _status,
             decoration: InputDecoration(
               labelText: 'สถานะบ้าน *',
-              prefixIcon: const Icon(Icons.home_filled),
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              prefixIcon: Icon(Icons.home_filled, color: const Color(0xFFA47551)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             items: _statusOptions.map((status) {
               return DropdownMenuItem(
                 value: status,
-                child: Text(_getStatusText(status)),
+                child: Text(_getStatusText(status), style: TextStyle(color: const Color(0xFFA47551))),
               );
             }).toList(),
             onChanged: (value) {
@@ -828,22 +921,70 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
           ),
           const SizedBox(height: 16),
 
+          // ประเภทความเป็นเจ้าของ
+          DropdownButtonFormField<String>(
+            value: _ownershipType,
+            decoration: InputDecoration(
+              labelText: 'ประเภทความเป็นเจ้าของ *',
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              prefixIcon: Icon(Icons.account_balance, color: const Color(0xFFA47551)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFFBF9F3),
+            ),
+            items: _ownershipTypeOptions.map((type) {
+              return DropdownMenuItem(
+                value: type,
+                child: Text(_getOwnershipTypeText(type), style: TextStyle(color: const Color(0xFFA47551))),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _ownershipType = value;
+                _hasUnsavedChanges = true;
+              });
+            },
+            validator: (value) => value == null ? 'กรุณาเลือกประเภทความเป็นเจ้าของ' : null,
+          ),
+          const SizedBox(height: 16),
+
           // สถานะการใช้งาน
           DropdownButtonFormField<String>(
             value: _usageStatus,
             decoration: InputDecoration(
               labelText: 'สถานะการใช้งาน *',
-              prefixIcon: const Icon(Icons.toggle_on),
+              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              prefixIcon: Icon(Icons.toggle_on, color: const Color(0xFFA47551)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFFBF9F3),
             ),
             items: _usageStatusOptions.map((status) {
               return DropdownMenuItem(
                 value: status,
-                child: Text(_getUsageStatusText(status)),
+                child: Text(_getUsageStatusText(status), style: TextStyle(color: const Color(0xFFA47551))),
               );
             }).toList(),
             onChanged: (value) {
@@ -869,11 +1010,13 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
           child: ElevatedButton(
             onPressed: _isSubmitting ? null : _submitForm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: const Color(0xFFE08E45),
               foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFFDCDCDC),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              elevation: 2,
             ),
             child: _isSubmitting
                 ? const Row(
@@ -912,7 +1055,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                 : () async {
               if (_hasUnsavedChanges) {
                 final shouldPop = await _onWillPop();
-                if (shouldPop && context.mounted) {
+                if (shouldPop && mounted) {
                   Navigator.pop(context);
                 }
               } else {
@@ -920,6 +1063,9 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
               }
             },
             style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFA47551),
+              side: BorderSide(color: const Color(0xFFD8CAB8)),
+              disabledForegroundColor: const Color(0xFFDCDCDC),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -938,7 +1084,12 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
   }) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: const Color(0xFFFFFDF6),
+      shadowColor: const Color(0xFFBFA18F).withValues(alpha: 0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: const Color(0xFFD8CAB8).withValues(alpha: 0.3)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -949,10 +1100,10 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue[100],
+                    color: const Color(0xFFE08E45).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: Colors.blue, size: 20),
+                  child: Icon(icon, color: const Color(0xFFE08E45), size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -960,7 +1111,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: Color(0xFFA47551),
                   ),
                 ),
               ],

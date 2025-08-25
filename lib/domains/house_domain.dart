@@ -1,23 +1,196 @@
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:fullproject/models/house_model.dart';
+import 'package:fullproject/services/image_service.dart';
 
 class HouseDomain {
   static final _client = SupabaseConfig.client;
   static const String _table = 'house';
 
   // Create - เพิ่มบ้านใหม่
-  static Future<HouseModel?> create({required HouseModel house}) async {
+  static Future<HouseModel?> create({
+    required int villageId,
+    required String size,
+    required String houseNumber,
+    required String phone,
+    required String owner,
+    required String status,
+    required int userId,
+    required String ownershipType,
+    required String houseType,
+    required int floors,
+    required String usableArea,
+    required String usageStatus,
+    dynamic imageFile, // รองรับทั้ง File และ Uint8List
+  }) async {
     try {
+      // 1. สร้าง house ก่อน (ยังไม่มีรูป)
       final response = await _client
           .from(_table)
-          .insert(house.toJson())
+          .insert({
+        'village_id': villageId,
+        'size': size,
+        'house_number': houseNumber,
+        'phone': phone,
+        'owner': owner,
+        'status': status,
+        'user_id': userId,
+        'ownership_type': ownershipType,
+        'house_type': houseType,
+        'floors': floors,
+        'usable_area': usableArea,
+        'usage_status': usageStatus,
+        'img': null,
+      })
+          .select()
+          .single();
+
+      final createdHouse = HouseModel.fromJson(response);
+
+      // 2. อัปโหลดรูป (ถ้ามี)
+      if (imageFile != null && createdHouse.houseId != 0) {
+        final imageUrl = await SupabaseImage().uploadImage(
+          bucketPath: "house",
+          imgName: "house",
+          imageFile: imageFile,
+          tableName: "house",
+          rowName: "house_id",
+          rowImgName: "img",
+          rowKey: createdHouse.houseId,
+        );
+
+        // 3. อัปเดต house ด้วย imageUrl
+        if (imageUrl != null) {
+          await _client
+              .from(_table)
+              .update({'img': imageUrl})
+              .eq('house_id', createdHouse.houseId);
+
+          // Return house ที่มี imageUrl
+          return HouseModel(
+            houseId: createdHouse.houseId,
+            villageId: createdHouse.villageId,
+            size: createdHouse.size,
+            houseNumber: createdHouse.houseNumber,
+            phone: createdHouse.phone,
+            owner: createdHouse.owner,
+            status: createdHouse.status,
+            userId: createdHouse.userId,
+            houseType: createdHouse.houseType,
+            floors: createdHouse.floors,
+            usableArea: createdHouse.usableArea,
+            usageStatus: createdHouse.usageStatus,
+            img: imageUrl,
+          );
+        }
+      }
+
+      return createdHouse;
+    } catch (e) {
+      print('Error creating house: $e');
+      return null;
+    }
+  }
+
+  // Update - อัพเดทข้อมูลบ้าน
+  static Future<HouseModel?> update({
+    required int houseId,
+    required int villageId,
+    required String size,
+    required String houseNumber,
+    required String phone,
+    required String owner,
+    required String status,
+    required int userId,
+    required String ownershipType,
+    required String houseType,
+    required int floors,
+    required String usableArea,
+    required String usageStatus,
+    dynamic imageFile, // รองรับทั้ง File และ Uint8List
+    bool removeImage = false, // flag สำหรับลบรูป
+  }) async {
+    try {
+      String? finalImageUrl;
+
+      if (removeImage) {
+        // ลบรูปภาพ
+        finalImageUrl = null;
+      } else if (imageFile != null) {
+        // อัปโหลดรูปใหม่
+        finalImageUrl = await SupabaseImage().uploadImage(
+          imageFile: imageFile,
+          tableName: "house",
+          rowName: "house_id",
+          rowImgName: "img",
+          rowKey: houseId,
+          bucketPath: "house",
+          imgName: "house",
+        );
+      }
+      // ถ้า imageFile เป็น null และ removeImage เป็น false = ไม่แก้ไขรูป
+
+      // อัปเดตข้อมูล
+      final Map<String, dynamic> updateData = {
+        'village_id': villageId,
+        'size': size,
+        'house_number': houseNumber,
+        'phone': phone,
+        'owner': owner,
+        'status': status,
+        'user_id': userId,
+        'ownership_type': ownershipType,
+        'house_type': houseType,
+        'floors': floors,
+        'usable_area': usableArea,
+        'usage_status': usageStatus,
+      };
+
+      // เพิ่ม img field เฉพาะเมื่อต้องการเปลี่ยนรูป
+      if (removeImage || imageFile != null) {
+        updateData['img'] = finalImageUrl;
+      }
+
+      final response = await _client
+          .from(_table)
+          .update(updateData)
+          .eq('house_id', houseId)
           .select()
           .single();
 
       return HouseModel.fromJson(response);
     } catch (e) {
-      print('Error creating house: $e');
+      print('Error updating house: $e');
       return null;
+    }
+  }
+
+  // Delete - ลบบ้าน
+  static Future<bool> delete(int houseId) async {
+    try {
+      // 1. ดึงข้อมูล house เพื่อเช็ค imageUrl ก่อน
+      final response = await _client
+          .from(_table)
+          .select('img')
+          .eq('house_id', houseId)
+          .single();
+
+      final imageUrl = response['img'] as String?;
+
+      // 2. ลบรูปภาพออกจาก storage ก่อน (ถ้ามี)
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "house",
+          imageUrl: imageUrl,
+        );
+      }
+
+      // 3. ลบข้อมูล house จากฐานข้อมูล
+      await _client.from(_table).delete().eq('house_id', houseId);
+
+      return true;
+    } catch (e) {
+      print('Error deleting house: $e');
+      return false;
     }
   }
 
@@ -235,97 +408,6 @@ class HouseDomain {
     } catch (e) {
       print('Error searching houses by owner: $e');
       return [];
-    }
-  }
-
-  // Update - อัพเดทข้อมูลบ้าน
-  static Future<HouseModel?> update({
-    required int houseId,
-    required HouseModel updatedHouse,
-  }) async {
-    try {
-      final response = await _client
-          .from(_table)
-          .update(updatedHouse.toJson())
-          .eq('house_id', houseId)
-          .select()
-          .single();
-
-      return HouseModel.fromJson(response);
-    } catch (e) {
-      print('Error updating house: $e');
-      return null;
-    }
-  }
-
-  // Update - อัพเดทสถานะบ้าน
-  static Future<bool> updateStatus({
-    required int houseId,
-    required String status,
-  }) async {
-    try {
-      await _client
-          .from(_table)
-          .update({'status': status})
-          .eq('house_id', houseId);
-
-      return true;
-    } catch (e) {
-      print('Error updating house status: $e');
-      return false;
-    }
-  }
-
-  // Update - อัพเดทข้อมูลเจ้าของ
-  static Future<bool> updateOwner({
-    required int houseId,
-    required String owner,
-    required String phone,
-    int? userId,
-  }) async {
-    try {
-      final updateData = {
-        'owner': owner,
-        'phone': phone,
-        if (userId != null) 'user_id': userId,
-      };
-
-      await _client.from(_table).update(updateData).eq('house_id', houseId);
-
-      return true;
-    } catch (e) {
-      print('Error updating house owner: $e');
-      return false;
-    }
-  }
-
-  // Update - อัพเดทรูปภาพบ้าน
-  static Future<bool> updateImage({
-    required int houseId,
-    required String imageUrl,
-  }) async {
-    try {
-      await _client
-          .from(_table)
-          .update({'img': imageUrl})
-          .eq('house_id', houseId);
-
-      return true;
-    } catch (e) {
-      print('Error updating house image: $e');
-      return false;
-    }
-  }
-
-  // Delete - ลบบ้าน
-  static Future<bool> delete(int houseId) async {
-    try {
-      await _client.from(_table).delete().eq('house_id', houseId);
-
-      return true;
-    } catch (e) {
-      print('Error deleting house: $e');
-      return false;
     }
   }
 

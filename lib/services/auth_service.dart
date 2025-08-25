@@ -9,9 +9,9 @@ class AuthService {
 
   // Login method (username/password based)
   static Future<Map<String, dynamic>> login(
-    String username,
-    String password,
-  ) async {
+      String username,
+      String password,
+      ) async {
     try {
       // Query admin table directly with username and password
       print(username + password);

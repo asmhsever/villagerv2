@@ -5,7 +5,7 @@ import 'package:fullproject/domains/complaint_type_domain.dart';
 import 'package:fullproject/models/complaint_model.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/pages/law/complaint/complaint_detail.dart';
-import 'package:fullproject/pages/law/complaint/complaint_detail_success.dart';
+import 'package:fullproject/pages/law/complaint/complaint_detail_success.dart' hide ComplaintDetailPage;
 import 'package:fullproject/services/auth_service.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:intl/intl.dart';
@@ -217,7 +217,7 @@ class _ComplaintPageState extends State<ComplaintPage> {
       targetPage = ComplaintDetailSuccessPage(complaint: complaint);
     } else {
       // ถ้ายังไม่เสร็จสิ้น ไปหน้า detail ปกติ
-      targetPage = SuccessComplaintFormPage(complaint: complaint);
+      targetPage = ComplaintDetailPage(complaint: complaint);
     }
 
     final result = await Navigator.push(

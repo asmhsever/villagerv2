@@ -1,3 +1,6 @@
+// File: lib/pages/law/dashboard.dart
+// Purpose: Wire dashboard cards to named routes for Guard/Fund/Committee.
+
 import 'package:flutter/material.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/navigation/app_navigation.dart';
@@ -17,7 +20,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
   LawModel? lawModel;
   bool isLoading = true;
 
-  // ธีมสี
+  // Theme
   static const Color _softBrown = Color(0xFFA47551);
   static const Color _ivoryWhite = Color(0xFFFFFDF6);
   static const Color _sandyTan = Color(0xFFD8CAB8);
@@ -42,14 +45,10 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
           isLoading = false;
         });
       } else {
-        if (mounted) {
-          AppNavigation.navigateTo(AppRoutes.login);
-        }
+        if (mounted) AppNavigation.navigateTo(AppRoutes.login);
       }
-    } catch (e) {
-      if (mounted) {
-        AppNavigation.navigateTo(AppRoutes.login);
-      }
+    } catch (_) {
+      if (mounted) AppNavigation.navigateTo(AppRoutes.login);
     }
   }
 
@@ -58,36 +57,23 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: _ivoryWhite,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          'ยืนยันการออกจากระบบ',
-          style: TextStyle(
-            color: _softBrown,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Text(
-          'คุณต้องการออกจากระบบใช่หรือไม่?',
-          style: TextStyle(color: _earthClay),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('ยืนยันการออกจากระบบ',
+            style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold)),
+        content: const Text('คุณต้องการออกจากระบบใช่หรือไม่?',
+            style: TextStyle(color: _earthClay)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(
-              foregroundColor: _warmStone,
-            ),
+            style: TextButton.styleFrom(foregroundColor: _warmStone),
             child: const Text('ยกเลิก'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade400,
+              backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text('ออกจากระบบ'),
           ),
@@ -108,18 +94,10 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(_softBrown),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'กำลังโหลดข้อมูล...',
-                style: TextStyle(
-                  color: _earthClay,
-                  fontSize: 16,
-                ),
-              ),
+            children: const [
+              CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(_softBrown)),
+              SizedBox(height: 16),
+              Text('กำลังโหลดข้อมูล...', style: TextStyle(color: _earthClay, fontSize: 16)),
             ],
           ),
         ),
@@ -127,16 +105,10 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     }
 
     if (lawModel == null) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: _ivoryWhite,
         body: Center(
-          child: Text(
-            'ไม่พบข้อมูลผู้ใช้',
-            style: TextStyle(
-              color: _earthClay,
-              fontSize: 16,
-            ),
-          ),
+          child: Text('ไม่พบข้อมูลผู้ใช้', style: TextStyle(color: _earthClay, fontSize: 16)),
         ),
       );
     }
@@ -147,92 +119,90 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         label: 'ค่าส่วนกลาง',
         color: _burntOrange,
         onTap: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const BillPage()),
-          );
-          if (mounted) {
-            setState(() {});
-          }
+          await Navigator.push(context, MaterialPageRoute(builder: (_) => const BillPage()));
+          if (mounted) setState(() {});
         },
       ),
       _DashboardItem(
         icon: Icons.report_problem,
         label: 'คำร้องเรียน',
         color: Colors.red.shade400,
-        onTap: () {
-          // ✨ เปลี่ยนให้ไปหน้า complaint แทน notFound
-          AppNavigation.navigateTo(AppRoutes.complaint);
-        },
+        onTap: () => AppNavigation.navigateTo(AppRoutes.complaint),
       ),
       _DashboardItem(
         icon: Icons.announcement,
         label: 'ข่าวสาร',
         color: _softTerracotta,
-        onTap: () {
-          AppNavigation.navigateTo(AppRoutes.notion);
-        },
+        onTap: () => AppNavigation.navigateTo(AppRoutes.notion),
       ),
       _DashboardItem(
         icon: Icons.pets,
         label: 'สัตว์เลี้ยง',
         color: _oliveGreen,
-        onTap: () {
-          AppNavigation.navigateTo(AppRoutes.notFound);
-        },
+        onTap: () => AppNavigation.navigateTo(AppRoutes.notFound),
       ),
       _DashboardItem(
         icon: Icons.people,
         label: 'ลูกบ้าน',
         color: _softBrown,
-        onTap: () async {
-          if (lawModel != null) {
-            AppNavigation.navigateTo(
-              AppRoutes.resident,
-              arguments: {'villageId': lawModel!.villageId},
-            );
-          }
-        },
+        onTap: () => AppNavigation.navigateTo(
+          AppRoutes.resident,
+          arguments: {'villageId': lawModel!.villageId},
+        ),
       ),
       _DashboardItem(
         icon: Icons.meeting_room,
         label: 'ประชุม',
         color: _warmStone,
-        onTap: () {
-          AppNavigation.navigateTo(AppRoutes.notFound);
-        },
+        onTap: () => AppNavigation.navigateTo(AppRoutes.notFound),
+      ),
+      // --- NEW WIRED ROUTES ---
+      _DashboardItem(
+        icon: Icons.person_pin,
+        label: 'เจ้าหน้าที่',
+        color: _softBrown,
+        onTap: () => AppNavigation.navigateTo(
+          AppRoutes.lawGuardList,
+          arguments: {'villageId': lawModel!.villageId}, // why: list depends on village
+        ),
+      ),
+
+      _DashboardItem(
+        icon: Icons.account_balance_wallet,
+        label: 'กองทุน',
+        color: _oliveGreen,
+        onTap: () => AppNavigation.navigateTo(
+          AppRoutes.houseFund,
+          arguments: {'villageId': lawModel!.villageId}, // why: list depends on village
+        ),
+      ),
+      _DashboardItem(
+        icon: Icons.people_alt,
+        label: 'คณะกรรมการ',
+        color: _burntOrange,
+        onTap: () => AppNavigation.navigateTo(
+          AppRoutes.committeeList,
+          arguments: {'villageId': lawModel!.villageId}, // why: list depends on village
+        ),
       ),
     ];
 
     return Scaffold(
       backgroundColor: _ivoryWhite,
       appBar: AppBar(
-        title: const Text(
-          'แดชบอร์ดนิติ',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('แดชบอร์ดนิติ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: _softBrown,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => LawProfilePage(lawId: lawModel!.lawId),
-                ),
-              );
-            },
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => LawProfilePage(lawId: lawModel!.lawId)),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
-          ),
+          IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
         ],
       ),
       body: RefreshIndicator(
@@ -244,26 +214,13 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Card
               _buildWelcomeCard(),
               const SizedBox(height: 20),
-
-              // Quick Stats
               _buildQuickStats(),
               const SizedBox(height: 24),
-
-              // Menu Grid Title
-              Text(
-                'เมนูหลัก',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: _softBrown,
-                ),
-              ),
+              const Text('เมนูหลัก',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _softBrown)),
               const SizedBox(height: 16),
-
-              // Menu Grid
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -274,26 +231,18 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
                   childAspectRatio: 1.1,
                 ),
                 itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return _buildDashboardCard(item);
-                },
+                itemBuilder: (context, index) => _buildDashboardCard(items[index]),
               ),
-
-              const SizedBox(height: 100), // เผื่อ FloatingActionButton
+              const SizedBox(height: 100),
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => LawProfilePage(lawId: lawModel!.lawId),
-            ),
-          );
-        },
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => LawProfilePage(lawId: lawModel!.lawId)),
+        ),
         backgroundColor: _burntOrange,
         foregroundColor: Colors.white,
         elevation: 4,
@@ -307,109 +256,60 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: [_softBrown, _burntOrange],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: LinearGradient(colors: [_softBrown, _burntOrange], begin: Alignment.topLeft, end: Alignment.bottomRight),
         boxShadow: [
-          BoxShadow(
-            color: _warmStone.withValues(alpha: 0.3),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
+          BoxShadow(color: _warmStone.withValues(alpha: 0.3), spreadRadius: 1, blurRadius: 8, offset: const Offset(0, 4)),
         ],
       ),
       padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                child: lawModel!.img != null && lawModel!.img!.isNotEmpty
-                    ? ClipOval(
-                  child: Image.network(
-                    lawModel!.img!,
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Text(
-                      lawModel!.fullName.isNotEmpty
-                          ? lawModel!.fullName.substring(0, 1).toUpperCase()
-                          : 'N',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                )
-                    : Text(
-                  lawModel!.fullName.isNotEmpty
-                      ? lawModel!.fullName.substring(0, 1).toUpperCase()
-                      : 'N',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+          CircleAvatar(
+            radius: 32,
+            backgroundColor: Colors.white.withValues(alpha: 0.2),
+            child: lawModel!.img != null && lawModel!.img!.isNotEmpty
+                ? ClipOval(
+              child: Image.network(
+                lawModel!.img!,
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Text(
+                  lawModel!.fullName.isNotEmpty ? lawModel!.fullName.substring(0, 1).toUpperCase() : 'N',
+                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'สวัสดี',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      lawModel!.fullName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const Text(
-                      'นิติบุคคลหมู่บ้าน',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => LawProfilePage(lawId: lawModel!.lawId),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
-                ),
-              ),
-            ],
+            )
+                : Text(
+              lawModel!.fullName.isNotEmpty ? lawModel!.fullName.substring(0, 1).toUpperCase() : 'N',
+              style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+            ),
           ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('สวัสดี', style: TextStyle(color: Colors.white70, fontSize: 16)),
+                Text(
+                  lawModel!.fullName,
+                  style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Text('นิติบุคคลหมู่บ้าน', style: TextStyle(color: Colors.white70, fontSize: 14)),
+              ],
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+            child: IconButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => LawProfilePage(lawId: lawModel!.lawId)),
+              ),
+              icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            ),
+          )
         ],
       ),
     );
@@ -419,74 +319,36 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     return Row(
       children: [
         Expanded(
-          child: _buildStatCard(
-            icon: Icons.location_on,
-            title: 'หมู่บ้าน',
-            value: 'ID: ${lawModel!.villageId}',
-            color: _oliveGreen,
-          ),
+          child: _buildStatCard(icon: Icons.location_on, title: 'หมู่บ้าน', value: 'ID: ${lawModel!.villageId}', color: _oliveGreen),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildStatCard(
-            icon: Icons.badge,
-            title: 'รหัสผู้ใช้',
-            value: 'ID: ${lawModel!.userId}',
-            color: _softTerracotta,
-          ),
+          child: _buildStatCard(icon: Icons.badge, title: 'รหัสผู้ใช้', value: 'ID: ${lawModel!.userId}', color: _softTerracotta),
         ),
       ],
     );
   }
 
-  Widget _buildStatCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-  }) {
+  Widget _buildStatCard({required IconData icon, required String title, required String value, required Color color}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _sandyTan.withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: _warmStone.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: _warmStone.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 4, offset: const Offset(0, 2))],
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
             child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(height: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: _warmStone,
-            ),
-          ),
+          Text(title, style: const TextStyle(fontSize: 12, color: _warmStone)),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: _earthClay,
-            ),
-          ),
+          Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: _earthClay)),
         ],
       ),
     );
@@ -498,14 +360,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: _sandyTan.withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: _warmStone.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: _warmStone.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 6, offset: const Offset(0, 3))],
       ),
       child: Material(
         color: Colors.transparent,
@@ -516,10 +371,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               gradient: LinearGradient(
-                colors: [
-                  item.color.withValues(alpha: 0.05),
-                  item.color.withValues(alpha: 0.02),
-                ],
+                colors: [item.color.withValues(alpha: 0.05), item.color.withValues(alpha: 0.02)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -529,26 +381,11 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: item.color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Icon(
-                    item.icon,
-                    size: 36,
-                    color: item.color,
-                  ),
+                  decoration: BoxDecoration(color: item.color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+                  child: Icon(item.icon, size: 36, color: item.color),
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  item.label,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: _earthClay,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                Text(item.label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _earthClay), textAlign: TextAlign.center),
               ],
             ),
           ),
@@ -564,10 +401,5 @@ class _DashboardItem {
   final Color color;
   final VoidCallback onTap;
 
-  _DashboardItem({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
+  _DashboardItem({required this.icon, required this.label, required this.color, required this.onTap});
 }
