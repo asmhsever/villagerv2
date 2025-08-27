@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/pages/admin/dashboard.dart';
+import 'package:fullproject/pages/house/complaint/complaint_form.dart';
 import 'package:fullproject/pages/house/main.dart';
+import 'package:fullproject/pages/law/committee/committee.dart';
+import 'package:fullproject/pages/law/complaint/complant_page.dart';
 import 'package:fullproject/pages/law/dashboard.dart';
+import 'package:fullproject/pages/law/fund/fund_page.dart';
+import 'package:fullproject/pages/law/guard/guard_page.dart';
 import 'package:fullproject/pages/law/house/house_page.dart';
 import 'package:fullproject/pages/law/notion/notion_page.dart';
 import 'package:fullproject/pages/notfound_age.dart';
 import 'package:fullproject/pages/splash_page.dart';
 import 'package:fullproject/pages/welcome_page.dart';
 import 'package:fullproject/pages/login_page.dart';
-import 'package:fullproject/pages/law/profile/profile_page.dart';
-
-import 'package:fullproject/pages/law/complaint/complant_page.dart';
-
-import '../pages/law/committee/committee.dart';
-import '../pages/law/fund/fund_page.dart';
-import '../pages/law/guard/guard_page.dart';
 import 'app_routes.dart';
 
 class RouteGenerator {
@@ -35,59 +33,76 @@ class RouteGenerator {
         return _createRoute(const LawDashboardPage());
       case AppRoutes.splash:
         return _createRoute(const SplashPage());
-    // case AppRoutes.lawBill:
-    //   return _createRoute(const BillPage());
-
-      case AppRoutes.notion:
+      // case AppRoutes.lawBill:
+      //   return _createRoute(const BillPage());
+      // case AppRoutes.houseComplaintForm:
+      //   final args = settings.arguments as Map<String, dynamic>;
+      //   final houseId = args['houseId'] as int;
+      //   return _createRoute(HouseComplaintFormPage(houseId: houseId));
+      case AppRoutes.lawNotion:
         return _createRoute(const LawNotionPage());
-
-    // ✨ เพิ่ม complaint route
-      case AppRoutes.complaint:
-        return _createRoute(const ComplaintPage());
-
-      case AppRoutes.resident:
+      case AppRoutes.lawVillage:
         final args = settings.arguments as Map<String, dynamic>;
         final villageId = args['villageId'] as int;
         return _createRoute(LawHouseManagePage(villageId: villageId));
 
-      case AppRoutes.LawProfilePage:
-        final args = settings.arguments as Map<String, dynamic>?;
-        final lawId = args?['lawId'] as int?;
+      // ✨ เพิ่ม complaint route
+      case AppRoutes.lawComplaint:
+        return _createRoute(const LawComplaintPage());
 
-        if (lawId == null) {
-          return _createRoute(const NotFoundPage());
-        }
-
-        return _createRoute(LawProfilePage(lawId: lawId));
+      case AppRoutes.lawVillage:
+        final args = settings.arguments as Map<String, dynamic>;
+        final villageId = args['villageId'] as int;
+        return _createRoute(LawHouseManagePage(villageId: villageId));
+      //
+      // case AppRoutes.LawProfilePage:
+      //   final args = settings.arguments as Map<String, dynamic>?;
+      //   final lawId = args?['lawId'] as int?;
+      //
+      //   if (lawId == null) {
+      //     return _createRoute(const NotFoundPage());
+      //   }
+      //
+      //   return _createRoute(LawProfilePage(lawId: lawId));
 
       case AppRoutes.committeeList:
         final args = settings.arguments as Map<String, dynamic>;
         final villageId = args['villageId'] as int;
-        return _createRoute(CommitteeListPage(villageId: villageId));
+        return _createRoute(LawCommitteeListPage(villageId: villageId));
 
-      case AppRoutes.lawGuardList:
-
+      case AppRoutes.lawGuard:
         final args = settings.arguments as Map<String, dynamic>?;
         final villageId = args?['villageId'];
         if (villageId is int) {
-          return _createRoute(HouseGuardListPage(villageId: villageId));
+          return _createRoute(LawGuardListPage(villageId: villageId));
         }
 
         return _createRoute(const NotFoundPage());
 
-
-      case AppRoutes.houseFund:
+      case AppRoutes.lawFund:
         final args = settings.arguments as Map<String, dynamic>;
         final villageId = args['villageId'] as int;
-        return _createRoute(HouseFundPage(villageId: villageId));
+        return _createRoute(LawFundPage(villageId: villageId));
 
-    /*case AppRoutes.animal:
+      /*case AppRoutes.animal:
         return _createRoute(const NotFoundPage());
 
       case AppRoutes.meeting:
         return _createRoute(const NotFoundPage());*/
 
+      /*case AppRoutes.complaint:
+        return _createRoute(const NotFoundPage());
 
+      case AppRoutes.animal:
+        return _createRoute(const NotFoundPage());
+
+      case AppRoutes.meeting:
+        return _createRoute(const NotFoundPage());
+
+
+
+      case AppRoutes.resident:
+        return _createRoute(const NotFoundPage());*/
       default:
         return _createRoute(const NotFoundPage());
     }

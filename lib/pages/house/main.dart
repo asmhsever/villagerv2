@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/models/house_model.dart';
 import 'package:fullproject/navigation/app_navigation.dart';
-import 'package:fullproject/pages/house/bill.dart';
+import 'package:fullproject/pages/house/bill/bill.dart';
+import 'package:fullproject/pages/house/complaint/complaint.dart';
 import 'package:fullproject/pages/house/myhouse.dart';
+import 'package:fullproject/pages/house/notion.dart';
 import 'package:fullproject/routes/app_routes.dart';
 import 'package:fullproject/services/auth_service.dart';
 
@@ -30,7 +32,9 @@ class _HouseMainPageState extends State<HouseMainPage> {
     }
 
     return [
-
+      HouseNotionsPage(villageId: houseModel!.villageId),
+      HouseBillPage(houseId: houseModel!.houseId),
+      HouseComplaintPage(houseId: houseModel!.houseId),
       HouseMyHousePage(houseId: houseModel!.houseId),
     ];
   }

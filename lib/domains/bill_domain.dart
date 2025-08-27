@@ -25,20 +25,20 @@ class BillDomain {
       final response = await _client
           .from(_table)
           .insert({
-        'house_id': houseId,
-        'bill_date': billDate,
-        'amount': amount,
-        'paid_status': 0,
-        'paid_date': null,
-        'paid_method': paidMethod,
-        'service': service,
-        'due_date': dueDate,
-        'reference_no': referenceNo,
-        'status': status,
-        'slip_img': null,
-        'bill_img': null,
-        'receipt_img': null,
-      })
+            'house_id': houseId,
+            'bill_date': billDate,
+            'amount': amount,
+            'paid_status': 0,
+            'paid_date': null,
+            'paid_method': paidMethod,
+            'service': service,
+            'due_date': dueDate,
+            'reference_no': referenceNo,
+            'status': status,
+            'slip_img': null,
+            'bill_img': null,
+            'receipt_img': null,
+          })
           .select()
           .single();
 
@@ -317,9 +317,9 @@ class BillDomain {
 
   // Read - อ่านบิลตาม status ในหมู่บ้าน
   static Future<List<BillModel>> getByStatusInVillage(
-      int villageId,
-      String status,
-      ) async {
+    int villageId,
+    String status,
+  ) async {
     try {
       final response = await _client
           .from(_table)
@@ -339,9 +339,9 @@ class BillDomain {
 
   // Read - อ่านบิลตาม status ของบ้าน
   static Future<List<BillModel>> getByStatusInHouse(
-      int houseId,
-      String status,
-      ) async {
+    int houseId,
+    String status,
+  ) async {
     try {
       final response = await _client
           .from(_table)
@@ -399,6 +399,28 @@ class BillDomain {
     }
   }
 
+  // Read - คำณวนเงินที่ยังไม่ได้จ่าย (paid_status = 0)
+  static Future<double> calUnpaidByHouse({required int houseId}) async {
+    try {
+      final response = await _client
+          .from(_table)
+          .select()
+          .eq('house_id', houseId)
+          .inFilter('status', ['PENDING', 'REJECTED', 'OVERDUE']);
+
+      // แปลงเป็น BillModel
+      final bills = (response as List)
+          .map((json) => BillModel.fromJson(json))
+          .toList();
+
+      // รวมยอด amount
+      return bills.fold<double>(0.0, (sum, bill) => sum + (bill.amount ?? 0));
+    } catch (e) {
+      print('Error Cal unpaid bills in house: $e');
+      return 0.0;
+    }
+  }
+
   // Update - อัพเดทสถานะการจ่ายเงิน (สำหรับ backward compatibility)
   static Future<bool> updatePaymentStatus({
     required int billId,
@@ -445,15 +467,51 @@ class BillDomain {
     }
   }
 
-  // Delete - ลบบิล
+  //delete
   static Future<bool> delete(int billId) async {
     try {
-      await _client.from(_table).delete().eq('bill_id', billId);
+      // 1. ดึงข้อมูล vehicle เพื่อเช็ค imageUrl ก่อน
+      final response = await _client
+          .from(_table)
+          .select('img')
+          .eq('bill_id', billId)
+          .single();
 
+      final imageUrlbill = response['bill_img'] as String?;
+      final imageUrlslip = response['slip_img'] as String?;
+      final imageUrlreceipt = response['receipt_img'] as String?;
+
+      // 2. ลบรูปภาพออกจาก storage ก่อน (ถ้ามี)
+      if (imageUrlbill != null && imageUrlbill.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "bill/bill",
+          imageUrl: imageUrlbill,
+        );
+      }
+
+      // 2. ลบรูปภาพออกจาก storage ก่อน (ถ้ามี)
+      if (imageUrlslip != null && imageUrlslip.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "bill/slip",
+          imageUrl: imageUrlslip,
+        );
+      }
+
+      // 2. ลบรูปภาพออกจาก storage ก่อน (ถ้ามี)
+      if (imageUrlreceipt != null && imageUrlreceipt.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "bill/receipt",
+          imageUrl: imageUrlreceipt,
+        );
+      }
+
+      // 3. ลบข้อมูล vehicle จากฐานข้อมูล
+      await _client.from(_table).delete().eq('bill_id', billId);
       return true;
     } catch (e) {
-      print('Error deleting bill: $e');
+      print('Error deleting vehicle: $e');
       return false;
+      // throw Exception('Failed to delete vehicle: $e');
     }
   }
 
@@ -520,8 +578,8 @@ class BillDomain {
 
   // Utility - สถิติการจ่ายเงินของหมู่บ้าน
   static Future<Map<String, dynamic>> getVillagePaymentStats(
-      int villageId,
-      ) async {
+    int villageId,
+  ) async {
     try {
       final allBills = await _client
           .from(_table)
@@ -599,9 +657,9 @@ class BillDomain {
 
   // Utility - คำนวณยอดรวมตาม status ของบ้าน
   static Future<double> getTotalByStatusInHouse(
-      int houseId,
-      String status,
-      ) async {
+    int houseId,
+    String status,
+  ) async {
     try {
       final response = await _client
           .from(_table)

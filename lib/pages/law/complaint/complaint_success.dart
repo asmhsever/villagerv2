@@ -8,16 +8,18 @@ import 'package:fullproject/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 
-class SuccessComplaintFormPage extends StatefulWidget {
+class LawSuccessComplaintFormPage extends StatefulWidget {
   final ComplaintModel complaint;
 
-  const SuccessComplaintFormPage({super.key, required this.complaint});
+  const LawSuccessComplaintFormPage({super.key, required this.complaint});
 
   @override
-  State<SuccessComplaintFormPage> createState() => _SuccessComplaintFormPageState();
+  State<LawSuccessComplaintFormPage> createState() =>
+      _LawSuccessComplaintFormPageState();
 }
 
-class _SuccessComplaintFormPageState extends State<SuccessComplaintFormPage> {
+class _LawSuccessComplaintFormPageState
+    extends State<LawSuccessComplaintFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
 
@@ -234,10 +236,7 @@ class _SuccessComplaintFormPageState extends State<SuccessComplaintFormPage> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.memory(
-                _imageFile as Uint8List,
-                fit: BoxFit.cover,
-              ),
+              child: Image.memory(_imageFile as Uint8List, fit: BoxFit.cover),
             ),
           ),
           const SizedBox(height: 8),
@@ -248,20 +247,14 @@ class _SuccessComplaintFormPageState extends State<SuccessComplaintFormPage> {
               Expanded(
                 child: Text(
                   _imageFileName ?? 'รูปภาพ',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: earthClay,
-                  ),
+                  style: TextStyle(fontSize: 12, color: earthClay),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               TextButton.icon(
                 onPressed: _removeImage,
                 icon: Icon(Icons.delete, color: burntOrange, size: 16),
-                label: Text(
-                  'ลบ',
-                  style: TextStyle(color: burntOrange),
-                ),
+                label: Text('ลบ', style: TextStyle(color: burntOrange)),
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
@@ -382,7 +375,8 @@ class _SuccessComplaintFormPageState extends State<SuccessComplaintFormPage> {
                       prefixIcon: Icon(Icons.description, color: earthClay),
                       fillColor: ivoryWhite,
                       filled: true,
-                      hintText: 'อธิบายรายละเอียดว่าได้ดำเนินการแก้ไขปัญหาอย่างไร\nเช่น ติดตั้งไฟส่องสว่าง จัดทำป้ายเตือน ซ่อมแซมสิ่งปลูกสร้าง ฯลฯ',
+                      hintText:
+                          'อธิบายรายละเอียดว่าได้ดำเนินการแก้ไขปัญหาอย่างไร\nเช่น ติดตั้งไฟส่องสว่าง จัดทำป้ายเตือน ซ่อมแซมสิ่งปลูกสร้าง ฯลฯ',
                       alignLabelWithHint: true,
                     ),
                     validator: (value) {
@@ -419,34 +413,36 @@ class _SuccessComplaintFormPageState extends State<SuccessComplaintFormPage> {
                   ),
                   child: _isLoading
                       ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text('กำลังบันทึก...'),
-                    ],
-                  )
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  ivoryWhite,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Text('กำลังบันทึก...'),
+                          ],
+                        )
                       : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.check_circle),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'บันทึกการดำเนินการเสร็จสิ้น',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.check_circle),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'บันทึกการดำเนินการเสร็จสิ้น',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
 

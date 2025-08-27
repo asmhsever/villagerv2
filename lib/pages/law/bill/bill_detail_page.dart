@@ -52,37 +52,37 @@ class _BillDetailPageState extends State<BillDetailPage> {
       'name': 'แบบร่าง',
       'icon': Icons.edit_outlined,
       'color': Colors.grey,
-      'description': 'บิลที่ยังอยู่ในระหว่างการเตรียม'
+      'description': 'บิลที่ยังอยู่ในระหว่างการเตรียม',
     },
     'PENDING': {
       'name': 'รอชำระ',
       'icon': Icons.schedule,
       'color': Color(0xFFD48B5C), // _softTerracotta
-      'description': 'รอการชำระเงินจากลูกบ้าน'
+      'description': 'รอการชำระเงินจากลูกบ้าน',
     },
     'UNDER_REVIEW': {
       'name': 'กำลังตรวจสอบ',
       'icon': Icons.search,
       'color': Color(0xFFA47551), // _softBrown
-      'description': 'กำลังตรวจสอบหลักฐานการชำระเงิน'
+      'description': 'กำลังตรวจสอบหลักฐานการชำระเงิน',
     },
     'RECEIPT_SENT': {
       'name': 'ส่งใบเสร็จแล้ว',
       'icon': Icons.check_circle,
       'color': Color(0xFFA3B18A), // _oliveGreen
-      'description': 'ชำระเงินสมบูรณ์และส่งใบเสร็จแล้ว'
+      'description': 'ชำระเงินสมบูรณ์และส่งใบเสร็จแล้ว',
     },
     'REJECTED': {
       'name': 'ถูกปฏิเสธ',
       'icon': Icons.cancel,
       'color': Colors.red,
-      'description': 'หลักฐานการชำระเงินไม่ถูกต้อง'
+      'description': 'หลักฐานการชำระเงินไม่ถูกต้อง',
     },
     'OVERDUE': {
       'name': 'เกินกำหนด',
       'icon': Icons.warning,
       'color': Colors.red,
-      'description': 'เกินกำหนดชำระเงิน'
+      'description': 'เกินกำหนดชำระเงิน',
     },
   };
 
@@ -118,14 +118,19 @@ class _BillDetailPageState extends State<BillDetailPage> {
     }
   }
 
-  String formatDate(DateTime? date) => date == null ? '-' : DateFormat('dd/MM/yyyy').format(date);
-  String formatDateTime(DateTime? date) => date == null ? '-' : DateFormat('dd/MM/yyyy HH:mm').format(date);
+  String formatDate(DateTime? date) =>
+      date == null ? '-' : DateFormat('dd/MM/yyyy').format(date);
+
+  String formatDateTime(DateTime? date) =>
+      date == null ? '-' : DateFormat('dd/MM/yyyy HH:mm').format(date);
 
   String getPaidStatus(int status) => status == 1 ? 'ชำระแล้ว' : 'ยังไม่ชำระ';
 
-  Color getPaidStatusColor(int status) => status == 1 ? _oliveGreen : _softTerracotta;
+  Color getPaidStatusColor(int status) =>
+      status == 1 ? _oliveGreen : _softTerracotta;
 
-  String _getServiceNameTh(String? englishName) => _serviceTranslations[englishName] ?? englishName ?? 'ไม่ระบุประเภท';
+  String _getServiceNameTh(String? englishName) =>
+      _serviceTranslations[englishName] ?? englishName ?? 'ไม่ระบุประเภท';
 
   String _getStatusText() {
     return _billStatuses[currentBill.status.toUpperCase()]?['name'] ??
@@ -138,7 +143,8 @@ class _BillDetailPageState extends State<BillDetailPage> {
   }
 
   IconData _getStatusIcon() {
-    return _billStatuses[currentBill.status.toUpperCase()]?['icon'] ?? Icons.schedule;
+    return _billStatuses[currentBill.status.toUpperCase()]?['icon'] ??
+        Icons.schedule;
   }
 
   bool _isOverdue() {
@@ -160,14 +166,19 @@ class _BillDetailPageState extends State<BillDetailPage> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: _ivoryWhite,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
               Icon(Icons.swap_horiz, color: _softBrown),
               const SizedBox(width: 8),
               Text(
                 'เปลี่ยนสถานะบิล',
-                style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: _softBrown,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -184,7 +195,8 @@ class _BillDetailPageState extends State<BillDetailPage> {
                 ..._billStatuses.entries.map((entry) {
                   final status = entry.key;
                   final statusData = entry.value;
-                  final isCurrentStatus = status == currentBill.status.toUpperCase();
+                  final isCurrentStatus =
+                      status == currentBill.status.toUpperCase();
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 8),
@@ -235,10 +247,13 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                           const SizedBox(width: 8),
                                           Container(
                                             padding: const EdgeInsets.symmetric(
-                                                horizontal: 6, vertical: 2),
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: statusData['color'],
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
                                             child: const Text(
                                               'ปัจจุบัน',
@@ -257,7 +272,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                       statusData['description'],
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: _earthClay.withValues(alpha: 0.8),
+                                        color: _earthClay.withValues(
+                                          alpha: 0.8,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -329,7 +346,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
               decoration: BoxDecoration(
                 color: statusData['color'].withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: statusData['color'].withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: statusData['color'].withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [
@@ -348,10 +367,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                         ),
                         Text(
                           statusData['description'],
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: _earthClay,
-                          ),
+                          style: TextStyle(fontSize: 12, color: _earthClay),
                         ),
                       ],
                     ),
@@ -409,7 +425,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
         if (currentBill.paidMethod == null || currentBill.paidMethod!.isEmpty) {
           newPaidMethod = 'โอนเงิน';
         }
-      } else if (newStatus == 'PENDING' || newStatus == 'DRAFT' || newStatus == 'REJECTED') {
+      } else if (newStatus == 'PENDING' ||
+          newStatus == 'DRAFT' ||
+          newStatus == 'REJECTED') {
         // ไม่เปลี่ยน paid_status ถ้าเป็นสถานะเหล่านี้
         // ให้ Admin ตัดสินใจเอง
       }
@@ -445,7 +463,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('เปลี่ยนสถานะเป็น "${_billStatuses[newStatus]?['name']}" สำเร็จ'),
+            content: Text(
+              'เปลี่ยนสถานะเป็น "${_billStatuses[newStatus]?['name']}" สำเร็จ',
+            ),
             backgroundColor: _oliveGreen,
           ),
         );
@@ -479,14 +499,19 @@ class _BillDetailPageState extends State<BillDetailPage> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: _ivoryWhite,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               title: Row(
                 children: [
                   Icon(Icons.receipt, color: _oliveGreen),
                   const SizedBox(width: 8),
                   Text(
                     'อัปโหลดใบเสร็จ',
-                    style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: _softBrown,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -517,40 +542,40 @@ class _BillDetailPageState extends State<BillDetailPage> {
                       ),
                       child: selectedImage != null
                           ? ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.file(
-                          selectedImage!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                      )
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                selectedImage!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            )
                           : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add_photo_alternate,
-                            size: 48,
-                            color: _earthClay,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'แตะเพื่อเลือกรูปใบเสร็จ',
-                            style: TextStyle(
-                              color: _earthClay,
-                              fontSize: 16,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_photo_alternate,
+                                  size: 48,
+                                  color: _earthClay,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'แตะเพื่อเลือกรูปใบเสร็จ',
+                                  style: TextStyle(
+                                    color: _earthClay,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'รองรับไฟล์ JPG, PNG',
+                                  style: TextStyle(
+                                    color: _earthClay.withValues(alpha: 0.7),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'รองรับไฟล์ JPG, PNG',
-                            style: TextStyle(
-                              color: _earthClay.withValues(alpha: 0.7),
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
 
                     const SizedBox(height: 16),
@@ -614,19 +639,24 @@ class _BillDetailPageState extends State<BillDetailPage> {
                       ],
                     ),
 
-                    if (selectedImage != null)
-                      const SizedBox(height: 12),
+                    if (selectedImage != null) const SizedBox(height: 12),
                     if (selectedImage != null)
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: _oliveGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: _oliveGreen.withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: _oliveGreen.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.check_circle, color: _oliveGreen, size: 16),
+                            Icon(
+                              Icons.check_circle,
+                              color: _oliveGreen,
+                              size: 16,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               'เลือกรูปแล้ว - พร้อมอัปโหลด',
@@ -640,7 +670,6 @@ class _BillDetailPageState extends State<BillDetailPage> {
                         ),
                       ),
                   ],
-
                 ),
               ),
               actions: [
@@ -652,19 +681,29 @@ class _BillDetailPageState extends State<BillDetailPage> {
                 ElevatedButton.icon(
                   onPressed: selectedImage != null
                       ? () async {
-                    Navigator.pop(context);
-                    await _updateBillStatusWithReceipt('RECEIPT_SENT', selectedImage!);
-                  }
+                          Navigator.pop(context);
+                          await _updateBillStatusWithReceipt(
+                            'RECEIPT_SENT',
+                            selectedImage!,
+                          );
+                        }
                       : null,
                   icon: Icon(
                     selectedImage != null ? Icons.cloud_upload : Icons.upload,
                     size: 18,
                   ),
-                  label: Text(selectedImage != null ? 'ส่งใบเสร็จ' : 'เลือกรูปก่อน'),
+                  label: Text(
+                    selectedImage != null ? 'ส่งใบเสร็จ' : 'เลือกรูปก่อน',
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: selectedImage != null ? _oliveGreen : _warmStone,
+                    backgroundColor: selectedImage != null
+                        ? _oliveGreen
+                        : _warmStone,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
               ],
@@ -676,12 +715,17 @@ class _BillDetailPageState extends State<BillDetailPage> {
   }
 
   // ฟังก์ชันอัปเดทสถานะพร้อมรูปใบเสร็จ
-  Future<void> _updateBillStatusWithReceipt(String newStatus, File receiptImage) async {
+  Future<void> _updateBillStatusWithReceipt(
+    String newStatus,
+    File receiptImage,
+  ) async {
     setState(() => _isLoading = true);
     try {
       // กำหนด paid_status ตามสถานะใหม่
       int newPaidStatus = 1; // เมื่อส่งใบเสร็จ = ชำระแล้ว
-      String newPaidDate = currentBill.paidDate?.toIso8601String() ?? DateTime.now().toIso8601String();
+      String newPaidDate =
+          currentBill.paidDate?.toIso8601String() ??
+          DateTime.now().toIso8601String();
       String newPaidMethod = currentBill.paidMethod ?? 'โอนเงิน';
 
       final success = await BillDomain.update(
@@ -738,6 +782,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
+
   Future<void> _showImageDialog(String imageUrl, String title) async {
     await showDialog(
       context: context,
@@ -801,11 +846,14 @@ class _BillDetailPageState extends State<BillDetailPage> {
                             height: 200,
                             child: Center(
                               child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
                                     ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
+                                          loadingProgress.expectedTotalBytes!
                                     : null,
-                                valueColor: const AlwaysStoppedAnimation<Color>(_softBrown),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  _softBrown,
+                                ),
                               ),
                             ),
                           );
@@ -819,9 +867,16 @@ class _BillDetailPageState extends State<BillDetailPage> {
                           child: const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.error_outline, size: 48, color: _earthClay),
+                              Icon(
+                                Icons.error_outline,
+                                size: 48,
+                                color: _earthClay,
+                              ),
                               SizedBox(height: 8),
-                              Text('ไม่สามารถโหลดรูปภาพได้', style: TextStyle(color: _earthClay)),
+                              Text(
+                                'ไม่สามารถโหลดรูปภาพได้',
+                                style: TextStyle(color: _earthClay),
+                              ),
                             ],
                           ),
                         ),
@@ -895,9 +950,11 @@ class _BillDetailPageState extends State<BillDetailPage> {
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
                             ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
+                                  loadingProgress.expectedTotalBytes!
                             : null,
-                        valueColor: const AlwaysStoppedAnimation<Color>(_softBrown),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          _softBrown,
+                        ),
                       ),
                     ),
                   );
@@ -978,28 +1035,58 @@ class _BillDetailPageState extends State<BillDetailPage> {
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text('ใบแจ้งค่าส่วนกลาง', style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Bill #${currentBill.billId}', style: const pw.TextStyle(fontSize: 14)),
+                  pw.Text(
+                    'ใบแจ้งค่าส่วนกลาง',
+                    style: pw.TextStyle(
+                      fontSize: 20,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    'Bill #${currentBill.billId}',
+                    style: const pw.TextStyle(fontSize: 14),
+                  ),
                 ],
               ),
               pw.SizedBox(height: 20),
-              pw.Text('ข้อมูลบิล', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                'ข้อมูลบิล',
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
               pw.SizedBox(height: 8),
               pw.Text('รหัสบิล: ${currentBill.billId}'),
               pw.Text('บ้านเลขที่: ${houseNumber ?? currentBill.houseId}'),
               pw.Text('ประเภทบริการ: ${_getServiceNameTh(serviceName)}'),
-              pw.Text('จำนวนเงิน: ${NumberFormat('#,##0.00').format(currentBill.amount)} บาท'),
+              pw.Text(
+                'จำนวนเงิน: ${NumberFormat('#,##0.00').format(currentBill.amount)} บาท',
+              ),
               pw.Text('สถานะ: ${_getStatusText()}'),
               pw.SizedBox(height: 16),
-              pw.Text('ข้อมูลวันที่', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                'ข้อมูลวันที่',
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
               pw.SizedBox(height: 8),
               pw.Text('วันที่ออกบิล: ${formatDate(currentBill.billDate)}'),
               pw.Text('วันครบกำหนด: ${formatDate(currentBill.dueDate)}'),
-              if (currentBill.paidDate != null) pw.Text('วันที่ชำระ: ${formatDate(currentBill.paidDate)}'),
-              if (currentBill.slipDate != null) pw.Text('วันที่อัพโหลดสลิป: ${formatDate(currentBill.slipDate)}'),
+              if (currentBill.paidDate != null)
+                pw.Text('วันที่ชำระ: ${formatDate(currentBill.paidDate)}'),
+              if (currentBill.slipDate != null)
+                pw.Text(
+                  'วันที่อัพโหลดสลิป: ${formatDate(currentBill.slipDate)}',
+                ),
               pw.Spacer(),
               pw.Divider(),
-              pw.Text('สร้างเมื่อ: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}', style: const pw.TextStyle(fontSize: 10)),
+              pw.Text(
+                'สร้างเมื่อ: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                style: const pw.TextStyle(fontSize: 10),
+              ),
             ],
           ),
         ),
@@ -1008,7 +1095,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('เกิดข้อผิดพลาดในการสร้าง PDF: $e'), backgroundColor: Colors.red.shade400),
+        SnackBar(
+          content: Text('เกิดข้อผิดพลาดในการสร้าง PDF: $e'),
+          backgroundColor: Colors.red.shade400,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -1021,17 +1111,28 @@ class _BillDetailPageState extends State<BillDetailPage> {
       builder: (context) => AlertDialog(
         backgroundColor: _ivoryWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('ยืนยันการลบ', style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold)),
+        title: Text(
+          'ยืนยันการลบ',
+          style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('คุณต้องการลบบิลนี้หรือไม่?', style: TextStyle(color: _earthClay)),
+            Text(
+              'คุณต้องการลบบิลนี้หรือไม่?',
+              style: TextStyle(color: _earthClay),
+            ),
             const SizedBox(height: 8),
-            Text('บิล #${currentBill.billId} - ${NumberFormat('#,##0.00').format(currentBill.amount)} บาท',
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'บิล #${currentBill.billId} - ${NumberFormat('#,##0.00').format(currentBill.amount)} บาท',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 4),
-            Text('การดำเนินการนี้ไม่สามารถย้อนกลับได้', style: TextStyle(color: Colors.red.shade400, fontSize: 12)),
+            Text(
+              'การดำเนินการนี้ไม่สามารถย้อนกลับได้',
+              style: TextStyle(color: Colors.red.shade400, fontSize: 12),
+            ),
           ],
         ),
         actions: [
@@ -1042,7 +1143,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade400, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade400,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('ลบ'),
           ),
         ],
@@ -1056,7 +1160,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
         if (success) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: const Text('ลบบิลสำเร็จ'), backgroundColor: _oliveGreen),
+            SnackBar(
+              content: const Text('ลบบิลสำเร็จ'),
+              backgroundColor: _oliveGreen,
+            ),
           );
           Navigator.pop(context, true);
         } else {
@@ -1065,7 +1172,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('เกิดข้อผิดพลาด: $e'), backgroundColor: Colors.red.shade400),
+          SnackBar(
+            content: Text('เกิดข้อผิดพลาด: $e'),
+            backgroundColor: Colors.red.shade400,
+          ),
         );
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -1080,14 +1190,28 @@ class _BillDetailPageState extends State<BillDetailPage> {
         context: context,
         builder: (context) => AlertDialog(
           backgroundColor: _ivoryWhite,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('ยืนยันการเปลี่ยนสถานะ', style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold)),
-          content: Text('ต้องการเปลี่ยนสถานะเป็น "ยังไม่ชำระ" หรือไม่?', style: TextStyle(color: _earthClay)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'ยืนยันการเปลี่ยนสถานะ',
+            style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'ต้องการเปลี่ยนสถานะเป็น "ยังไม่ชำระ" หรือไม่?',
+            style: TextStyle(color: _earthClay),
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ยกเลิก')),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('ยกเลิก'),
+            ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(backgroundColor: _softTerracotta, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _softTerracotta,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('ยืนยัน'),
             ),
           ],
@@ -1125,13 +1249,19 @@ class _BillDetailPageState extends State<BillDetailPage> {
               );
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: const Text('อัพเดทสถานะสำเร็จ'), backgroundColor: _softTerracotta),
+              SnackBar(
+                content: const Text('อัพเดทสถานะสำเร็จ'),
+                backgroundColor: _softTerracotta,
+              ),
             );
           }
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('เกิดข้อผิดพลาด: $e'), backgroundColor: Colors.red.shade400),
+              SnackBar(
+                content: Text('เกิดข้อผิดพลาด: $e'),
+                backgroundColor: Colors.red.shade400,
+              ),
             );
           }
         } finally {
@@ -1143,14 +1273,28 @@ class _BillDetailPageState extends State<BillDetailPage> {
         context: context,
         builder: (context) => AlertDialog(
           backgroundColor: _ivoryWhite,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('ยืนยันการชำระเงิน', style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold)),
-          content: Text('ยืนยันว่าได้รับชำระเงินแล้วหรือไม่?', style: TextStyle(color: _earthClay)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'ยืนยันการชำระเงิน',
+            style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'ยืนยันว่าได้รับชำระเงินแล้วหรือไม่?',
+            style: TextStyle(color: _earthClay),
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ยกเลิก')),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('ยกเลิก'),
+            ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(backgroundColor: _oliveGreen, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _oliveGreen,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('ยืนยันการชำระ'),
             ),
           ],
@@ -1188,13 +1332,19 @@ class _BillDetailPageState extends State<BillDetailPage> {
               );
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: const Text('อัพเดทสถานะสำเร็จ'), backgroundColor: _oliveGreen),
+              SnackBar(
+                content: const Text('อัพเดทสถานะสำเร็จ'),
+                backgroundColor: _oliveGreen,
+              ),
             );
           }
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('เกิดข้อผิดพลาด: $e'), backgroundColor: Colors.red.shade400),
+              SnackBar(
+                content: Text('เกิดข้อผิดพลาด: $e'),
+                backgroundColor: Colors.red.shade400,
+              ),
             );
           }
         } finally {
@@ -1212,7 +1362,13 @@ class _BillDetailPageState extends State<BillDetailPage> {
     return Scaffold(
       backgroundColor: _ivoryWhite,
       appBar: AppBar(
-        title: Text('บิล #${currentBill.billId}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(
+          'บิล #${currentBill.billId}',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: _softBrown,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -1222,14 +1378,16 @@ class _BillDetailPageState extends State<BillDetailPage> {
             onPressed: _isLoading
                 ? null
                 : () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => BillEditPage(bill: currentBill)),
-              );
-              if (result == true && mounted) {
-                Navigator.pop(context, true);
-              }
-            },
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BillEditPage(bill: currentBill),
+                      ),
+                    );
+                    if (result == true && mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
           ),
           IconButton(
             icon: const Icon(Icons.delete),
@@ -1239,259 +1397,312 @@ class _BillDetailPageState extends State<BillDetailPage> {
       ),
       body: _isLoading
           ? Center(
-        child: CircularProgressIndicator(
-          valueColor: const AlwaysStoppedAnimation<Color>(_softBrown),
-          backgroundColor: _sandyTan.withValues(alpha: 0.5),
-        ),
-      )
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ===== Banner Status =====
-            Container(
-              decoration: BoxDecoration(
-                color: stateColor.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: stateColor.withValues(alpha: 0.25)),
+              child: CircularProgressIndicator(
+                valueColor: const AlwaysStoppedAnimation<Color>(_softBrown),
+                backgroundColor: _sandyTan.withValues(alpha: 0.5),
               ),
+            )
+          : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    _getStatusIcon(),
-                    color: stateColor,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  // ===== Banner Status =====
+                  Container(
+                    decoration: BoxDecoration(
+                      color: stateColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: stateColor.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
                       children: [
-                        Text(
-                          _getStatusText(),
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: stateColor),
+                        Icon(_getStatusIcon(), color: stateColor, size: 28),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _getStatusText(),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: stateColor,
+                                ),
+                              ),
+                              if (overdue)
+                                Text(
+                                  'เกินกำหนด ${_getDaysUntilDue().abs()} วัน',
+                                  style: TextStyle(color: Colors.red.shade400),
+                                )
+                              else if (currentBill.paidStatus == 0)
+                                Text(
+                                  'เหลืออีก ${_getDaysUntilDue()} วัน',
+                                  style: TextStyle(color: _softTerracotta),
+                                ),
+                            ],
+                          ),
                         ),
-                        if (overdue)
-                          Text('เกินกำหนด ${_getDaysUntilDue().abs()} วัน', style: TextStyle(color: Colors.red.shade400))
-                        else if (currentBill.paidStatus == 0)
-                          Text('เหลืออีก ${_getDaysUntilDue()} วัน', style: TextStyle(color: _softTerracotta)),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // ===== บัตรข้อมูลบิล =====
-            _themedCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _cardTitle('ข้อมูลบิล'),
-                  const Divider(),
-                  _buildInfoRow('รหัสบิล', '${currentBill.billId}'),
-                  _buildInfoRow('บ้านเลขที่', houseNumber ?? '${currentBill.houseId}'),
-                  _buildInfoRow('ประเภทบริการ', _getServiceNameTh(serviceName)),
-                  _buildInfoRow(
-                    'จำนวนเงิน',
-                    '${NumberFormat('#,##0.00').format(currentBill.amount)} บาท',
-                    valueStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _softBrown),
-                  ),
-                  _buildInfoRow('สถานะ', _getStatusText()),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // ===== บัตรข้อมูลวันที่ =====
-            _themedCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _cardTitle('ข้อมูลวันที่'),
-                  const Divider(),
-                  _buildInfoRow('วันที่ออกบิล', formatDate(currentBill.billDate)),
-                  _buildInfoRow('วันครบกำหนด', formatDate(currentBill.dueDate)),
-                  if (currentBill.paidDate != null) _buildInfoRow('วันที่ชำระ', formatDate(currentBill.paidDate)),
-                  if (currentBill.slipDate != null) _buildInfoRow('วันที่อัพโหลดสลิป', formatDate(currentBill.slipDate)),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // ===== บัตรข้อมูลการชำระ =====
-            if (currentBill.paidStatus == 1) ...[
-              _themedCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _cardTitle('ข้อมูลการชำระเงิน'),
-                    const Divider(),
-                    if (currentBill.paidMethod != null) _buildInfoRow('วิธีชำระเงิน', currentBill.paidMethod!),
-                    if (currentBill.referenceNo != null) _buildInfoRow('เลขอ้างอิง', currentBill.referenceNo!),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // ===== บัตรรูปภาพ =====
-            _themedCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _cardTitle('รูปภาพเอกสาร'),
-                  const Divider(),
-                  const SizedBox(height: 8),
-
-                  // แถวแรก: รูปบิล และ รูปสลิปการโอน
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'รูปบิล',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: _earthClay,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            _buildImageCard(
-                              currentBill.billImg,
-                              'รูปบิล',
-                              Icons.receipt_long,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'สลิปการโอน',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: _earthClay,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            _buildImageCard(
-                              currentBill.slipImg,
-                              'สลิปการโอน',
-                              Icons.payment,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
 
                   const SizedBox(height: 16),
 
-                  // แถวที่สอง: รูปใบเสร็จ (เต็มความกว้าง)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  // ===== บัตรข้อมูลบิล =====
+                  _themedCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _cardTitle('ข้อมูลบิล'),
+                        const Divider(),
+                        _buildInfoRow('รหัสบิล', '${currentBill.billId}'),
+                        _buildInfoRow(
+                          'บ้านเลขที่',
+                          houseNumber ?? '${currentBill.houseId}',
+                        ),
+                        _buildInfoRow(
+                          'ประเภทบริการ',
+                          _getServiceNameTh(serviceName),
+                        ),
+                        _buildInfoRow(
+                          'จำนวนเงิน',
+                          '${NumberFormat('#,##0.00').format(currentBill.amount)} บาท',
+                          valueStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: _softBrown,
+                          ),
+                        ),
+                        _buildInfoRow('สถานะ', _getStatusText()),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // ===== บัตรข้อมูลวันที่ =====
+                  _themedCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _cardTitle('ข้อมูลวันที่'),
+                        const Divider(),
+                        _buildInfoRow(
+                          'วันที่ออกบิล',
+                          formatDate(currentBill.billDate),
+                        ),
+                        _buildInfoRow(
+                          'วันครบกำหนด',
+                          formatDate(currentBill.dueDate),
+                        ),
+                        if (currentBill.paidDate != null)
+                          _buildInfoRow(
+                            'วันที่ชำระ',
+                            formatDate(currentBill.paidDate),
+                          ),
+                        if (currentBill.slipDate != null)
+                          _buildInfoRow(
+                            'วันที่อัพโหลดสลิป',
+                            formatDate(currentBill.slipDate),
+                          ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // ===== บัตรข้อมูลการชำระ =====
+                  if (currentBill.paidStatus == 1) ...[
+                    _themedCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _cardTitle('ข้อมูลการชำระเงิน'),
+                          const Divider(),
+                          if (currentBill.paidMethod != null)
+                            _buildInfoRow(
+                              'วิธีชำระเงิน',
+                              currentBill.paidMethod!,
+                            ),
+                          if (currentBill.referenceNo != null)
+                            _buildInfoRow(
+                              'เลขอ้างอิง',
+                              currentBill.referenceNo!,
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // ===== บัตรรูปภาพ =====
+                  _themedCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _cardTitle('รูปภาพเอกสาร'),
+                        const Divider(),
+                        const SizedBox(height: 8),
+
+                        // แถวแรก: รูปบิล และ รูปสลิปการโอน
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'รูปบิล',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: _earthClay,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildImageCard(
+                                    currentBill.billImg,
+                                    'รูปบิล',
+                                    Icons.receipt_long,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'สลิปการโอน',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: _earthClay,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildImageCard(
+                                    currentBill.slipImg,
+                                    'สลิปการโอน',
+                                    Icons.payment,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // แถวที่สอง: รูปใบเสร็จ (เต็มความกว้าง)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'ใบเสร็จการชำระเงิน',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: _earthClay,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildImageCard(
+                              currentBill.receiptImg,
+                              'ใบเสร็จการชำระเงิน',
+                              Icons.receipt,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ===== ปุ่มจัดการสถานะ =====
+                  Row(
                     children: [
-                      Text(
-                        'ใบเสร็จการชำระเงิน',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: _earthClay,
-                          fontSize: 14,
+                      // ปุ่มเปลี่ยนสถานะบิล (ปุ่มหลัก)
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoading
+                              ? null
+                              : _showStatusChangeDialog,
+                          icon: const Icon(Icons.swap_horiz),
+                          label: const Text('เปลี่ยนสถานะบิล'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _softBrown,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      _buildImageCard(
-                        currentBill.receiptImg,
-                        'ใบเสร็จการชำระเงิน',
-                        Icons.receipt,
+                      const SizedBox(width: 12),
+                      // ปุ่มเปลี่ยนสถานะการชำระ (ปุ่มย่อย)
+                      Expanded(
+                        flex: 1,
+                        child: OutlinedButton.icon(
+                          onPressed: _isLoading ? null : _updatePaymentStatus,
+                          icon: Icon(
+                            currentBill.paidStatus == 1
+                                ? Icons.undo
+                                : Icons.check,
+                            size: 18,
+                          ),
+                          label: Text(
+                            currentBill.paidStatus == 1 ? 'ยกเลิก' : 'ชำระ',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: currentBill.paidStatus == 1
+                                ? _softTerracotta
+                                : _oliveGreen,
+                            side: BorderSide(
+                              color: currentBill.paidStatus == 1
+                                  ? _softTerracotta
+                                  : _oliveGreen,
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
+
+                  const SizedBox(height: 80), // เผื่อ FloatingActionButton
                 ],
               ),
             ),
-
-            const SizedBox(height: 24),
-
-            // ===== ปุ่มจัดการสถานะ =====
-            Row(
-              children: [
-                // ปุ่มเปลี่ยนสถานะบิล (ปุ่มหลัก)
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _showStatusChangeDialog,
-                    icon: const Icon(Icons.swap_horiz),
-                    label: const Text('เปลี่ยนสถานะบิล'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _softBrown,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // ปุ่มเปลี่ยนสถานะการชำระ (ปุ่มย่อย)
-                Expanded(
-                  flex: 1,
-                  child: OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _updatePaymentStatus,
-                    icon: Icon(
-                      currentBill.paidStatus == 1 ? Icons.undo : Icons.check,
-                      size: 18,
-                    ),
-                    label: Text(
-                      currentBill.paidStatus == 1 ? 'ยกเลิก' : 'ชำระ',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: currentBill.paidStatus == 1 ? _softTerracotta : _oliveGreen,
-                      side: BorderSide(
-                        color: currentBill.paidStatus == 1 ? _softTerracotta : _oliveGreen,
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 80), // เผื่อ FloatingActionButton
-          ],
-        ),
-      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isLoading ? null : _exportSingleBillAsPdf,
         icon: _isLoading
             ? const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-        )
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
             : const Icon(Icons.picture_as_pdf),
         label: Text(_isLoading ? 'กำลังสร้าง...' : 'Export PDF'),
         backgroundColor: _burntOrange,
         foregroundColor: Colors.white,
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
@@ -1537,18 +1748,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
             width: 120,
             child: Text(
               '$label:',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: _earthClay,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w600, color: _earthClay),
             ),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: valueStyle ?? const TextStyle(),
-            ),
-          ),
+          Expanded(child: Text(value, style: valueStyle ?? const TextStyle())),
         ],
       ),
     );

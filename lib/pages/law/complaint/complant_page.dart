@@ -5,19 +5,20 @@ import 'package:fullproject/domains/complaint_type_domain.dart';
 import 'package:fullproject/models/complaint_model.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/pages/law/complaint/complaint_detail.dart';
-import 'package:fullproject/pages/law/complaint/complaint_detail_success.dart' hide ComplaintDetailPage;
+import 'package:fullproject/pages/law/complaint/complaint_detail_success.dart'
+    hide ComplaintDetailPage;
 import 'package:fullproject/services/auth_service.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:intl/intl.dart';
 
-class ComplaintPage extends StatefulWidget {
-  const ComplaintPage({super.key});
+class LawComplaintPage extends StatefulWidget {
+  const LawComplaintPage({super.key});
 
   @override
-  State<ComplaintPage> createState() => _ComplaintPageState();
+  State<LawComplaintPage> createState() => _LawComplaintPageState();
 }
 
-class _ComplaintPageState extends State<ComplaintPage> {
+class _LawComplaintPageState extends State<LawComplaintPage> {
   Future<List<ComplaintModel>>? _complaints;
   LawModel? law;
   Map<int, String> houseMap = {};
@@ -85,7 +86,7 @@ class _ComplaintPageState extends State<ComplaintPage> {
       setState(() {
         houseMap = {
           for (var house in houses)
-            house['house_id']: house['house_number'].toString()
+            house['house_id']: house['house_number'].toString(),
         };
       });
     } catch (e) {
@@ -98,8 +99,7 @@ class _ComplaintPageState extends State<ComplaintPage> {
       final types = await ComplaintTypeDomain.getAll();
       setState(() {
         complaintTypeMap = {
-          for (var type in types)
-            type.typeId: type.type ?? 'ไม่ระบุ'
+          for (var type in types) type.typeId: type.type ?? 'ไม่ระบุ',
         };
       });
     } catch (e) {
@@ -214,10 +214,10 @@ class _ComplaintPageState extends State<ComplaintPage> {
 
     // ถ้าคำร้องเสร็จสิ้นแล้ว ไปหน้า detail success
     if (complaint.status == 'resolved') {
-      targetPage = ComplaintDetailSuccessPage(complaint: complaint);
+      targetPage = LawComplaintDetailSuccessPage(complaint: complaint);
     } else {
       // ถ้ายังไม่เสร็จสิ้น ไปหน้า detail ปกติ
-      targetPage = ComplaintDetailPage(complaint: complaint);
+      targetPage = LawComplaintDetailPage(complaint: complaint);
     }
 
     final result = await Navigator.push(
@@ -279,17 +279,22 @@ class _ComplaintPageState extends State<ComplaintPage> {
                 prefixIcon: Icon(Icons.home, color: earthClay),
                 fillColor: ivoryWhite,
                 filled: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               items: [
                 DropdownMenuItem<int?>(
                   value: null,
                   child: Text('ทั้งหมู่บ้าน'),
                 ),
-                ...houseMap.entries.map((entry) => DropdownMenuItem<int?>(
-                  value: entry.key,
-                  child: Text('บ้านเลขที่ ${entry.value}'),
-                )),
+                ...houseMap.entries.map(
+                  (entry) => DropdownMenuItem<int?>(
+                    value: entry.key,
+                    child: Text('บ้านเลขที่ ${entry.value}'),
+                  ),
+                ),
               ],
               onChanged: (value) {
                 setState(() {
@@ -320,13 +325,13 @@ class _ComplaintPageState extends State<ComplaintPage> {
                 prefixIcon: Icon(Icons.visibility, color: earthClay),
                 fillColor: ivoryWhite,
                 filled: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               items: [
-                DropdownMenuItem<bool?>(
-                  value: null,
-                  child: Text('ทั้งหมด'),
-                ),
+                DropdownMenuItem<bool?>(value: null, child: Text('ทั้งหมด')),
                 DropdownMenuItem<bool?>(
                   value: false,
                   child: Row(
@@ -415,11 +420,15 @@ class _ComplaintPageState extends State<ComplaintPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: isResolved ? oliveGreen.withValues(alpha: 0.1) : beige,
+                      color: isResolved
+                          ? oliveGreen.withValues(alpha: 0.1)
+                          : beige,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      isResolved ? Icons.check_circle : getTypeIcon(complaint.typeComplaint),
+                      isResolved
+                          ? Icons.check_circle
+                          : getTypeIcon(complaint.typeComplaint),
                       color: isResolved ? oliveGreen : softBrown,
                       size: 20,
                     ),
@@ -441,17 +450,17 @@ class _ComplaintPageState extends State<ComplaintPage> {
                         ),
                         Text(
                           'บ้านเลขที่ $houseNumber • $typeName',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: earthClay,
-                          ),
+                          style: TextStyle(fontSize: 12, color: earthClay),
                         ),
                       ],
                     ),
                   ),
                   if (isHighPriority)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.red.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
@@ -473,10 +482,7 @@ class _ComplaintPageState extends State<ComplaintPage> {
               // Description
               Text(
                 complaint.description,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: earthClay,
-                ),
+                style: TextStyle(fontSize: 14, color: earthClay),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -488,9 +494,14 @@ class _ComplaintPageState extends State<ComplaintPage> {
                 children: [
                   // Status
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: getStatusColor(complaint.status).withValues(alpha: 0.2),
+                      color: getStatusColor(
+                        complaint.status,
+                      ).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -516,9 +527,14 @@ class _ComplaintPageState extends State<ComplaintPage> {
 
                   // Level
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: getLevelColor(complaint.level).withValues(alpha: 0.2),
+                      color: getLevelColor(
+                        complaint.level,
+                      ).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -536,10 +552,7 @@ class _ComplaintPageState extends State<ComplaintPage> {
                   // Date
                   Text(
                     formatDateFromString(complaint.createAt),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: warmStone,
-                    ),
+                    style: TextStyle(fontSize: 11, color: warmStone),
                   ),
                 ],
               ),
@@ -592,345 +605,396 @@ class _ComplaintPageState extends State<ComplaintPage> {
       ),
       body: _complaints == null
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: softBrown),
-            const SizedBox(height: 16),
-            Text(
-              'กำลังโหลดข้อมูล...',
-              style: TextStyle(color: earthClay),
-            ),
-          ],
-        ),
-      )
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: softBrown),
+                  const SizedBox(height: 16),
+                  Text(
+                    'กำลังโหลดข้อมูล...',
+                    style: TextStyle(color: earthClay),
+                  ),
+                ],
+              ),
+            )
           : Column(
-        children: [
-          // House Selector
-          _buildHouseSelector(),
+              children: [
+                // House Selector
+                _buildHouseSelector(),
 
-          Expanded(
-            child: FutureBuilder<List<ComplaintModel>>(
-              future: _complaints,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(color: softBrown),
-                        const SizedBox(height: 16),
-                        Text(
-                          'กำลังโหลดข้อมูล...',
-                          style: TextStyle(color: earthClay),
-                        ),
-                      ],
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline, color: burntOrange, size: 48),
-                        const SizedBox(height: 16),
-                        Text(
-                          'เกิดข้อผิดพลาด',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: burntOrange,
+                Expanded(
+                  child: FutureBuilder<List<ComplaintModel>>(
+                    future: _complaints,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(color: softBrown),
+                              const SizedBox(height: 16),
+                              Text(
+                                'กำลังโหลดข้อมูล...',
+                                style: TextStyle(color: earthClay),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${snapshot.error}',
-                          style: TextStyle(color: earthClay),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _refreshComplaints,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: burntOrange,
-                            foregroundColor: ivoryWhite,
-                          ),
-                          child: const Text('ลองใหม่'),
-                        ),
-                      ],
-                    ),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.report_outlined, color: warmStone, size: 64),
-                        const SizedBox(height: 16),
-                        Text(
-                          'ไม่มีข้อมูลร้องเรียน',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: earthClay,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          selectedHouseId != null
-                              ? 'ไม่มีคำร้องของบ้านนี้'
-                              : 'ไม่มีข้อมูลร้องเรียนในระบบ',
-                          style: TextStyle(color: earthClay),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  final filtered = _filterComplaints(snapshot.data!);
-                  final totalCount = filtered.length;
-                  final pendingCount = filtered.where((c) =>
-                  c.status == null || c.status == 'pending' || c.status == 'in_progress'
-                  ).length;
-                  final resolvedCount = filtered.where((c) => c.status == 'resolved').length;
-                  final privateCount = filtered.where((c) => c.isPrivate).length;
-
-                  return Column(
-                    children: [
-                      // Summary Card
-                      Container(
-                        margin: const EdgeInsets.all(16),
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: ivoryWhite,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: softBrown.withValues(alpha: 0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.analytics, color: softBrown),
-                                const SizedBox(width: 8),
-                                Text(
-                                  selectedHouseId != null
-                                      ? 'สรุปคำร้องบ้านเลขที่ ${houseMap[selectedHouseId]}'
-                                      : 'สรุปข้อมูลร้องเรียน',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: softBrown,
-                                  ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: burntOrange,
+                                size: 48,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'เกิดข้อผิดพลาด',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: burntOrange,
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${snapshot.error}',
+                                style: TextStyle(color: earthClay),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _refreshComplaints,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: burntOrange,
+                                  foregroundColor: ivoryWhite,
+                                ),
+                                child: const Text('ลองใหม่'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.report_outlined,
+                                color: warmStone,
+                                size: 64,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'ไม่มีข้อมูลร้องเรียน',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: earthClay,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                selectedHouseId != null
+                                    ? 'ไม่มีคำร้องของบ้านนี้'
+                                    : 'ไม่มีข้อมูลร้องเรียนในระบบ',
+                                style: TextStyle(color: earthClay),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        final filtered = _filterComplaints(snapshot.data!);
+                        final totalCount = filtered.length;
+                        final pendingCount = filtered
+                            .where(
+                              (c) =>
+                                  c.status == null ||
+                                  c.status == 'pending' ||
+                                  c.status == 'in_progress',
+                            )
+                            .length;
+                        final resolvedCount = filtered
+                            .where((c) => c.status == 'resolved')
+                            .length;
+                        final privateCount = filtered
+                            .where((c) => c.isPrivate)
+                            .length;
+
+                        return Column(
+                          children: [
+                            // Summary Card
+                            Container(
+                              margin: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: ivoryWhite,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: softBrown.withValues(alpha: 0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
                                     children: [
+                                      Icon(Icons.analytics, color: softBrown),
+                                      const SizedBox(width: 8),
                                       Text(
-                                        '$totalCount',
+                                        selectedHouseId != null
+                                            ? 'สรุปคำร้องบ้านเลขที่ ${houseMap[selectedHouseId]}'
+                                            : 'สรุปข้อมูลร้องเรียน',
                                         style: TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                           color: softBrown,
                                         ),
                                       ),
-                                      Text(
-                                        'ทั้งหมด',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: earthClay,
-                                        ),
-                                      ),
                                     ],
                                   ),
-                                ),
-                                Container(width: 1, height: 30, color: warmStone),
-                                Expanded(
-                                  child: Column(
+                                  const SizedBox(height: 12),
+                                  Row(
                                     children: [
-                                      Text(
-                                        '$pendingCount',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: burntOrange,
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              '$totalCount',
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: softBrown,
+                                              ),
+                                            ),
+                                            Text(
+                                              'ทั้งหมด',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: earthClay,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      Text(
-                                        'รอดำเนินการ',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: earthClay,
+                                      Container(
+                                        width: 1,
+                                        height: 30,
+                                        color: warmStone,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              '$pendingCount',
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: burntOrange,
+                                              ),
+                                            ),
+                                            Text(
+                                              'รอดำเนินการ',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: earthClay,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 1,
+                                        height: 30,
+                                        color: warmStone,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              '$resolvedCount',
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: oliveGreen,
+                                              ),
+                                            ),
+                                            Text(
+                                              'เสร็จสิ้น',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: earthClay,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 1,
+                                        height: 30,
+                                        color: warmStone,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              '$privateCount',
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: burntOrange,
+                                              ),
+                                            ),
+                                            Text(
+                                              'ส่วนตัว',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: earthClay,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
+                                ],
+                              ),
+                            ),
+
+                            // Filter Chips
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'กรอง: ',
+                                      style: TextStyle(
+                                        color: earthClay,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildFilterChip(
+                                      label: 'ทั้งหมด',
+                                      isSelected:
+                                          filterStatus == null &&
+                                          filterType == null &&
+                                          filterPrivacy == null,
+                                      onTap: () => setState(() {
+                                        filterStatus = null;
+                                        filterType = null;
+                                        filterPrivacy = null;
+                                      }),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildFilterChip(
+                                      label: 'รอดำเนินการ',
+                                      isSelected: filterStatus == 'pending',
+                                      onTap: () => setState(
+                                        () => filterStatus = 'pending',
+                                      ),
+                                      color: burntOrange,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildFilterChip(
+                                      label: 'กำลังดำเนินการ',
+                                      isSelected: filterStatus == 'in_progress',
+                                      onTap: () => setState(
+                                        () => filterStatus = 'in_progress',
+                                      ),
+                                      color: Colors.blue,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildFilterChip(
+                                      label: 'เสร็จสิ้น',
+                                      isSelected: filterStatus == 'resolved',
+                                      onTap: () => setState(
+                                        () => filterStatus = 'resolved',
+                                      ),
+                                      color: oliveGreen,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildFilterChip(
+                                      label: 'สาธารณะ',
+                                      isSelected: filterPrivacy == false,
+                                      onTap: () =>
+                                          setState(() => filterPrivacy = false),
+                                      color: oliveGreen,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildFilterChip(
+                                      label: 'ส่วนตัว',
+                                      isSelected: filterPrivacy == true,
+                                      onTap: () =>
+                                          setState(() => filterPrivacy = true),
+                                      color: burntOrange,
+                                    ),
+                                  ],
                                 ),
-                                Container(width: 1, height: 30, color: warmStone),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        '$resolvedCount',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: oliveGreen,
-                                        ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Complaints List
+                            Expanded(
+                              child: filtered.isEmpty
+                                  ? Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.filter_alt_off,
+                                            color: warmStone,
+                                            size: 48,
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Text(
+                                            'ไม่มีรายการตามเงื่อนไขที่เลือก',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: earthClay,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        'เสร็จสิ้น',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: earthClay,
+                                    )
+                                  : RefreshIndicator(
+                                      color: softBrown,
+                                      backgroundColor: ivoryWhite,
+                                      onRefresh: _refreshComplaints,
+                                      child: ListView.builder(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 80,
                                         ),
+                                        itemCount: filtered.length,
+                                        itemBuilder: (context, index) {
+                                          return _buildComplaintCard(
+                                            filtered[index],
+                                          );
+                                        },
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                Container(width: 1, height: 30, color: warmStone),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        '$privateCount',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: burntOrange,
-                                        ),
-                                      ),
-                                      Text(
-                                        'ส่วนตัว',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: earthClay,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                    ),
                             ),
                           ],
-                        ),
-                      ),
-
-                      // Filter Chips
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              Text(
-                                'กรอง: ',
-                                style: TextStyle(
-                                  color: earthClay,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                label: 'ทั้งหมด',
-                                isSelected: filterStatus == null && filterType == null && filterPrivacy == null,
-                                onTap: () => setState(() {
-                                  filterStatus = null;
-                                  filterType = null;
-                                  filterPrivacy = null;
-                                }),
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                label: 'รอดำเนินการ',
-                                isSelected: filterStatus == 'pending',
-                                onTap: () => setState(() => filterStatus = 'pending'),
-                                color: burntOrange,
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                label: 'กำลังดำเนินการ',
-                                isSelected: filterStatus == 'in_progress',
-                                onTap: () => setState(() => filterStatus = 'in_progress'),
-                                color: Colors.blue,
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                label: 'เสร็จสิ้น',
-                                isSelected: filterStatus == 'resolved',
-                                onTap: () => setState(() => filterStatus = 'resolved'),
-                                color: oliveGreen,
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                label: 'สาธารณะ',
-                                isSelected: filterPrivacy == false,
-                                onTap: () => setState(() => filterPrivacy = false),
-                                color: oliveGreen,
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                label: 'ส่วนตัว',
-                                isSelected: filterPrivacy == true,
-                                onTap: () => setState(() => filterPrivacy = true),
-                                color: burntOrange,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Complaints List
-                      Expanded(
-                        child: filtered.isEmpty
-                            ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.filter_alt_off, color: warmStone, size: 48),
-                              const SizedBox(height: 16),
-                              Text(
-                                'ไม่มีรายการตามเงื่อนไขที่เลือก',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: earthClay,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                            : RefreshIndicator(
-                          color: softBrown,
-                          backgroundColor: ivoryWhite,
-                          onRefresh: _refreshComplaints,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.only(bottom: 80),
-                            itemCount: filtered.length,
-                            itemBuilder: (context, index) {
-                              return _buildComplaintCard(filtered[index]);
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              },
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

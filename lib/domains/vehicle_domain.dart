@@ -41,12 +41,12 @@ class VehicleDomain {
       final response = await _client
           .from(_table)
           .insert({
-        'house_id': houseId,
-        'brand': brand,
-        'model': model,
-        'number': number,
-        'img': null,
-      })
+            'house_id': houseId,
+            'brand': brand,
+            'model': model,
+            'number': number,
+            'img': null,
+          })
           .select()
           .single();
 
@@ -139,6 +139,24 @@ class VehicleDomain {
 
   static Future<void> delete(int vehicleId) async {
     try {
+      // 1. ดึงข้อมูล vehicle เพื่อเช็ค imageUrl ก่อน
+      final response = await _client
+          .from(_table)
+          .select('img')
+          .eq('vehicle_id', vehicleId)
+          .single();
+
+      final imageUrl = response['img'] as String?;
+
+      // 2. ลบรูปภาพออกจาก storage ก่อน (ถ้ามี)
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "vehicle",
+          imageUrl: imageUrl,
+        );
+      }
+
+      // 3. ลบข้อมูล vehicle จากฐานข้อมูล
       await _client.from(_table).delete().eq('vehicle_id', vehicleId);
     } catch (e) {
       print('Error deleting vehicle: $e');

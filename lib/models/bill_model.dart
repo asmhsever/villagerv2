@@ -44,8 +44,8 @@ class BillModel {
       paidStatus: json['paid_status'] ?? 0,
       paidDate: json['paid_date'] != null
           ? (json['paid_date'] is String
-          ? DateTime.parse(json['paid_date'])
-          : json['paid_date'] as DateTime)
+                ? DateTime.parse(json['paid_date'])
+                : json['paid_date'] as DateTime)
           : null,
       paidMethod: json['paid_method'],
       service: json['service'] ?? 0,
@@ -59,8 +59,8 @@ class BillModel {
       status: json['status'],
       slipDate: json['slip_date'] != null
           ? (json['slip_date'] is String
-          ? DateTime.parse(json['slip_date'])
-          : json['slip_date'] as DateTime)
+                ? DateTime.parse(json['slip_date'])
+                : json['slip_date'] as DateTime)
           : null,
     );
   }

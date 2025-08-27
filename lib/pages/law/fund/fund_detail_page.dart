@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:fullproject/models/funds_model.dart';
 import 'package:intl/intl.dart';
 
-class HouseFundDetailPage extends StatelessWidget {
+class LawFundDetailPage extends StatelessWidget {
   final FundModel fund;
 
-  const HouseFundDetailPage({Key? key, required this.fund}) : super(key: key);
+  const LawFundDetailPage({Key? key, required this.fund}) : super(key: key);
 
   // Theme Colors
   static const Color softBrown = Color(0xFFA47551);
@@ -293,9 +293,9 @@ class HouseFundDetailPage extends StatelessWidget {
                                     children: [
                                       CircularProgressIndicator(
                                         valueColor:
-                                        AlwaysStoppedAnimation<Color>(
-                                          softBrown,
-                                        ),
+                                            AlwaysStoppedAnimation<Color>(
+                                              softBrown,
+                                            ),
                                         strokeWidth: 2,
                                       ),
                                       SizedBox(height: 12),

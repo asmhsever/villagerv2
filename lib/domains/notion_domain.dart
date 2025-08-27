@@ -69,7 +69,30 @@ class NotionDomain {
   }
 
   static Future<void> delete(int notionId) async {
-    await _client.from(_tableName).delete().eq('notion_id', notionId);
+    try {
+      // 1. ดึงข้อมูล vehicle เพื่อเช็ค imageUrl ก่อน
+      final response = await _client
+          .from(_tableName)
+          .select('img')
+          .eq('notion_id', notionId)
+          .single();
+
+      final imageUrl = response['img'] as String?;
+
+      // 2. ลบรูปภาพออกจาก storage ก่อน (ถ้ามี)
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "notion",
+          imageUrl: imageUrl,
+        );
+      }
+
+      // 3. ลบข้อมูล vehicle จากฐานข้อมูล
+      await _client.from(_tableName).delete().eq('notion_id', notionId);
+    } catch (e) {
+      print('Error deleting vehicle: $e');
+      throw Exception('Failed to delete vehicle: $e');
+    }
   }
 
   static Future<List<NotionModel>> getByVillage(int villageId) async {
@@ -101,14 +124,14 @@ class NotionDomain {
       final response = await _client
           .from(_tableName)
           .insert({
-        'law_id': lawId,
-        'village_id': villageId,
-        'header': header,
-        'description': description,
-        'type': type,
-        'create_date': DateTime.now().toIso8601String(),
-        'img': null,
-      })
+            'law_id': lawId,
+            'village_id': villageId,
+            'header': header,
+            'description': description,
+            'type': type,
+            'create_date': DateTime.now().toIso8601String(),
+            'img': null,
+          })
           .select()
           .single();
 

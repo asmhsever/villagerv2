@@ -56,9 +56,9 @@ class ComplaintTypeDomain {
 
   /// อัพเดทข้อมูลประเภทร้องเรียน
   static Future<bool> update(
-      int typeId,
-      ComplaintTypeModel complaintType,
-      ) async {
+    int typeId,
+    ComplaintTypeModel complaintType,
+  ) async {
     try {
       final response = await _client
           .from(_table)
@@ -119,9 +119,9 @@ class ComplaintTypeDomain {
 
   /// ตรวจสอบว่าชื่อประเภทร้องเรียนซ้ำหรือไม่
   static Future<bool> isTypeNameExists(
-      String typeName, {
-        int? excludeId,
-      }) async {
+    String typeName, {
+    int? excludeId,
+  }) async {
     try {
       var query = _client
           .from(_table)
@@ -141,8 +141,8 @@ class ComplaintTypeDomain {
 
   /// สำหรับ batch operations - สร้างหลายประเภทพร้อมกัน
   static Future<List<bool>> createMultiple(
-      List<ComplaintTypeModel> complaintTypes,
-      ) async {
+    List<ComplaintTypeModel> complaintTypes,
+  ) async {
     try {
       final List<Map<String, dynamic>> data = complaintTypes
           .map((type) => type.toJson())
@@ -157,7 +157,7 @@ class ComplaintTypeDomain {
       final List<dynamic> results = response as List<dynamic>;
       return List.generate(
         complaintTypes.length,
-            (index) => index < results.length,
+        (index) => index < results.length,
       );
     } catch (e) {
       throw Exception('Error creating multiple complaint types: $e');

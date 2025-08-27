@@ -21,8 +21,8 @@ class SuccessComplaintDomain {
 
   // ดึงข้อมูลตาม complaint_id
   static Future<List<SuccessComplaintModel>> getByComplaintId(
-      int complaintId,
-      ) async {
+    int complaintId,
+  ) async {
     try {
       final response = await _client
           .from(_table)
@@ -86,12 +86,12 @@ class SuccessComplaintDomain {
       final response = await _client
           .from(_table)
           .insert({
-        'law_id': lawId,
-        'complaint_id': complaintId,
-        'description': description,
-        'img': null,
-        'success_at': successAt?.toIso8601String(),
-      })
+            'law_id': lawId,
+            'complaint_id': complaintId,
+            'description': description,
+            'img': null,
+            'success_at': successAt?.toIso8601String(),
+          })
           .select()
           .single();
 
@@ -252,8 +252,8 @@ class SuccessComplaintDomain {
 
   // Batch operations
   static Future<List<SuccessComplaintModel>> createMultiple(
-      List<SuccessComplaintModel> successComplaints,
-      ) async {
+    List<SuccessComplaintModel> successComplaints,
+  ) async {
     try {
       final data = successComplaints.map((sc) => sc.toJson()).toList();
       final response = await _client.from(_table).insert(data).select();

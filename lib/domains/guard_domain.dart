@@ -24,13 +24,13 @@ class GuardDomain {
       final response = await _client
           .from(_table)
           .insert({
-        'village_id': villageId,
-        'first_name': firstName,
-        'last_name': lastName,
-        'phone': phone,
-        'nickname': nickname,
-        'img': null,
-      })
+            'village_id': villageId,
+            'first_name': firstName,
+            'last_name': lastName,
+            'phone': phone,
+            'nickname': nickname,
+            'img': null,
+          })
           .select()
           .single();
 

@@ -21,17 +21,17 @@ class ComplaintDomain {
       final response = await _client
           .from(_tableName)
           .insert({
-        'house_id': houseId,
-        'type_complaint': typeComplaint,
-        'create_at': DateTime.now().toIso8601String(),
-        'header': header,
-        'description': description,
-        'level': level,
-        'private': isPrivate,
-        'img': null,
-        'status': null,
-        'update_at': null,
-      })
+            'house_id': houseId,
+            'type_complaint': typeComplaint,
+            'create_at': DateTime.now().toIso8601String(),
+            'header': header,
+            'description': description,
+            'level': level,
+            'private': isPrivate,
+            'img': null,
+            'status': null,
+            'update_at': null,
+          })
           .select()
           .single();
 
@@ -214,9 +214,9 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามประเภทในหมู่บ้าน
   static Future<List<ComplaintModel>> getByTypeInVillage(
-      int villageId,
-      int typeComplaint,
-      ) async {
+    int villageId,
+    int typeComplaint,
+  ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -237,10 +237,10 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามประเภทของบ้าน
   static Future<List<ComplaintModel>> getByTypeInHouse(
-      int villageId,
-      int houseId,
-      int typeComplaint,
-      ) async {
+    int villageId,
+    int houseId,
+    int typeComplaint,
+  ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -261,9 +261,9 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามระดับความสำคัญในหมู่บ้าน
   static Future<List<ComplaintModel>> getByLevelInVillage(
-      int villageId,
-      int level,
-      ) async {
+    int villageId,
+    int level,
+  ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -284,9 +284,9 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามระดับความสำคัญของบ้าน
   static Future<List<ComplaintModel>> getByLevelInHouse(
-      int houseId,
-      int level,
-      ) async {
+    int houseId,
+    int level,
+  ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -306,9 +306,9 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามสถานะในหมู่บ้าน
   static Future<List<ComplaintModel>> getByStatusInVillage(
-      int villageId,
-      String status,
-      ) async {
+    int villageId,
+    String status,
+  ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -329,10 +329,10 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนตามสถานะของบ้าน
   static Future<List<ComplaintModel>> getByStatusInHouse(
-      int villageId,
-      int houseId,
-      String status,
-      ) async {
+    int villageId,
+    int houseId,
+    String status,
+  ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -394,8 +394,8 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนที่เสร็จสิ้นแล้วในหมู่บ้าน
   static Future<List<ComplaintModel>> getResolvedInVillage(
-      int villageId,
-      ) async {
+    int villageId,
+  ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -435,8 +435,8 @@ class ComplaintDomain {
 
   // Read - อ่านร้องเรียนที่มีระดับความสำคัญสูงในหมู่บ้าน
   static Future<List<ComplaintModel>> getHighPriorityInVillage(
-      int villageId,
-      ) async {
+    int villageId,
+  ) async {
     try {
       final response = await _client
           .from(_tableName)
@@ -489,9 +489,9 @@ class ComplaintDomain {
       await _client
           .from(_tableName)
           .update({
-        'level': level,
-        'update_at': DateTime.now().toIso8601String(),
-      })
+            'level': level,
+            'update_at': DateTime.now().toIso8601String(),
+          })
           .eq('complaint_id', complaintId);
 
       return true;
@@ -515,9 +515,9 @@ class ComplaintDomain {
 
   // Utility - สถิติร้องเรียนของบ้าน
   static Future<Map<String, dynamic>> getHouseComplaintStats(
-      int villageId,
-      int houseId,
-      ) async {
+    int villageId,
+    int houseId,
+  ) async {
     try {
       final allComplaints = await _client
           .from(_tableName)
@@ -561,8 +561,8 @@ class ComplaintDomain {
 
   // Utility - สถิติร้องเรียนของหมู่บ้าน
   static Future<Map<String, dynamic>> getVillageComplaintStats(
-      int villageId,
-      ) async {
+    int villageId,
+  ) async {
     try {
       final allComplaints = await _client
           .from(_tableName)

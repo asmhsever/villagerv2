@@ -51,9 +51,7 @@ class LawDomain {
           .eq('village_id', villageId)
           .order('first_name', ascending: true);
 
-      return response
-          .map<LawModel>((json) => LawModel.fromJson(json))
-          .toList();
+      return response.map<LawModel>((json) => LawModel.fromJson(json)).toList();
     } catch (e) {
       print('Error getting laws by village: $e');
       return [];
@@ -100,10 +98,7 @@ class LawDomain {
         'gender': gender,
       };
 
-      await _client
-          .from(_tableName)
-          .update(updateData)
-          .eq('law_id', lawId);
+      await _client.from(_tableName).update(updateData).eq('law_id', lawId);
 
       return true;
     } catch (e) {
@@ -316,16 +311,16 @@ class LawDomain {
       final response = await _client
           .from(_tableName)
           .insert({
-        'village_id': villageId,
-        'user_id': userId,
-        'first_name': firstName,
-        'last_name': lastName,
-        'phone': phone,
-        'address': address,
-        'birth_date': birthDate?.toIso8601String(),
-        'gender': gender,
-        'img': img,
-      })
+            'village_id': villageId,
+            'user_id': userId,
+            'first_name': firstName,
+            'last_name': lastName,
+            'phone': phone,
+            'address': address,
+            'birth_date': birthDate?.toIso8601String(),
+            'gender': gender,
+            'img': img,
+          })
           .select()
           .single();
 
@@ -339,10 +334,7 @@ class LawDomain {
   /// ลบ Law (สำหรับ Admin เท่านั้น)
   static Future<bool> delete(int lawId) async {
     try {
-      await _client
-          .from(_tableName)
-          .delete()
-          .eq('law_id', lawId);
+      await _client.from(_tableName).delete().eq('law_id', lawId);
 
       return true;
     } catch (e) {
@@ -356,10 +348,7 @@ class LawDomain {
   /// ตรวจสอบว่าเบอร์โทรซ้ำหรือไม่
   static Future<bool> isPhoneExists(String phone, {int? excludeLawId}) async {
     try {
-      var query = _client
-          .from(_tableName)
-          .select('law_id')
-          .eq('phone', phone);
+      var query = _client.from(_tableName).select('law_id').eq('phone', phone);
 
       if (excludeLawId != null) {
         query = query.neq('law_id', excludeLawId);

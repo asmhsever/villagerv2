@@ -7,16 +7,16 @@ import 'package:fullproject/models/complaint_type_model.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:intl/intl.dart';
 
-class ComplaintDeletePage extends StatefulWidget {
+class LawComplaintDeletePage extends StatefulWidget {
   final ComplaintModel complaint;
 
-  const ComplaintDeletePage({super.key, required this.complaint});
+  const LawComplaintDeletePage({super.key, required this.complaint});
 
   @override
-  State<ComplaintDeletePage> createState() => _ComplaintDeletePageState();
+  State<LawComplaintDeletePage> createState() => _LawComplaintDeletePageState();
 }
 
-class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
+class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
   String? houseNumber;
   String? complaintTypeName;
   bool isLoading = false;
@@ -49,7 +49,9 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
           .maybeSingle();
 
       // โหลดข้อมูลประเภทร้องเรียน
-      final complaintType = await ComplaintTypeDomain.getById(widget.complaint.typeComplaint);
+      final complaintType = await ComplaintTypeDomain.getById(
+        widget.complaint.typeComplaint,
+      );
 
       if (mounted) {
         setState(() {
@@ -224,10 +226,7 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
             const SizedBox(height: 16),
             Text(
               'คุณต้องการลบร้องเรียนนี้หรือไม่?',
-              style: TextStyle(
-                color: earthClay,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: earthClay, fontSize: 16),
             ),
             const SizedBox(height: 12),
             Container(
@@ -292,7 +291,9 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
               backgroundColor: Colors.red,
               foregroundColor: ivoryWhite,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -319,7 +320,9 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
     setState(() => isDeleting = true);
 
     try {
-      final success = await ComplaintDomain.delete(widget.complaint.complaintId!);
+      final success = await ComplaintDomain.delete(
+        widget.complaint.complaintId!,
+      );
 
       if (success && mounted) {
         // แสดงการแจ้งเตือนความสำเร็จ
@@ -338,7 +341,9 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
             backgroundColor: oliveGreen,
             duration: const Duration(seconds: 3),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
 
@@ -368,7 +373,9 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             action: SnackBarAction(
               label: 'ลองใหม่',
               textColor: ivoryWhite,
@@ -440,10 +447,7 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
             width: 120,
             child: Text(
               label,
-              style: TextStyle(
-                color: earthClay,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(color: earthClay, fontWeight: FontWeight.w500),
             ),
           ),
           Expanded(
@@ -462,7 +466,8 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isHighPriority = widget.complaint.level == '3' || widget.complaint.level == '4';
+    final isHighPriority =
+        widget.complaint.level == '3' || widget.complaint.level == '4';
 
     return Scaffold(
       backgroundColor: beige,
@@ -481,221 +486,244 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
       ),
       body: isLoading
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: softBrown),
-            const SizedBox(height: 16),
-            Text(
-              'กำลังโหลดข้อมูล...',
-              style: TextStyle(color: earthClay),
-            ),
-          ],
-        ),
-      )
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Warning Banner
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.delete_forever, color: ivoryWhite, size: 28),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  CircularProgressIndicator(color: softBrown),
+                  const SizedBox(height: 16),
+                  Text(
+                    'กำลังโหลดข้อมูล...',
+                    style: TextStyle(color: earthClay),
+                  ),
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // Warning Banner
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
                       children: [
-                        Text(
-                          'การลบข้อมูลถาวร',
-                          style: TextStyle(
-                            color: ivoryWhite,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          'ข้อมูลที่ลบแล้วจะไม่สามารถกู้คืนได้',
-                          style: TextStyle(
-                            color: ivoryWhite,
-                            fontSize: 12,
+                        Icon(Icons.delete_forever, color: ivoryWhite, size: 28),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'การลบข้อมูลถาวร',
+                                style: TextStyle(
+                                  color: ivoryWhite,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                'ข้อมูลที่ลบแล้วจะไม่สามารถกู้คืนได้',
+                                style: TextStyle(
+                                  color: ivoryWhite,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
 
-            // Priority Banner
-            if (isHighPriority)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: burntOrange,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.priority_high, color: ivoryWhite),
-                    const SizedBox(width: 12),
-                    Text(
-                      'ร้องเรียนระดับความสำคัญสูง',
-                      style: TextStyle(
-                        color: ivoryWhite,
-                        fontWeight: FontWeight.bold,
+                  // Priority Banner
+                  if (isHighPriority)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: burntOrange,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.priority_high, color: ivoryWhite),
+                          const SizedBox(width: 12),
+                          Text(
+                            'ร้องเรียนระดับความสำคัญสูง',
+                            style: TextStyle(
+                              color: ivoryWhite,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
 
-            // Complaint Summary
-            _buildInfoCard(
-              title: 'ข้อมูลร้องเรียนที่จะถูกลบ',
-              icon: getTypeIcon(widget.complaint.typeComplaint),
-              backgroundColor: Colors.red.withValues(alpha: 0.05),
-              iconColor: Colors.red,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  // Complaint Summary
+                  _buildInfoCard(
+                    title: 'ข้อมูลร้องเรียนที่จะถูกลบ',
+                    icon: getTypeIcon(widget.complaint.typeComplaint),
+                    backgroundColor: Colors.red.withValues(alpha: 0.05),
+                    iconColor: Colors.red,
                     children: [
-                      Text(
-                        widget.complaint.header,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red.shade700,
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.red.withValues(alpha: 0.3),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.complaint.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.red.shade600,
-                          height: 1.4,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.complaint.header,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.complaint.description,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.red.shade600,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
 
-            // Basic Information
-            _buildInfoCard(
-              title: 'ข้อมูลพื้นฐาน',
-              icon: Icons.info_outline,
-              children: [
-                _buildInfoRow('รหัสร้องเรียน:', '${widget.complaint.complaintId}'),
-                _buildInfoRow('บ้านเลขที่:', houseNumber ?? '${widget.complaint.houseId}'),
-                _buildInfoRow('ประเภท:', complaintTypeName ?? 'ไม่ระบุ'),
-                _buildInfoRow('วันที่ส่ง:', formatDateFromString(widget.complaint.createAt)),
-                if (widget.complaint.updateAt != null)
-                  _buildInfoRow('อัปเดตล่าสุด:', formatDateFromString(widget.complaint.updateAt)),
-                _buildInfoRow(
-                  'สถานะ:',
-                  getStatusLabel(widget.complaint.status),
-                  valueColor: getStatusColor(widget.complaint.status),
-                ),
-                _buildInfoRow(
-                  'ระดับความสำคัญ:',
-                  'ระดับ ${getLevelLabel(widget.complaint.level)}',
-                  valueColor: getLevelColor(widget.complaint.level),
-                ),
-                _buildInfoRow(
-                  'ความเป็นส่วนตัว:',
-                  widget.complaint.isPrivate ? 'ส่วนตัว' : 'สาธารณะ',
-                  valueColor: widget.complaint.isPrivate ? burntOrange : oliveGreen,
-                ),
-              ],
-            ),
+                  // Basic Information
+                  _buildInfoCard(
+                    title: 'ข้อมูลพื้นฐาน',
+                    icon: Icons.info_outline,
+                    children: [
+                      _buildInfoRow(
+                        'รหัสร้องเรียน:',
+                        '${widget.complaint.complaintId}',
+                      ),
+                      _buildInfoRow(
+                        'บ้านเลขที่:',
+                        houseNumber ?? '${widget.complaint.houseId}',
+                      ),
+                      _buildInfoRow('ประเภท:', complaintTypeName ?? 'ไม่ระบุ'),
+                      _buildInfoRow(
+                        'วันที่ส่ง:',
+                        formatDateFromString(widget.complaint.createAt),
+                      ),
+                      if (widget.complaint.updateAt != null)
+                        _buildInfoRow(
+                          'อัปเดตล่าสุด:',
+                          formatDateFromString(widget.complaint.updateAt),
+                        ),
+                      _buildInfoRow(
+                        'สถานะ:',
+                        getStatusLabel(widget.complaint.status),
+                        valueColor: getStatusColor(widget.complaint.status),
+                      ),
+                      _buildInfoRow(
+                        'ระดับความสำคัญ:',
+                        'ระดับ ${getLevelLabel(widget.complaint.level)}',
+                        valueColor: getLevelColor(widget.complaint.level),
+                      ),
+                      _buildInfoRow(
+                        'ความเป็นส่วนตัว:',
+                        widget.complaint.isPrivate ? 'ส่วนตัว' : 'สาธารณะ',
+                        valueColor: widget.complaint.isPrivate
+                            ? burntOrange
+                            : oliveGreen,
+                      ),
+                    ],
+                  ),
 
-            // Image Information
-            if (widget.complaint.img?.isNotEmpty == true)
-              _buildInfoCard(
-                title: 'รูปภาพประกอบ',
-                icon: Icons.image,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
-                    ),
-                    child: Row(
+                  // Image Information
+                  if (widget.complaint.img?.isNotEmpty == true)
+                    _buildInfoCard(
+                      title: 'รูปภาพประกอบ',
+                      icon: Icons.image,
                       children: [
-                        Icon(Icons.warning, color: Colors.red, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'รูปภาพประกอบจะถูกลบไปด้วย',
-                            style: TextStyle(
-                              color: Colors.red.shade700,
-                              fontWeight: FontWeight.w500,
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.red.withValues(alpha: 0.2),
                             ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.warning, color: Colors.red, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'รูปภาพประกอบจะถูกลบไปด้วย',
+                                  style: TextStyle(
+                                    color: Colors.red.shade700,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            widget.complaint.img!,
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  height: 200,
+                                  color: beige,
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.broken_image,
+                                          color: earthClay,
+                                          size: 48,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'ไม่สามารถโหลดรูปภาพได้',
+                                          style: TextStyle(color: earthClay),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      widget.complaint.img!,
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Container(
-                            height: 200,
-                            color: beige,
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.broken_image, color: earthClay, size: 48),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'ไม่สามารถโหลดรูปภาพได้',
-                                    style: TextStyle(color: earthClay),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                    ),
-                  ),
+
+                  const SizedBox(height: 80), // Space for buttons
                 ],
               ),
-
-            const SizedBox(height: 80), // Space for buttons
-          ],
-        ),
-      ),
+            ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -714,10 +742,7 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
               child: OutlinedButton.icon(
                 onPressed: isDeleting ? null : () => Navigator.pop(context),
                 icon: Icon(Icons.arrow_back, color: warmStone),
-                label: Text(
-                  'ยกเลิก',
-                  style: TextStyle(color: warmStone),
-                ),
+                label: Text('ยกเลิก', style: TextStyle(color: warmStone)),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: warmStone),
                   shape: RoundedRectangleBorder(
@@ -733,13 +758,13 @@ class _ComplaintDeletePageState extends State<ComplaintDeletePage> {
                 onPressed: isDeleting ? null : _confirmDelete,
                 icon: isDeleting
                     ? SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
-                  ),
-                )
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
+                        ),
+                      )
                     : const Icon(Icons.delete_forever),
                 label: Text(
                   isDeleting ? 'กำลังลบ...' : 'ลบถาวร',

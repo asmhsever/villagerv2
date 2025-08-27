@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fullproject/domains/guard_domain.dart';
 import 'package:fullproject/models/guard_model.dart';
+import 'package:fullproject/pages/law/guard/add_guard_page.dart';
+import 'package:fullproject/pages/law/guard/edit_guard_page.dart';
+import 'package:fullproject/config/supabase_config.dart';
 
-class HouseGuardListPage extends StatefulWidget {
+class LawGuardListPage extends StatefulWidget {
   final int villageId;
 
-  const HouseGuardListPage({super.key, required this.villageId});
+  const LawGuardListPage({super.key, required this.villageId});
 
   @override
-  State<HouseGuardListPage> createState() => _HouseGuardListPageState();
+  State<LawGuardListPage> createState() => _LawGuardListPageState();
 }
 
-class _HouseGuardListPageState extends State<HouseGuardListPage> {
-  // Theme Colors
+class _LawGuardListPageState extends State<LawGuardListPage> {
+  // Theme Colors - เหมือน Committee Page
   static const Color softBrown = Color(0xFFA47551);
   static const Color ivoryWhite = Color(0xFFFFFDF6);
   static const Color beige = Color(0xFFF5F0E1);
@@ -24,6 +28,143 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
   static const Color softTerracotta = Color(0xFFD48B5C);
   static const Color clayOrange = Color(0xFFCC7748);
   static const Color mutedBurntSienna = Color(0xFFC8755A);
+  static const Color danger = Color(0xFFDC3545);
+
+  static const String _bucketName = 'guard';
+  bool _isRefreshing = false;
+
+  Future<void> _navigateToAddGuard() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddGuardPage(villageId: widget.villageId),
+      ),
+    );
+
+    if (result == true && mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _navigateToEditGuard(GuardModel guard) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditGuardPage(guard: guard),
+      ),
+    );
+
+    if (result == true && mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _confirmDelete(GuardModel guard) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: ivoryWhite,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: danger.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.warning_amber, color: danger, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'ยืนยันการลบ',
+                style: TextStyle(
+                  color: earthClay,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'ต้องการลบเจ้าหน้าที่ ${_getDisplayName(guard)} ใช่หรือไม่?',
+            style: TextStyle(color: warmStone, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                'ยกเลิก',
+                style: TextStyle(color: warmStone),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: danger,
+                foregroundColor: ivoryWhite,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('ลบ'),
+            ),
+          ],
+        );
+      },
+    ) ?? false;
+
+    if (!confirmed) return;
+
+    setState(() => _isRefreshing = true);
+    try {
+      await GuardDomain.delete(guard.guardId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: ivoryWhite, size: 20),
+              const SizedBox(width: 8),
+              Text('ลบเจ้าหน้าที่สำเร็จ'),
+            ],
+          ),
+          backgroundColor: oliveGreen,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: ivoryWhite, size: 20),
+              const SizedBox(width: 8),
+              Expanded(child: Text('ลบไม่สำเร็จ: $e')),
+            ],
+          ),
+          backgroundColor: danger,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isRefreshing = false);
+        setState(() {});
+      }
+    }
+  }
+
+  String _getDisplayName(GuardModel guard) {
+    final full = '${guard.firstName ?? ''} ${guard.lastName ?? ''}'.trim();
+    return full.isNotEmpty ? full : (guard.nickname ?? 'ไม่ระบุชื่อ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +186,13 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: _navigateToAddGuard,
+            tooltip: 'เพิ่มเจ้าหน้าที่ใหม่',
+          ),
+        ],
       ),
       body: FutureBuilder<List<GuardModel>>(
         future: GuardDomain.getByVillageId(widget.villageId),
@@ -137,9 +285,24 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'ยังไม่มีเจ้าหน้าที่รักษาความปลอดภัยในหมู่บ้านนี้',
+                    'ยังไม่มีเจ้าหน้าที่ในหมู่บ้านนี้',
                     style: TextStyle(color: warmStone, fontSize: 14),
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: _navigateToAddGuard,
+                    icon: const Icon(Icons.add),
+                    label: const Text('เพิ่มเจ้าหน้าที่ใหม่'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: oliveGreen,
+                      foregroundColor: ivoryWhite,
+                      elevation: 4,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -153,34 +316,73 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Info
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: beige.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: warmStone.withOpacity(0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.people, color: softBrown, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'จำนวนเจ้าหน้าที่: ${guards.length} คน',
-                        style: TextStyle(
-                          color: earthClay,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                // Header Info with Add Button
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: beige.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: warmStone.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.security, color: softBrown, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              'จำนวนเจ้าหน้าที่: ${guards.length} คน',
+                              style: TextStyle(
+                                color: earthClay,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: oliveGreen.withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _isRefreshing ? null : _navigateToAddGuard,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: oliveGreen,
+                          foregroundColor: ivoryWhite,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.add, size: 18),
+                            SizedBox(width: 4),
+                            Text('เพิ่ม', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
 
@@ -234,55 +436,21 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min, // เพื่อให้ Card ไม่สูง
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Header with Avatar and Name
+              // Header with Avatar, Title and Action Buttons
               Row(
                 children: [
-                  Container(
-                    width: 50, // ลดขนาด Avatar
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: cardColor.withOpacity(0.3),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 24, // ลดขนาด Icon
-                    ),
-                  ),
+                  _buildGuardAvatar(guard, cardColor),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '👮‍♂️ เจ้าหน้าที่',
-                          style: TextStyle(
-                            color: earthClay,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${guard.firstName ?? ''} ${guard.lastName ?? ''}'
-                              .trim()
-                              .isNotEmpty
-                              ? '${guard.firstName ?? ''} ${guard.lastName ?? ''}'
-                              .trim()
-                              : guard.nickname ?? 'ไม่ระบุชื่อ',
-                          style: TextStyle(
-                            fontSize: 18, // ลดขนาดฟอนต์
+                          _getDisplayName(guard),
+                          style: const TextStyle(
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                             letterSpacing: -0.3,
@@ -291,7 +459,7 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
-                        // Status Badge แบบ inline
+                        // Status Badge
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -331,6 +499,65 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
                       ],
                     ),
                   ),
+                  // ปุ่ม Edit
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: burntOrange.withOpacity(0.2),
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: burntOrange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: _isRefreshing ? null : () => _navigateToEditGuard(guard),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.edit,
+                            color: burntOrange,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // ปุ่ม Delete
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: danger.withOpacity(0.15),
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: danger.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: _isRefreshing ? null : () => _confirmDelete(guard),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.delete_outline,
+                            color: danger,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -342,8 +569,17 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
                   Expanded(
                     child: _buildCompactDetailItem(
                       label: 'รหัส',
-                      value: guard.guardId?.toString() ?? 'ไม่ระบุ',
+                      value: guard.guardId.toString(),
                       color: cardColor,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // เบอร์โทร
+                  Expanded(
+                    child: _buildCompactDetailItem(
+                      label: 'เบอร์โทร',
+                      value: guard.phone ?? 'ไม่ระบุ',
+                      color: cardColor.withOpacity(0.8),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -352,15 +588,6 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
                     child: _buildCompactDetailItem(
                       label: 'ชื่อเล่น',
                       value: guard.nickname ?? 'ไม่ระบุ',
-                      color: cardColor.withOpacity(0.8),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  // เบอร์โทรศัพท์
-                  Expanded(
-                    child: _buildCompactDetailItem(
-                      label: 'เบอร์โทร',
-                      value: guard.phone ?? 'ไม่ระบุ',
                       color: cardColor.withOpacity(0.6),
                     ),
                   ),
@@ -371,6 +598,100 @@ class _HouseGuardListPageState extends State<HouseGuardListPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildGuardAvatar(GuardModel guard, Color cardColor) {
+    final url = _resolveImageUrl(_bucketName, guard.img);
+    final initials = _getInitials(_getDisplayName(guard));
+
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: cardColor.withOpacity(0.3),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: url == null
+          ? Center(
+        child: Text(
+          initials,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      )
+          : ClipRRect(
+        borderRadius: BorderRadius.circular(25),
+        child: Image.network(
+          url,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Center(
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  String _getInitials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+
+    String getFirstChar(String s) {
+      final it = s.runes.iterator;
+      return it.moveNext() ? String.fromCharCode(it.current).toUpperCase() : '?';
+    }
+
+    String getLastChar(String s) {
+      int? last;
+      for (final r in s.runes) {
+        last = r;
+      }
+      return String.fromCharCode(last ?? 63).toUpperCase();
+    }
+
+    return parts.length == 1
+        ? getFirstChar(parts.first)
+        : '${getFirstChar(parts.first)}${getLastChar(parts.last)}';
+  }
+
+  String? _resolveImageUrl(String bucket, String? pathOrUrl) {
+    if (pathOrUrl == null || pathOrUrl.isEmpty) return null;
+    final s = pathOrUrl.trim();
+    if (s.startsWith('http://') || s.startsWith('https://')) return s;
+    final client = SupabaseConfig.client;
+    return client.storage.from(bucket).getPublicUrl(s);
   }
 
   // Helper Widget สำหรับแสดงข้อมูลแบบกะทัดรัด

@@ -19,13 +19,13 @@ class FundDomain {
       final response = await _client
           .from(_table)
           .insert({
-        'village_id': villageId,
-        'type': type,
-        'amount': amount,
-        'description': description,
-        'created_at': DateTime.now().toIso8601String(),
-        'receipt_img': null,
-      })
+            'village_id': villageId,
+            'type': type,
+            'amount': amount,
+            'description': description,
+            'created_at': DateTime.now().toIso8601String(),
+            'receipt_img': null,
+          })
           .select()
           .single();
 
@@ -174,9 +174,9 @@ class FundDomain {
 
   // Read - อ่านรายการกองทุนตาม village_id และประเภท
   static Future<List<FundModel>> getByVillageAndType(
-      int villageId,
-      String type,
-      ) async {
+    int villageId,
+    String type,
+  ) async {
     try {
       final response = await _client
           .from(_table)
@@ -266,9 +266,9 @@ class FundDomain {
 
   // ค้นหารายการกองทุนจากคำอธิบาย
   static Future<List<FundModel>> searchByDescription(
-      String searchText, {
-        int? villageId,
-      }) async {
+    String searchText, {
+    int? villageId,
+  }) async {
     try {
       var query = _client.from(_table).select();
 
