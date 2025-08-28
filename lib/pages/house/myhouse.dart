@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:fullproject/models/house_model.dart';
 import 'package:fullproject/pages/house/house_detail/animal/animal.dart';
 import 'package:fullproject/pages/house/house_detail/house.dart';
 import 'package:fullproject/pages/house/house_detail/vehicle/vehicle.dart';
 import 'package:fullproject/pages/house/house_detail/village/village.dart';
+import 'package:fullproject/pages/house/widgets/appbar.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseMyHousePage extends StatefulWidget {
-  final int? houseId;
+  final HouseModel? houseData;
 
-  const HouseMyHousePage({super.key, this.houseId});
+  const HouseMyHousePage({super.key, this.houseData});
 
   @override
   State<HouseMyHousePage> createState() => _HouseMyHousePageState();
@@ -32,15 +35,16 @@ class _HouseMyHousePageState extends State<HouseMyHousePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFDF6), // Ivory White background
+      appBar: HouseAppBar(house: widget.houseData?.houseNumber),
+      backgroundColor: ThemeColors.ivoryWhite, // Ivory White background
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFFFDF6), // Ivory White
-              Color(0xFFF5F0E1), // Beige
+              ThemeColors.ivoryWhite, // Ivory White
+              ThemeColors.beige, // Beige
             ],
           ),
         ),
@@ -50,17 +54,17 @@ class _HouseMyHousePageState extends State<HouseMyHousePage>
             Container(
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFBF9F3), // Input Fill
+                color: ThemeColors.inputFill, // Input Fill
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFD0C4B0).withOpacity(0.3),
+                    color: ThemeColors.softBorder.withOpacity(0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFFD0C4B0), // Soft Border
+                  color: ThemeColors.softBorder, // Soft Border
                   width: 1,
                 ),
               ),
@@ -76,7 +80,7 @@ class _HouseMyHousePageState extends State<HouseMyHousePage>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFDC7633).withOpacity(0.3),
+                      color: ThemeColors.clickHighlight.withOpacity(0.3),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -84,9 +88,9 @@ class _HouseMyHousePageState extends State<HouseMyHousePage>
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorPadding: const EdgeInsets.all(4),
-                labelColor: const Color(0xFFFFFDF6),
+                labelColor: ThemeColors.ivoryWhite,
                 // Ivory White
-                unselectedLabelColor: const Color(0xFFA47551),
+                unselectedLabelColor: ThemeColors.softBrown,
                 // Soft Brown
                 labelStyle: const TextStyle(
                   fontSize: 12,
@@ -119,14 +123,14 @@ class _HouseMyHousePageState extends State<HouseMyHousePage>
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFDF6), // Ivory White
+                  color: ThemeColors.ivoryWhite, // Ivory White
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFBFA18F).withOpacity(0.2),
+                      color: ThemeColors.earthClay.withOpacity(0.2),
                       blurRadius: 10,
                       offset: const Offset(0, -2),
                     ),
@@ -140,10 +144,14 @@ class _HouseMyHousePageState extends State<HouseMyHousePage>
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      HouseDetailPage(houseId: widget.houseId),
-                      HouseVillageDetailPage(houseId: widget.houseId),
-                      HouseAnimalDetailPage(houseId: widget.houseId),
-                      HouseVehicleDetailPage(houseId: widget.houseId),
+                      HouseDetailPage(houseId: widget.houseData?.houseId),
+                      HouseVillageDetailPage(
+                        houseId: widget.houseData?.houseId,
+                      ),
+                      HouseAnimalDetailPage(houseId: widget.houseData?.houseId),
+                      HouseVehicleDetailPage(
+                        houseId: widget.houseData?.houseId,
+                      ),
                     ],
                   ),
                 ),

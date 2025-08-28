@@ -4,6 +4,7 @@ import 'package:fullproject/navigation/app_navigation.dart';
 import 'package:fullproject/pages/welcome_page.dart';
 import 'package:fullproject/routes/app_routes.dart';
 import 'package:fullproject/services/auth_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -13,16 +14,16 @@ class LoginPage extends StatelessWidget {
     return MaterialApp(
       title: '้login',
       home: Scaffold(
-        //      appBar: AppBar(title: Text("--"), backgroundColor: Color(0xFFBFA18F)),
+        //      appBar: AppBar(title: Text("--"), backgroundColor: ThemeColors.earthClay),
         body: Container(
           height: double.infinity,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
                 // Color(0xFF3C82F6), // Sky Blue
-                Color(0xFFA47551), // Royal Blue
-                Color(0xFFBFA18F),
-                Color(0xFFA47551),
+                ThemeColors.softBrown, // Royal Blue
+                ThemeColors.earthClay,
+                ThemeColors.softBrown,
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -198,11 +199,11 @@ class _LoginFormState extends State<LoginForm> {
               labelText: 'ชื่อผู้ใช้',
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(color: Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Color(0xFF916846)),
+                borderSide: BorderSide(color: ThemeColors.focusedBrown),
               ),
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 20,
@@ -224,11 +225,11 @@ class _LoginFormState extends State<LoginForm> {
               labelText: 'รหัสผ่าน',
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(color: Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Color(0xFF916846)),
+                borderSide: BorderSide(color: ThemeColors.focusedBrown),
               ),
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 20,
@@ -247,7 +248,7 @@ class _LoginFormState extends State<LoginForm> {
 
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: 105, vertical: 12),
-              backgroundColor: Color(0xFFD48B5C),
+              backgroundColor: ThemeColors.softTerracotta,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),

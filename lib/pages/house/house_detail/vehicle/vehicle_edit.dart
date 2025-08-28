@@ -6,6 +6,7 @@ import 'package:fullproject/services/image_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseVehicleEditPage extends StatefulWidget {
   final VehicleModel vehicle; // ต้องมี vehicle เสมอสำหรับการแก้ไข
@@ -34,16 +35,6 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
   final ImagePicker _picker = ImagePicker();
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
 
   @override
   void initState() {
@@ -86,27 +77,39 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: clayOrange, size: 28),
+            Icon(
+              Icons.warning_amber_rounded,
+              color: ThemeColors.clayOrange,
+              size: 28,
+            ),
             const SizedBox(width: 12),
-            Text('ยืนยันการออก', style: TextStyle(color: softBrown)),
+            Text(
+              'ยืนยันการออก',
+              style: TextStyle(color: ThemeColors.softBrown),
+            ),
           ],
         ),
         content: Text(
           'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?',
-          style: TextStyle(color: earthClay),
+          style: TextStyle(color: ThemeColors.earthClay),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('ยกเลิก', style: TextStyle(color: warmStone)),
+            child: Text(
+              'ยกเลิก',
+              style: TextStyle(color: ThemeColors.warmStone),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: clayOrange),
+            style: TextButton.styleFrom(
+              foregroundColor: ThemeColors.clayOrange,
+            ),
             child: const Text('ออก'),
           ),
         ],
@@ -126,13 +129,16 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: ivoryWhite,
+          backgroundColor: ThemeColors.ivoryWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
             'เลือกรูปภาพ',
-            style: TextStyle(color: softBrown, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: ThemeColors.softBrown,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -141,14 +147,17 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: oliveGreen.withOpacity(0.1),
+                    color: ThemeColors.oliveGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.photo_library_rounded, color: oliveGreen),
+                  child: Icon(
+                    Icons.photo_library_rounded,
+                    color: ThemeColors.oliveGreen,
+                  ),
                 ),
                 title: Text(
                   'เลือกจากแกลเลอรี่',
-                  style: TextStyle(color: earthClay),
+                  style: TextStyle(color: ThemeColors.earthClay),
                 ),
                 onTap: () => Navigator.pop(context, 'gallery'),
               ),
@@ -156,12 +165,18 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: burntOrange.withOpacity(0.1),
+                    color: ThemeColors.burntOrange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.camera_alt_rounded, color: burntOrange),
+                  child: Icon(
+                    Icons.camera_alt_rounded,
+                    color: ThemeColors.burntOrange,
+                  ),
                 ),
-                title: Text('ถ่ายภาพ', style: TextStyle(color: earthClay)),
+                title: Text(
+                  'ถ่ายภาพ',
+                  style: TextStyle(color: ThemeColors.earthClay),
+                ),
                 onTap: () => Navigator.pop(context, 'camera'),
               ),
               if (_hasSelectedImage() ||
@@ -170,12 +185,18 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: clayOrange.withOpacity(0.1),
+                      color: ThemeColors.clayOrange.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(Icons.delete_rounded, color: clayOrange),
+                    child: Icon(
+                      Icons.delete_rounded,
+                      color: ThemeColors.clayOrange,
+                    ),
                   ),
-                  title: Text('ลบรูปภาพ', style: TextStyle(color: clayOrange)),
+                  title: Text(
+                    'ลบรูปภาพ',
+                    style: TextStyle(color: ThemeColors.clayOrange),
+                  ),
                   onTap: () => Navigator.pop(context, 'delete'),
                 ),
             ],
@@ -246,7 +267,9 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? clayOrange : oliveGreen,
+        backgroundColor: isError
+            ? ThemeColors.clayOrange
+            : ThemeColors.oliveGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -312,7 +335,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: beige,
+        backgroundColor: ThemeColors.beige,
         appBar: _buildAppBar(),
         body: Form(
           key: _formKey,
@@ -338,18 +361,21 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: ivoryWhite.withOpacity(0.9),
+          color: ThemeColors.ivoryWhite.withOpacity(0.9),
           borderRadius: BorderRadius.circular(12),
         ),
         child: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_rounded, color: softBrown),
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: ThemeColors.softBrown,
+          ),
         ),
       ),
       title: Text(
         'แก้ไขยานพาหนะ',
         style: TextStyle(
-          color: softBrown,
+          color: ThemeColors.softBrown,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -361,11 +387,11 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.1),
+            color: ThemeColors.earthClay.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -379,7 +405,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: softBrown,
+              color: ThemeColors.softBrown,
             ),
           ),
           const SizedBox(height: 20),
@@ -440,34 +466,34 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
     return TextFormField(
       controller: controller,
       validator: validator,
-      style: TextStyle(color: earthClay, fontSize: 16),
+      style: TextStyle(color: ThemeColors.earthClay, fontSize: 16),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        labelStyle: TextStyle(color: warmStone),
-        hintStyle: TextStyle(color: warmStone.withOpacity(0.7)),
-        prefixIcon: Icon(icon, color: softBrown),
+        labelStyle: TextStyle(color: ThemeColors.warmStone),
+        hintStyle: TextStyle(color: ThemeColors.warmStone.withOpacity(0.7)),
+        prefixIcon: Icon(icon, color: ThemeColors.softBrown),
         filled: true,
-        fillColor: beige.withOpacity(0.5),
+        fillColor: ThemeColors.beige.withOpacity(0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: sandyTan, width: 1),
+          borderSide: BorderSide(color: ThemeColors.sandyTan, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: softBrown, width: 2),
+          borderSide: BorderSide(color: ThemeColors.softBrown, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: clayOrange, width: 1),
+          borderSide: BorderSide(color: ThemeColors.clayOrange, width: 1),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: clayOrange, width: 2),
+          borderSide: BorderSide(color: ThemeColors.clayOrange, width: 2),
         ),
       ),
     );
@@ -482,7 +508,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: softBrown,
+            color: ThemeColors.softBrown,
           ),
         ),
         const SizedBox(height: 12),
@@ -503,7 +529,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
       height: 200,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: sandyTan, width: 2),
+        border: Border.all(color: ThemeColors.sandyTan, width: 2),
       ),
       child: Stack(
         children: [
@@ -517,11 +543,11 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
                   : !kIsWeb && _selectedImageFile != null
                   ? Image.file(_selectedImageFile!, fit: BoxFit.cover)
                   : Container(
-                      color: beige,
+                      color: ThemeColors.beige,
                       child: Icon(
                         Icons.directions_car_rounded,
                         size: 60,
-                        color: warmStone,
+                        color: ThemeColors.warmStone,
                       ),
                     ),
             ),
@@ -531,7 +557,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
             right: 8,
             child: Container(
               decoration: BoxDecoration(
-                color: clayOrange,
+                color: ThemeColors.clayOrange,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -543,7 +569,10 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
               ),
               child: IconButton(
                 onPressed: _removeImage,
-                icon: const Icon(Icons.close_rounded, color: ivoryWhite),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: ThemeColors.ivoryWhite,
+                ),
                 padding: const EdgeInsets.all(8),
                 constraints: const BoxConstraints(),
               ),
@@ -555,7 +584,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: oliveGreen,
+                color: ThemeColors.oliveGreen,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
@@ -575,7 +604,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
       height: 200,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: sandyTan, width: 2),
+        border: Border.all(color: ThemeColors.sandyTan, width: 2),
       ),
       child: Stack(
         children: [
@@ -592,7 +621,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: burntOrange,
+                color: ThemeColors.burntOrange,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
@@ -640,10 +669,10 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
         width: double.infinity,
         height: 150,
         decoration: BoxDecoration(
-          color: beige.withOpacity(0.5),
+          color: ThemeColors.beige.withOpacity(0.5),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: sandyTan,
+            color: ThemeColors.sandyTan,
             width: 2,
             style: BorderStyle.solid,
           ),
@@ -654,13 +683,13 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: oliveGreen.withOpacity(0.1),
+                color: ThemeColors.oliveGreen.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(50),
               ),
               child: Icon(
                 Icons.add_photo_alternate_rounded,
                 size: 32,
-                color: oliveGreen,
+                color: ThemeColors.oliveGreen,
               ),
             ),
             const SizedBox(height: 12),
@@ -669,13 +698,13 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: earthClay,
+                color: ThemeColors.earthClay,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'แตะเพื่อเลือกรูปภาพ',
-              style: TextStyle(fontSize: 12, color: warmStone),
+              style: TextStyle(fontSize: 12, color: ThemeColors.warmStone),
             ),
           ],
         ),
@@ -693,12 +722,12 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [burntOrange, softTerracotta],
+              colors: [ThemeColors.burntOrange, ThemeColors.softTerracotta],
             ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: burntOrange.withOpacity(0.3),
+                color: ThemeColors.burntOrange.withOpacity(0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -721,7 +750,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                ivoryWhite,
+                                ThemeColors.ivoryWhite,
                               ),
                             ),
                           ),
@@ -731,7 +760,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: ivoryWhite,
+                              color: ThemeColors.ivoryWhite,
                             ),
                           ),
                         ],
@@ -741,7 +770,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
                         children: [
                           Icon(
                             Icons.update_rounded,
-                            color: ivoryWhite,
+                            color: ThemeColors.ivoryWhite,
                             size: 24,
                           ),
                           const SizedBox(width: 8),
@@ -750,7 +779,7 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: ivoryWhite,
+                              color: ThemeColors.ivoryWhite,
                             ),
                           ),
                         ],
@@ -768,9 +797,12 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: warmStone.withOpacity(0.1),
+            color: ThemeColors.warmStone.withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: warmStone.withOpacity(0.3), width: 1),
+            border: Border.all(
+              color: ThemeColors.warmStone.withOpacity(0.3),
+              width: 1,
+            ),
           ),
           child: Material(
             color: Colors.transparent,
@@ -793,14 +825,18 @@ class _HouseVehicleEditPageState extends State<HouseVehicleEditPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.close_rounded, color: warmStone, size: 24),
+                    Icon(
+                      Icons.close_rounded,
+                      color: ThemeColors.warmStone,
+                      size: 24,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'ยกเลิก',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: warmStone,
+                        color: ThemeColors.warmStone,
                       ),
                     ),
                   ],

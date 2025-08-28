@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fullproject/domains/funds_domain.dart';
 import 'package:fullproject/models/funds_model.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'package:image_picker/image_picker.dart';
 
 class LawFundEditPage extends StatefulWidget {
@@ -20,15 +21,6 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
   final TextEditingController _amountController = TextEditingController();
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
 
   String _selectedType = 'income'; // income, outcome
   File? _newReceiptImage;
@@ -113,7 +105,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
         return Container(
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: beige,
+            color: ThemeColors.beige,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -126,7 +118,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                 width: 50,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: warmStone,
+                  color: ThemeColors.warmStone,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -136,7 +128,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                 ),
               ),
               SizedBox(height: 20),
@@ -163,7 +155,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                     _buildImageOption(
                       icon: Icons.delete_outline,
                       label: 'ลบรูป',
-                      color: burntOrange,
+                      color: ThemeColors.burntOrange,
                       onTap: () {
                         Navigator.pop(context);
                         _removeImage();
@@ -185,7 +177,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
     required VoidCallback onTap,
     Color? color,
   }) {
-    final optionColor = color ?? softBrown;
+    final optionColor = color ?? ThemeColors.softBrown;
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -236,7 +228,6 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
 
       _showSuccessSnackBar('บันทึกข้อมูลเรียบร้อยแล้ว');
       Navigator.pop(context, true); // Return true to indicate success
-
     } catch (e) {
       _showErrorSnackBar('เกิดข้อผิดพลาดในการบันทึกข้อมูล: $e');
     } finally {
@@ -251,12 +242,12 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.check_circle_outline, color: ivoryWhite),
+            Icon(Icons.check_circle_outline, color: ThemeColors.ivoryWhite),
             SizedBox(width: 8),
             Text(message),
           ],
         ),
-        backgroundColor: oliveGreen,
+        backgroundColor: ThemeColors.oliveGreen,
         duration: Duration(seconds: 3),
       ),
     );
@@ -267,12 +258,12 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.error_outline, color: ivoryWhite),
+            Icon(Icons.error_outline, color: ThemeColors.ivoryWhite),
             SizedBox(width: 8),
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: burntOrange,
+        backgroundColor: ThemeColors.burntOrange,
         duration: Duration(seconds: 4),
       ),
     );
@@ -282,9 +273,9 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
     return Container(
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: beige,
+        color: ThemeColors.beige,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: sandyTan, width: 1),
+        border: Border.all(color: ThemeColors.sandyTan, width: 1),
       ),
       child: Row(
         children: [
@@ -293,7 +284,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
               type: 'income',
               label: 'รายรับ',
               icon: Icons.trending_up_rounded,
-              color: oliveGreen,
+              color: ThemeColors.oliveGreen,
             ),
           ),
           Expanded(
@@ -301,7 +292,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
               type: 'outcome',
               label: 'รายจ่าย',
               icon: Icons.trending_down_rounded,
-              color: burntOrange,
+              color: ThemeColors.burntOrange,
             ),
           ),
         ],
@@ -333,12 +324,16 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20, color: isSelected ? color : warmStone),
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected ? color : ThemeColors.warmStone,
+            ),
             SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? color : warmStone,
+                color: isSelected ? color : ThemeColors.warmStone,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 fontSize: 16,
               ),
@@ -358,7 +353,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: softBrown,
+            color: ThemeColors.softBrown,
           ),
         ),
         SizedBox(height: 12),
@@ -368,9 +363,9 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
         else if (_newReceiptImage != null)
           _buildNewImagePreview()
         else if (_currentReceiptUrl != null && _currentReceiptUrl!.isNotEmpty)
-            _buildCurrentImagePreview()
-          else
-            _buildNoImageState(),
+          _buildCurrentImagePreview()
+        else
+          _buildNoImageState(),
       ],
     );
   }
@@ -382,9 +377,13 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
         width: double.infinity,
         height: 200,
         decoration: BoxDecoration(
-          color: beige,
+          color: ThemeColors.beige,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: sandyTan, width: 2, style: BorderStyle.none),
+          border: Border.all(
+            color: ThemeColors.sandyTan,
+            width: 2,
+            style: BorderStyle.none,
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -392,20 +391,20 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
             Container(
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: warmStone.withOpacity(0.1),
+                color: ThemeColors.warmStone.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(50),
               ),
               child: Icon(
                 Icons.add_photo_alternate_outlined,
                 size: 48,
-                color: warmStone,
+                color: ThemeColors.warmStone,
               ),
             ),
             SizedBox(height: 16),
             Text(
               'เพิ่มรูปใบเสร็จ',
               style: TextStyle(
-                color: warmStone,
+                color: ThemeColors.warmStone,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -413,10 +412,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
             SizedBox(height: 4),
             Text(
               'แตะเพื่อเลือกรูปภาพ',
-              style: TextStyle(
-                color: earthClay,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
             ),
           ],
         ),
@@ -429,7 +425,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: sandyTan, width: 2),
+        border: Border.all(color: ThemeColors.sandyTan, width: 2),
       ),
       child: Column(
         children: [
@@ -456,7 +452,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
           Container(
             padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: beige,
+              color: ThemeColors.beige,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(10),
                 bottomRight: Radius.circular(10),
@@ -467,18 +463,24 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
               children: [
                 TextButton.icon(
                   onPressed: _showImagePicker,
-                  icon: Icon(Icons.edit_outlined, color: softTerracotta),
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    color: ThemeColors.softTerracotta,
+                  ),
                   label: Text(
                     'เปลี่ยนรูป',
-                    style: TextStyle(color: softTerracotta),
+                    style: TextStyle(color: ThemeColors.softTerracotta),
                   ),
                 ),
                 TextButton.icon(
                   onPressed: _removeImage,
-                  icon: Icon(Icons.delete_outline, color: burntOrange),
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: ThemeColors.burntOrange,
+                  ),
                   label: Text(
                     'ลบรูป',
-                    style: TextStyle(color: burntOrange),
+                    style: TextStyle(color: ThemeColors.burntOrange),
                   ),
                 ),
               ],
@@ -494,7 +496,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: sandyTan, width: 2),
+        border: Border.all(color: ThemeColors.sandyTan, width: 2),
       ),
       child: Column(
         children: [
@@ -521,7 +523,9 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                     height: 200,
                     child: Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          ThemeColors.softBrown,
+                        ),
                       ),
                     ),
                   );
@@ -529,7 +533,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     height: 200,
-                    color: burntOrange.withOpacity(0.1),
+                    color: ThemeColors.burntOrange.withOpacity(0.1),
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -537,12 +541,12 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                           Icon(
                             Icons.broken_image_outlined,
                             size: 48,
-                            color: burntOrange,
+                            color: ThemeColors.burntOrange,
                           ),
                           SizedBox(height: 8),
                           Text(
                             'ไม่สามารถโหลดรูปภาพได้',
-                            style: TextStyle(color: burntOrange),
+                            style: TextStyle(color: ThemeColors.burntOrange),
                           ),
                         ],
                       ),
@@ -555,7 +559,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
           Container(
             padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: beige,
+              color: ThemeColors.beige,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(10),
                 bottomRight: Radius.circular(10),
@@ -566,18 +570,24 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
               children: [
                 TextButton.icon(
                   onPressed: _showImagePicker,
-                  icon: Icon(Icons.edit_outlined, color: softTerracotta),
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    color: ThemeColors.softTerracotta,
+                  ),
                   label: Text(
                     'เปลี่ยนรูป',
-                    style: TextStyle(color: softTerracotta),
+                    style: TextStyle(color: ThemeColors.softTerracotta),
                   ),
                 ),
                 TextButton.icon(
                   onPressed: _removeImage,
-                  icon: Icon(Icons.delete_outline, color: burntOrange),
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: ThemeColors.burntOrange,
+                  ),
                   label: Text(
                     'ลบรูป',
-                    style: TextStyle(color: burntOrange),
+                    style: TextStyle(color: ThemeColors.burntOrange),
                   ),
                 ),
               ],
@@ -591,18 +601,18 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ivoryWhite,
+      backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
         title: Text(
           'แก้ไขรายการกองทุน',
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: ivoryWhite,
+            color: ThemeColors.ivoryWhite,
             fontSize: 20,
           ),
         ),
-        backgroundColor: softBrown,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.softBrown,
+        foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -614,7 +624,9 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ThemeColors.ivoryWhite,
+                    ),
                     strokeWidth: 2,
                   ),
                 ),
@@ -635,7 +647,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                 ),
               ),
               SizedBox(height: 8),
@@ -648,7 +660,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                 ),
               ),
               SizedBox(height: 8),
@@ -662,33 +674,48 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                   hintText: 'กรอกจำนวนเงิน',
                   prefixText: '฿ ',
                   prefixStyle: TextStyle(
-                    color: softBrown,
+                    color: ThemeColors.softBrown,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                   filled: true,
-                  fillColor: beige,
+                  fillColor: ThemeColors.beige,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: sandyTan, width: 1),
+                    borderSide: BorderSide(
+                      color: ThemeColors.sandyTan,
+                      width: 1,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: sandyTan, width: 1),
+                    borderSide: BorderSide(
+                      color: ThemeColors.sandyTan,
+                      width: 1,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: softBrown, width: 2),
+                    borderSide: BorderSide(
+                      color: ThemeColors.softBrown,
+                      width: 2,
+                    ),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: burntOrange, width: 1),
+                    borderSide: BorderSide(
+                      color: ThemeColors.burntOrange,
+                      width: 1,
+                    ),
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                 ),
                 style: TextStyle(
                   fontSize: 16,
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                   fontWeight: FontWeight.w500,
                 ),
                 validator: (value) {
@@ -713,7 +740,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                 ),
               ),
               SizedBox(height: 8),
@@ -723,29 +750,38 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                 decoration: InputDecoration(
                   hintText: 'กรอกคำอธิบายรายการ...',
                   filled: true,
-                  fillColor: beige,
+                  fillColor: ThemeColors.beige,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: sandyTan, width: 1),
+                    borderSide: BorderSide(
+                      color: ThemeColors.sandyTan,
+                      width: 1,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: sandyTan, width: 1),
+                    borderSide: BorderSide(
+                      color: ThemeColors.sandyTan,
+                      width: 1,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: softBrown, width: 2),
+                    borderSide: BorderSide(
+                      color: ThemeColors.softBrown,
+                      width: 2,
+                    ),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: burntOrange, width: 1),
+                    borderSide: BorderSide(
+                      color: ThemeColors.burntOrange,
+                      width: 1,
+                    ),
                   ),
                   contentPadding: EdgeInsets.all(16),
                 ),
-                style: TextStyle(
-                  fontSize: 16,
-                  color: softBrown,
-                ),
+                style: TextStyle(fontSize: 16, color: ThemeColors.softBrown),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'กรุณากรอกคำอธิบาย';
@@ -769,43 +805,47 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _saveChanges,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedType == 'income' ? oliveGreen : burntOrange,
-                    foregroundColor: ivoryWhite,
+                    backgroundColor: _selectedType == 'income'
+                        ? ThemeColors.oliveGreen
+                        : ThemeColors.burntOrange,
+                    foregroundColor: ThemeColors.ivoryWhite,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    disabledBackgroundColor: warmStone,
+                    disabledBackgroundColor: ThemeColors.warmStone,
                   ),
                   child: _isLoading
                       ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
-                          strokeWidth: 2,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        'กำลังบันทึก...',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  )
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  ThemeColors.ivoryWhite,
+                                ),
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              'กำลังบันทึก...',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        )
                       : Text(
-                    'บันทึกการเปลี่ยนแปลง',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                          'บันทึกการเปลี่ยนแปลง',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
               SizedBox(height: 16),

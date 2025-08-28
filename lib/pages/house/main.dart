@@ -7,9 +7,12 @@ import 'package:fullproject/pages/house/myhouse.dart';
 import 'package:fullproject/pages/house/notion.dart';
 import 'package:fullproject/routes/app_routes.dart';
 import 'package:fullproject/services/auth_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseMainPage extends StatefulWidget {
-  const HouseMainPage({super.key});
+  final int indexPage;
+
+  const HouseMainPage({super.key, this.indexPage = 0});
 
   @override
   State<HouseMainPage> createState() => _HouseMainPageState();
@@ -18,7 +21,7 @@ class HouseMainPage extends StatefulWidget {
 class _HouseMainPageState extends State<HouseMainPage> {
   HouseModel? houseModel;
   bool isLoading = true;
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   // สร้าง screens หลังจากได้ข้อมูล houseModel แล้ว
   List<Widget> _getScreens() {
@@ -32,16 +35,17 @@ class _HouseMainPageState extends State<HouseMainPage> {
     }
 
     return [
-      HouseNotionsPage(villageId: houseModel!.villageId),
-      HouseBillPage(houseId: houseModel!.houseId),
-      HouseComplaintPage(houseId: houseModel!.houseId),
-      HouseMyHousePage(houseId: houseModel!.houseId),
+      HouseNotionsPage(houseData: houseModel),
+      HouseBillPage(houseData: houseModel!),
+      HouseComplaintPage(houseData: houseModel!),
+      HouseMyHousePage(houseData: houseModel),
     ];
   }
 
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.indexPage;
     loadCurrentUser();
   }
 
@@ -68,10 +72,10 @@ class _HouseMainPageState extends State<HouseMainPage> {
       final _screens = _getScreens();
       return Scaffold(
         // appBar: AppBar(title: Text("ssss")),
-        backgroundColor: Color(0xFFD8CAB8),
+        backgroundColor: ThemeColors.sandyTan,
         body: _screens[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Color(0xFFA47551),
+          backgroundColor: ThemeColors.softBrown,
           currentIndex: _currentIndex,
           onTap: (index) {
             setState(() {

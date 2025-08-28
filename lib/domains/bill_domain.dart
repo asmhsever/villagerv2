@@ -338,10 +338,10 @@ class BillDomain {
   }
 
   // Read - อ่านบิลตาม status ของบ้าน
-  static Future<List<BillModel>> getByStatusInHouse(
-    int houseId,
-    String status,
-  ) async {
+  static Future<List<BillModel>> getByStatusInHouse({
+    required int houseId,
+    required String status,
+  }) async {
     try {
       final response = await _client
           .from(_table)
@@ -369,6 +369,7 @@ class BillDomain {
           .select()
           .eq('house_id', houseId)
           .eq('paid_status', 0)
+          .inFilter('status', ['PENDING', 'REJECTED', 'OVERDUE', 'CANCELLED'])
           .order('due_date', ascending: true);
 
       return response

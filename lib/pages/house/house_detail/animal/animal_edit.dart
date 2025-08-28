@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import 'package:fullproject/domains/animal_domain.dart';
 import 'package:fullproject/models/animal_model.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseEditAnimalPage extends StatefulWidget {
   final int animalId;
@@ -18,20 +19,6 @@ class HouseEditAnimalPage extends StatefulWidget {
 
 class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
   // Theme Colors - เดียวกับหน้า detail
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
-  static const Color warmAmber = Color(0xFFDA9856);
-  static const Color softBorder = Color(0xFFD0C4B0);
-  static const Color focusedBrown = Color(0xFF916846);
-  static const Color inputFill = Color(0xFFFBF9F3);
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -88,7 +75,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('ไม่พบข้อมูลสัตว์เลี้ยงที่ต้องการแก้ไข'),
-              backgroundColor: clayOrange,
+              backgroundColor: ThemeColors.clayOrange,
             ),
           );
           Navigator.of(context).pop();
@@ -102,7 +89,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('เกิดข้อผิดพลาดในการโหลดข้อมูล: $e'),
-            backgroundColor: clayOrange,
+            backgroundColor: ThemeColors.clayOrange,
           ),
         );
         Navigator.of(context).pop();
@@ -181,13 +168,16 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: ivoryWhite,
+          backgroundColor: ThemeColors.ivoryWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
             'เลือกรูปภาพ',
-            style: TextStyle(color: softBrown, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: ThemeColors.softBrown,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -196,14 +186,17 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: oliveGreen.withOpacity(0.1),
+                    color: ThemeColors.oliveGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.photo_library_rounded, color: oliveGreen),
+                  child: Icon(
+                    Icons.photo_library_rounded,
+                    color: ThemeColors.oliveGreen,
+                  ),
                 ),
                 title: Text(
                   'เลือกจากแกลเลอรี่',
-                  style: TextStyle(color: earthClay),
+                  style: TextStyle(color: ThemeColors.earthClay),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -214,12 +207,18 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: burntOrange.withOpacity(0.1),
+                    color: ThemeColors.burntOrange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.camera_alt_rounded, color: burntOrange),
+                  child: Icon(
+                    Icons.camera_alt_rounded,
+                    color: ThemeColors.burntOrange,
+                  ),
                 ),
-                title: Text('ถ่ายภาพ', style: TextStyle(color: earthClay)),
+                title: Text(
+                  'ถ่ายภาพ',
+                  style: TextStyle(color: ThemeColors.earthClay),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImageFromCamera();
@@ -295,13 +294,16 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
     // แสดง loading ระหว่างโหลดข้อมูล
     if (_isLoadingData) {
       return Scaffold(
-        backgroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         appBar: AppBar(
-          backgroundColor: softBrown,
-          foregroundColor: ivoryWhite,
+          backgroundColor: ThemeColors.softBrown,
+          foregroundColor: ThemeColors.ivoryWhite,
           title: const Text(
             'แก้ไขข้อมูลสัตว์เลี้ยง',
-            style: TextStyle(fontWeight: FontWeight.w600, color: ivoryWhite),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: ThemeColors.ivoryWhite,
+            ),
           ),
           elevation: 0,
         ),
@@ -310,12 +312,14 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  ThemeColors.softBrown,
+                ),
               ),
               SizedBox(height: 16),
               Text(
                 'กำลังโหลดข้อมูลสัตว์เลี้ยง...',
-                style: TextStyle(color: earthClay, fontSize: 16),
+                style: TextStyle(color: ThemeColors.earthClay, fontSize: 16),
               ),
             ],
           ),
@@ -326,13 +330,16 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
     // แสดงข้อผิดพลาดหากไม่มีข้อมูล
     if (_animal == null) {
       return Scaffold(
-        backgroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         appBar: AppBar(
-          backgroundColor: softBrown,
-          foregroundColor: ivoryWhite,
+          backgroundColor: ThemeColors.softBrown,
+          foregroundColor: ThemeColors.ivoryWhite,
           title: const Text(
             'แก้ไขข้อมูลสัตว์เลี้ยง',
-            style: TextStyle(fontWeight: FontWeight.w600, color: ivoryWhite),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: ThemeColors.ivoryWhite,
+            ),
           ),
           elevation: 0,
         ),
@@ -340,12 +347,16 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: clayOrange, size: 64),
+              Icon(
+                Icons.error_outline,
+                color: ThemeColors.clayOrange,
+                size: 64,
+              ),
               SizedBox(height: 16),
               Text(
                 'ไม่พบข้อมูลสัตว์เลี้ยงที่ต้องการแก้ไข',
                 style: TextStyle(
-                  color: clayOrange,
+                  color: ThemeColors.clayOrange,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -358,15 +369,15 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
     }
 
     return Scaffold(
-      backgroundColor: ivoryWhite,
+      backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
-        backgroundColor: softBrown,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.softBrown,
+        foregroundColor: ThemeColors.ivoryWhite,
         title: Text(
           'แก้ไขข้อมูล ${_animal!.name}',
           style: const TextStyle(
             fontWeight: FontWeight.w600,
-            color: ivoryWhite,
+            color: ThemeColors.ivoryWhite,
           ),
         ),
         elevation: 0,
@@ -386,14 +397,16 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          ThemeColors.ivoryWhite,
+                        ),
                       ),
                     )
                   : const Icon(Icons.save),
               tooltip: 'บันทึก',
               style: IconButton.styleFrom(
-                backgroundColor: oliveGreen,
-                foregroundColor: ivoryWhite,
+                backgroundColor: ThemeColors.oliveGreen,
+                foregroundColor: ThemeColors.ivoryWhite,
                 shape: const CircleBorder(),
               ),
             ),
@@ -415,20 +428,20 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                   vertical: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: beige,
+                  color: ThemeColors.beige,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: sandyTan, width: 1),
+                  border: Border.all(color: ThemeColors.sandyTan, width: 1),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.edit, color: softBrown, size: 28),
+                    Icon(Icons.edit, color: ThemeColors.softBrown, size: 28),
                     const SizedBox(width: 12),
                     const Text(
                       'แก้ไขข้อมูลสัตว์เลี้ยง',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: softBrown,
+                        color: ThemeColors.softBrown,
                       ),
                     ),
                     const Spacer(),
@@ -438,14 +451,14 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: warmStone,
+                        color: ThemeColors.warmStone,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         'ID: ${_animal!.animalId}',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: ivoryWhite,
+                          color: ThemeColors.ivoryWhite,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -460,12 +473,12 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: ivoryWhite,
+                  color: ThemeColors.ivoryWhite,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: sandyTan, width: 1),
+                  border: Border.all(color: ThemeColors.sandyTan, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: warmStone.withOpacity(0.1),
+                      color: ThemeColors.warmStone.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -479,36 +492,39 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: softBrown,
+                        color: ThemeColors.softBrown,
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _nameController,
-                      style: const TextStyle(color: softBrown, fontSize: 16),
+                      style: const TextStyle(
+                        color: ThemeColors.softBrown,
+                        fontSize: 16,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'กรอกชื่อสัตว์เลี้ยง',
-                        hintStyle: TextStyle(color: warmStone),
+                        hintStyle: TextStyle(color: ThemeColors.warmStone),
                         filled: true,
-                        fillColor: inputFill,
+                        fillColor: ThemeColors.inputFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: softBorder,
+                            color: ThemeColors.softBorder,
                             width: 1,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: softBorder,
+                            color: ThemeColors.softBorder,
                             width: 1,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: focusedBrown,
+                            color: ThemeColors.focusedBrown,
                             width: 2,
                           ),
                         ),
@@ -519,7 +535,10 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                             width: 1,
                           ),
                         ),
-                        prefixIcon: Icon(Icons.pets, color: warmStone),
+                        prefixIcon: Icon(
+                          Icons.pets,
+                          color: ThemeColors.warmStone,
+                        ),
                         contentPadding: const EdgeInsets.all(16),
                       ),
                       validator: (value) {
@@ -542,12 +561,12 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: ivoryWhite,
+                  color: ThemeColors.ivoryWhite,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: sandyTan, width: 1),
+                  border: Border.all(color: ThemeColors.sandyTan, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: warmStone.withOpacity(0.1),
+                      color: ThemeColors.warmStone.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -561,36 +580,39 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: softBrown,
+                        color: ThemeColors.softBrown,
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _typeController,
-                      style: const TextStyle(color: softBrown, fontSize: 16),
+                      style: const TextStyle(
+                        color: ThemeColors.softBrown,
+                        fontSize: 16,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'กรอกประเภทสัตว์เลี้ยง (เช่น สุนัข, แมว, นก)',
-                        hintStyle: TextStyle(color: warmStone),
+                        hintStyle: TextStyle(color: ThemeColors.warmStone),
                         filled: true,
-                        fillColor: inputFill,
+                        fillColor: ThemeColors.inputFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: softBorder,
+                            color: ThemeColors.softBorder,
                             width: 1,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: softBorder,
+                            color: ThemeColors.softBorder,
                             width: 1,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: focusedBrown,
+                            color: ThemeColors.focusedBrown,
                             width: 2,
                           ),
                         ),
@@ -603,7 +625,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                         ),
                         prefixIcon: Icon(
                           Icons.category_rounded,
-                          color: warmStone,
+                          color: ThemeColors.warmStone,
                         ),
                         contentPadding: const EdgeInsets.all(16),
                       ),
@@ -628,12 +650,12 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: ivoryWhite,
+                  color: ThemeColors.ivoryWhite,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: sandyTan, width: 1),
+                  border: Border.all(color: ThemeColors.sandyTan, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: warmStone.withOpacity(0.1),
+                      color: ThemeColors.warmStone.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -646,7 +668,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: softBrown,
+                        color: ThemeColors.softBrown,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -657,7 +679,10 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                       height: 200,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: sandyTan, width: 2),
+                        border: Border.all(
+                          color: ThemeColors.sandyTan,
+                          width: 2,
+                        ),
                       ),
                       child: Stack(
                         children: [
@@ -677,7 +702,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: burntOrange,
+                                color: ThemeColors.burntOrange,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Text(
@@ -736,8 +761,8 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                       icon: const Icon(Icons.delete_outline, size: 18),
                       label: const Text('ลบรูป'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: clayOrange,
-                        foregroundColor: ivoryWhite,
+                        backgroundColor: ThemeColors.clayOrange,
+                        foregroundColor: ThemeColors.ivoryWhite,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
@@ -759,8 +784,8 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _saveAnimal,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: oliveGreen,
-                    foregroundColor: ivoryWhite,
+                    backgroundColor: ThemeColors.oliveGreen,
+                    foregroundColor: ThemeColors.ivoryWhite,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -774,7 +799,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              ivoryWhite,
+                              ThemeColors.ivoryWhite,
                             ),
                           ),
                         )
@@ -823,7 +848,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
             Text(message),
           ],
         ),
-        backgroundColor: oliveGreen,
+        backgroundColor: ThemeColors.oliveGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),

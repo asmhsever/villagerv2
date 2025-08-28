@@ -7,6 +7,7 @@ import 'package:fullproject/pages/house/house_detail/village/fund.dart';
 import 'package:fullproject/pages/house/house_detail/village/guard.dart';
 import 'package:fullproject/pages/house/house_detail/village/village_rule.dart';
 import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseVillageDetailPage extends StatefulWidget {
   final int? houseId;
@@ -19,17 +20,8 @@ class HouseVillageDetailPage extends StatefulWidget {
 
 class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
-  static const Color mutedBurntSienna = Color(0xFFC8755A);
+
+  late Future<VillageModel> _villageFuture;
 
   Future<VillageModel> _loaddata() async {
     try {
@@ -42,11 +34,17 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _villageFuture = _loaddata();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ivoryWhite, // เปลี่ยนจาก Colors.grey[50]
+      backgroundColor: ThemeColors.ivoryWhite, // เปลี่ยนจาก Colors.grey[50]
       body: FutureBuilder<VillageModel>(
-        future: _loaddata(),
+        future: _villageFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -55,14 +53,15 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                 children: [
                   CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      softBrown, // เปลี่ยนจาก Colors.teal[600]
+                      ThemeColors.softBrown, // เปลี่ยนจาก Colors.teal[600]
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'กำลังโหลดข้อมูล...',
                     style: TextStyle(
-                      color: earthClay, // เปลี่ยนจาก Colors.grey[600]
+                      color: ThemeColors.earthClay,
+                      // เปลี่ยนจาก Colors.grey[600]
                       fontSize: 14,
                     ),
                   ),
@@ -78,14 +77,16 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                 children: [
                   Icon(
                     Icons.error_outline,
-                    color: mutedBurntSienna, // เปลี่ยนจาก Colors.red[400]
+                    color: ThemeColors.mutedBurntSienna,
+                    // เปลี่ยนจาก Colors.red[400]
                     size: 64,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'เกิดข้อผิดพลาด',
                     style: TextStyle(
-                      color: clayOrange, // เปลี่ยนจาก Colors.red[700]
+                      color: ThemeColors.clayOrange,
+                      // เปลี่ยนจาก Colors.red[700]
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -94,7 +95,8 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                   Text(
                     '${snapshot.error}',
                     style: TextStyle(
-                      color: mutedBurntSienna, // เปลี่ยนจาก Colors.red[600]
+                      color: ThemeColors.mutedBurntSienna,
+                      // เปลี่ยนจาก Colors.red[600]
                       fontSize: 14,
                     ),
                     textAlign: TextAlign.center,
@@ -107,9 +109,9 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                     icon: const Icon(Icons.refresh),
                     label: const Text('ลองใหม่'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: burntOrange,
+                      backgroundColor: ThemeColors.burntOrange,
                       // เปลี่ยนจาก Colors.red[600]
-                      foregroundColor: ivoryWhite,
+                      foregroundColor: ThemeColors.ivoryWhite,
                       elevation: 2,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -126,7 +128,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
               child: Text(
                 'ไม่พบข้อมูล',
                 style: TextStyle(
-                  color: earthClay, // เปลี่ยนจาก Colors.grey[600]
+                  color: ThemeColors.earthClay, // เปลี่ยนจาก Colors.grey[600]
                   fontSize: 16,
                 ),
               ),
@@ -142,7 +144,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                 // Village Section
                 Card(
                   elevation: 6,
-                  shadowColor: softBrown.withOpacity(0.2),
+                  shadowColor: ThemeColors.softBrown.withOpacity(0.2),
                   // เปลี่ยน shadow color
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20), // เพิ่ม radius
@@ -155,8 +157,8 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          ivoryWhite,
-                          beige, // เปลี่ยนจาก Colors.teal[50]
+                          ThemeColors.ivoryWhite,
+                          ThemeColors.beige, // เปลี่ยนจาก Colors.teal[50]
                         ],
                       ),
                     ),
@@ -178,13 +180,15 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                                 padding: const EdgeInsets.all(14),
                                 // เพิ่ม padding
                                 decoration: BoxDecoration(
-                                  color: softBrown,
+                                  color: ThemeColors.softBrown,
                                   // เปลี่ยนจาก Colors.teal[600]
                                   borderRadius: BorderRadius.circular(16),
                                   // เพิ่ม radius
                                   boxShadow: [
                                     BoxShadow(
-                                      color: softBrown.withOpacity(0.3),
+                                      color: ThemeColors.softBrown.withOpacity(
+                                        0.3,
+                                      ),
                                       blurRadius: 12,
                                       offset: const Offset(0, 4),
                                     ),
@@ -204,7 +208,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                                     Text(
                                       '🏘️ หมู่บ้าน',
                                       style: TextStyle(
-                                        color: earthClay,
+                                        color: ThemeColors.earthClay,
                                         // เปลี่ยนจาก Colors.grey[600]
                                         fontSize: 15,
                                         fontWeight: FontWeight.w500,
@@ -232,7 +236,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                             icon: Icons.tag,
                             label: 'รหัสหมู่บ้าน',
                             value: data.villageId?.toString() ?? 'ไม่ระบุ',
-                            color: softBrown,
+                            color: ThemeColors.softBrown,
                           ),
                           const SizedBox(height: 20),
 
@@ -240,7 +244,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                             icon: Icons.location_on,
                             label: 'ที่อยู่',
                             value: data.address ?? 'ไม่ระบุที่อยู่',
-                            color: burntOrange,
+                            color: ThemeColors.burntOrange,
                           ),
                           const SizedBox(height: 20),
 
@@ -248,7 +252,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                             icon: Icons.phone,
                             label: 'เบอร์โทรศัพท์',
                             value: data.salePhone ?? 'ไม่ระบุ',
-                            color: oliveGreen,
+                            color: ThemeColors.oliveGreen,
                           ),
                         ],
                       ),
@@ -261,7 +265,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                 // Action Buttons Section
                 Card(
                   elevation: 6,
-                  shadowColor: softBrown.withOpacity(0.2),
+                  shadowColor: ThemeColors.softBrown.withOpacity(0.2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -272,7 +276,10 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [ivoryWhite, sandyTan.withOpacity(0.3)],
+                        colors: [
+                          ThemeColors.ivoryWhite,
+                          ThemeColors.sandyTan.withOpacity(0.3),
+                        ],
                       ),
                     ),
                     child: Padding(
@@ -286,11 +293,12 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: burntOrange,
+                                  color: ThemeColors.burntOrange,
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: burntOrange.withOpacity(0.3),
+                                      color: ThemeColors.burntOrange
+                                          .withOpacity(0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -325,7 +333,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                                   icon: Icons.security,
                                   title: 'เจ้าหน้าที่',
                                   subtitle: 'รักษาความปลอดภัย',
-                                  color: softBrown,
+                                  color: ThemeColors.softBrown,
                                   onTap: () {
                                     print(data.villageId);
                                     Navigator.push(
@@ -347,7 +355,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                                   icon: Icons.account_balance_wallet,
                                   title: 'กองทุน',
                                   subtitle: 'ข้อมูลการเงิน',
-                                  color: oliveGreen,
+                                  color: ThemeColors.oliveGreen,
                                   onTap: () {
                                     Navigator.push(
                                       context,
@@ -372,7 +380,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                                   icon: Icons.groups,
                                   title: 'คณะกรรมการ',
                                   subtitle: 'ข้อมูลคณะกรรมการหมู่บ้าน',
-                                  color: softTerracotta,
+                                  color: ThemeColors.softTerracotta,
                                   isFullWidth: true,
                                   onTap: () {
                                     Navigator.push(
@@ -393,7 +401,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                                   icon: Icons.rule,
                                   title: 'กฏหมู่บ้าน',
                                   subtitle: 'กฏของหมู่บ้านของท่าน',
-                                  color: oliveGreen,
+                                  color: ThemeColors.oliveGreen,
                                   onTap: () {
                                     Navigator.push(
                                       context,
@@ -487,7 +495,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                         subtitle,
                         style: TextStyle(
                           fontSize: 12,
-                          color: earthClay,
+                          color: ThemeColors.earthClay,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
@@ -514,9 +522,12 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
     return Container(
       padding: const EdgeInsets.all(16), // เพิ่ม padding รอบ row
       decoration: BoxDecoration(
-        color: sandyTan.withOpacity(0.3), // เพิ่มพื้นหลังแต่ละ row
+        color: ThemeColors.sandyTan.withOpacity(0.3), // เพิ่มพื้นหลังแต่ละ row
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: warmStone.withOpacity(0.3), width: 1),
+        border: Border.all(
+          color: ThemeColors.warmStone.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -538,7 +549,7 @@ class _HouseVillageDetailPageState extends State<HouseVillageDetailPage> {
                 Text(
                   label,
                   style: TextStyle(
-                    color: earthClay,
+                    color: ThemeColors.earthClay,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.3,

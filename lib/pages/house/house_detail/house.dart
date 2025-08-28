@@ -5,6 +5,7 @@ import 'package:fullproject/models/house_model.dart';
 import 'package:fullproject/models/village_model.dart';
 import 'package:fullproject/services/image_service.dart';
 import 'package:fullproject/widgets/logout_buttom.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseDetailPage extends StatefulWidget {
   final int? houseId;
@@ -22,16 +23,6 @@ class _HouseDetailPageState extends State<HouseDetailPage>
   late Animation<Offset> _slideAnimation;
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
 
   @override
   void initState() {
@@ -62,7 +53,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: beige,
+      backgroundColor: ThemeColors.beige,
       body: FutureBuilder(
         future: HouseDomain.getById(widget.houseId!),
         builder: (context, snapshot) {
@@ -100,11 +91,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       child: Container(
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -114,14 +105,14 @@ class _HouseDetailPageState extends State<HouseDetailPage>
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+              valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
               strokeWidth: 3,
             ),
             const SizedBox(height: 20),
             Text(
               'กำลังโหลดข้อมูลบ้าน...',
               style: TextStyle(
-                color: earthClay,
+                color: ThemeColors.earthClay,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -138,11 +129,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
         margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -154,12 +145,12 @@ class _HouseDetailPageState extends State<HouseDetailPage>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: clayOrange.withOpacity(0.1),
+                color: ThemeColors.clayOrange.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 Icons.error_outline_rounded,
-                color: clayOrange,
+                color: ThemeColors.clayOrange,
                 size: 48,
               ),
             ),
@@ -169,14 +160,14 @@ class _HouseDetailPageState extends State<HouseDetailPage>
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: softBrown,
+                color: ThemeColors.softBrown,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               error,
               textAlign: TextAlign.center,
-              style: TextStyle(color: earthClay, fontSize: 14),
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -184,8 +175,8 @@ class _HouseDetailPageState extends State<HouseDetailPage>
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('ลองใหม่'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: burntOrange,
-                foregroundColor: ivoryWhite,
+                backgroundColor: ThemeColors.burntOrange,
+                foregroundColor: ThemeColors.ivoryWhite,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -207,11 +198,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
         margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -220,14 +211,14 @@ class _HouseDetailPageState extends State<HouseDetailPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.home_outlined, size: 64, color: warmStone),
+            Icon(Icons.home_outlined, size: 64, color: ThemeColors.warmStone),
             const SizedBox(height: 16),
             Text(
               'ไม่พบข้อมูลบ้าน',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: softBrown,
+                color: ThemeColors.softBrown,
               ),
             ),
           ],
@@ -269,11 +260,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
   Widget _buildHouseImageCard(HouseModel house) {
     return Container(
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.1),
+            color: ThemeColors.earthClay.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -289,12 +280,12 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: burntOrange.withOpacity(0.1),
+                    color: ThemeColors.burntOrange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
                     Icons.photo_camera_rounded,
-                    color: burntOrange,
+                    color: ThemeColors.burntOrange,
                     size: 24,
                   ),
                 ),
@@ -304,7 +295,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: softBrown,
+                    color: ThemeColors.softBrown,
                   ),
                 ),
               ],
@@ -321,7 +312,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: earthClay.withOpacity(0.15),
+                    color: ThemeColors.earthClay.withOpacity(0.15),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -340,9 +331,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
               margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
               height: 150,
               decoration: BoxDecoration(
-                color: beige,
+                color: ThemeColors.beige,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: warmStone.withOpacity(0.3)),
+                border: Border.all(
+                  color: ThemeColors.warmStone.withOpacity(0.3),
+                ),
               ),
               child: Center(
                 child: Column(
@@ -351,12 +344,15 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                     Icon(
                       Icons.image_not_supported_rounded,
                       size: 48,
-                      color: warmStone,
+                      color: ThemeColors.warmStone,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'ไม่มีรูปภาพ',
-                      style: TextStyle(color: earthClay, fontSize: 14),
+                      style: TextStyle(
+                        color: ThemeColors.earthClay,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -371,7 +367,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     return _buildCard(
       title: 'ข้อมูลพื้นฐาน',
       icon: Icons.home_rounded,
-      iconColor: softBrown,
+      iconColor: ThemeColors.softBrown,
       children: [
         _buildInfoRow(
           'หมายเลขบ้าน',
@@ -406,7 +402,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     return _buildCard(
       title: 'รายละเอียด',
       icon: Icons.info_rounded,
-      iconColor: burntOrange,
+      iconColor: ThemeColors.burntOrange,
       children: [
         _buildInfoRow(
           'สถานะ',
@@ -436,7 +432,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     return _buildCard(
       title: 'ข้อมูลเจ้าของ',
       icon: Icons.person_rounded,
-      iconColor: oliveGreen,
+      iconColor: ThemeColors.oliveGreen,
       children: [
         _buildInfoRow(
           'ชื่อเจ้าของ',
@@ -461,11 +457,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     return Container(
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.08),
+            color: ThemeColors.earthClay.withOpacity(0.08),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -493,7 +489,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: softBrown,
+                    color: ThemeColors.softBrown,
                   ),
                 ),
               ],
@@ -513,13 +509,13 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: beige.withOpacity(0.5),
+        color: ThemeColors.beige.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: warmStone.withOpacity(0.2)),
+        border: Border.all(color: ThemeColors.warmStone.withOpacity(0.2)),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: earthClay),
+          Icon(icon, size: 20, color: ThemeColors.earthClay),
           const SizedBox(width: 12),
           Expanded(
             flex: 2,
@@ -527,7 +523,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
               label,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: earthClay,
+                color: ThemeColors.earthClay,
                 fontSize: 14,
               ),
             ),
@@ -537,7 +533,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
             child: Text(
               value,
               style: TextStyle(
-                color: softBrown,
+                color: ThemeColors.softBrown,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),

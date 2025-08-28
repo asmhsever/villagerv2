@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:fullproject/models/bill_model.dart';
 import 'package:fullproject/domains/bill_domain.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class BillPaymentPage extends StatefulWidget {
   final BillModel bill;
@@ -77,10 +78,10 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFFA47551), // Soft Brown
-              onPrimary: Color(0xFFFFFDF6), // Ivory White
-              surface: Color(0xFFFFFDF6), // Ivory White
-              onSurface: Color(0xFFA47551), // Soft Brown
+              primary: ThemeColors.softBrown, // Soft rown
+              onPrimary: ThemeColors.ivoryWhite, // Ivory White
+              surface: ThemeColors.ivoryWhite, // Ivory White
+              onSurface: ThemeColors.softBrown, // Soft Brown
             ),
           ),
           child: child!,
@@ -99,10 +100,10 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           return Theme(
             data: Theme.of(context).copyWith(
               colorScheme: const ColorScheme.light(
-                primary: Color(0xFFA47551), // Soft Brown
-                onPrimary: Color(0xFFFFFDF6), // Ivory White
-                surface: Color(0xFFFFFDF6), // Ivory White
-                onSurface: Color(0xFFA47551), // Soft Brown
+                primary: ThemeColors.softBrown, // Soft Brown
+                onPrimary: ThemeColors.ivoryWhite, // Ivory White
+                surface: ThemeColors.ivoryWhite, // Ivory White
+                onSurface: ThemeColors.softBrown, // Soft Brown
               ),
             ),
             child: child!,
@@ -166,7 +167,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFFFFFDF6),
+          backgroundColor: ThemeColors.ivoryWhite,
           // Ivory White
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -174,7 +175,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           title: const Text(
             'เลือกรูปภาพ',
             style: TextStyle(
-              color: Color(0xFFA47551), // Soft Brown
+              color: ThemeColors.softBrown, // Soft Brown
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
@@ -186,7 +187,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                 icon: Icons.camera_alt,
                 title: 'ถ่ายรูป',
                 subtitle: 'เปิดกล้องถ่ายรูปใหม่',
-                color: const Color(0xFFE08E45),
+                color: ThemeColors.burntOrange,
                 // Burnt Orange
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
@@ -195,7 +196,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                 icon: Icons.photo_library,
                 title: 'เลือกจากแกลเลอรี่',
                 subtitle: 'เลือกรูปที่มีอยู่แล้ว',
-                color: const Color(0xFFA3B18A),
+                color: ThemeColors.oliveGreen,
                 // Olive Green
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
@@ -205,7 +206,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFBFA18F), // Earth Clay
+                foregroundColor: ThemeColors.earthClay, // Earth Clay
               ),
               child: const Text('ยกเลิก'),
             ),
@@ -333,17 +334,17 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFDF6),
+        backgroundColor: ThemeColors.ivoryWhite,
         // Ivory White
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
-            Icon(Icons.help_outline, color: Color(0xFFA47551), size: 24),
+            Icon(Icons.help_outline, color: ThemeColors.softBrown, size: 24),
             SizedBox(width: 8),
             Text(
               'ยืนยันการชำระเงิน',
               style: TextStyle(
-                color: Color(0xFFA47551), // Soft Brown
+                color: ThemeColors.softBrown, // Soft Brown
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -362,7 +363,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F0E1), // Beige
+                color: ThemeColors.beige, // Beige
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -384,15 +385,15 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFBFA18F), // Earth Clay
+              foregroundColor: ThemeColors.earthClay, // Earth Clay
             ),
             child: const Text('ยกเลิก'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE08E45), // Burnt Orange
-              foregroundColor: const Color(0xFFFFFDF6), // Ivory White
+              backgroundColor: ThemeColors.burntOrange, // Burnt Orange
+              foregroundColor: ThemeColors.ivoryWhite, // Ivory White
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -416,7 +417,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 12,
-                color: Color(0xFFBFA18F), // Earth Clay
+                color: ThemeColors.earthClay, // Earth Clay
               ),
             ),
           ),
@@ -426,7 +427,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
-                color: Color(0xFFA47551), // Soft Brown
+                color: ThemeColors.softBrown, // Soft Brown
               ),
             ),
           ),
@@ -445,7 +446,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: const Color(0xFFA3B18A), // Olive Green
+        backgroundColor: ThemeColors.oliveGreen, // Olive Green
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -462,7 +463,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: const Color(0xFFD48B5C), // Soft Terracotta
+        backgroundColor: ThemeColors.softTerracotta, // Soft Terracotta
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -472,18 +473,18 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFDF6), // Ivory White
+      backgroundColor: ThemeColors.ivoryWhite, // Ivory White
       appBar: AppBar(
         title: const Text(
           'จ่ายบิล',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFFFFFDF6), // Ivory White
+            color: ThemeColors.ivoryWhite, // Ivory White
           ),
         ),
-        backgroundColor: const Color(0xFFA47551),
+        backgroundColor: ThemeColors.softBrown,
         // Soft Brown
-        foregroundColor: const Color(0xFFFFFDF6),
+        foregroundColor: ThemeColors.ivoryWhite,
         // Ivory White
         elevation: 0,
         actions: [
@@ -526,7 +527,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
 
   Widget _buildBillInfoCard() {
     return Card(
-      color: const Color(0xFFF5F0E1), // Beige
+      color: ThemeColors.beige, // Beige
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -539,13 +540,13 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFA47551).withOpacity(0.1),
+                    color: ThemeColors.softBrown.withOpacity(0.1),
                     // Soft Brown
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.receipt_long,
-                    color: Color(0xFFA47551), // Soft Brown
+                    color: ThemeColors.softBrown, // Soft Brown
                     size: 24,
                   ),
                 ),
@@ -555,7 +556,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFA47551), // Soft Brown
+                    color: ThemeColors.softBrown, // Soft Brown
                   ),
                 ),
                 const Spacer(),
@@ -583,9 +584,9 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFDF6), // Ivory White
+                color: ThemeColors.ivoryWhite, // Ivory White
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFD8CAB8)), // Sandy Tan
+                border: Border.all(color: ThemeColors.sandyTan), // Sandy Tan
               ),
               child: Column(
                 children: [
@@ -611,13 +612,13 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
   Color _getBillStatusColor() {
     switch (widget.bill.status) {
       case 'PENDING':
-        return const Color(0xFFE08E45); // Burnt Orange
+        return ThemeColors.burntOrange; // Burnt Orange
       case 'REJECTED':
-        return const Color(0xFFD48B5C); // Soft Terracotta
+        return ThemeColors.softTerracotta; // Soft Terracotta
       case 'OVERDUE':
-        return const Color(0xFFCC7748); // Clay Orange
+        return ThemeColors.clayOrange; // Clay Orange
       default:
-        return const Color(0xFFBFA18F); // Earth Clay
+        return ThemeColors.earthClay; // Earth Clay
     }
   }
 
@@ -644,7 +645,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
             child: Text(
               '$label:',
               style: const TextStyle(
-                color: Color(0xFFBFA18F), // Earth Clay
+                color: ThemeColors.earthClay, // Earth Clay
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
               ),
@@ -654,7 +655,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
             child: Text(
               value,
               style: const TextStyle(
-                color: Color(0xFFA47551), // Soft Brown
+                color: ThemeColors.softBrown, // Soft Brown
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
@@ -667,7 +668,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
 
   Widget _buildPaymentForm() {
     return Card(
-      color: const Color(0xFFFBF9F3), // Input Fill
+      color: ThemeColors.inputFill, // Input Fill
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -680,13 +681,13 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE08E45).withOpacity(0.1),
+                    color: ThemeColors.burntOrange.withOpacity(0.1),
                     // Burnt Orange
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.payment,
-                    color: Color(0xFFE08E45), // Burnt Orange
+                    color: ThemeColors.burntOrange, // Burnt Orange
                     size: 24,
                   ),
                 ),
@@ -696,7 +697,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFA47551), // Soft Brown
+                    color: ThemeColors.softBrown, // Soft Brown
                   ),
                 ),
               ],
@@ -738,7 +739,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           label,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
-            color: Color(0xFFA47551), // Soft Brown
+            color: ThemeColors.softBrown, // Soft Brown
             fontSize: 16,
           ),
         ),
@@ -748,34 +749,34 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           readOnly: true,
           onTap: onTap,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: const Color(0xFFE08E45)),
+            prefixIcon: Icon(icon, color: ThemeColors.burntOrange),
             // Burnt Orange
             suffixIcon: const Icon(
               Icons.keyboard_arrow_down,
-              color: Color(0xFFBFA18F),
+              color: ThemeColors.beige,
             ),
             filled: true,
-            fillColor: const Color(0xFFFFFDF6),
+            fillColor: ThemeColors.ivoryWhite,
             // Ivory White
             hintText: 'แตะเพื่อเลือกวันที่และเวลา',
-            hintStyle: const TextStyle(color: Color(0xFFC7B9A5)),
+            hintStyle: const TextStyle(color: ThemeColors.warmStone),
             // Warm Stone
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: Color(0xFFD0C4B0),
+                color: ThemeColors.softBrown,
               ), // Soft Border
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: Color(0xFFD0C4B0),
+                color: ThemeColors.softBrown,
               ), // Soft Border
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: Color(0xFF916846),
+                color: ThemeColors.focusedBrown,
                 width: 2,
               ), // Focused Brown
             ),
@@ -812,7 +813,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           label,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
-            color: Color(0xFFA47551), // Soft Brown
+            color: ThemeColors.softBrown, // Soft Brown
             fontSize: 16,
           ),
         ),
@@ -824,37 +825,37 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           inputFormatters: inputFormatters,
           maxLines: maxLines,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: const Color(0xFFE08E45)),
+            prefixIcon: Icon(icon, color: ThemeColors.burntOrange),
             // Burnt Orange
             filled: true,
-            fillColor: const Color(0xFFFFFDF6),
+            fillColor: ThemeColors.ivoryWhite,
             // Ivory White
             hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFFC7B9A5)),
+            hintStyle: const TextStyle(color: ThemeColors.warmStone),
             // Warm Stone
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: Color(0xFFD0C4B0),
+                color: ThemeColors.softBrown,
               ), // Soft Border
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: Color(0xFFD0C4B0),
+                color: ThemeColors.softBrown,
               ), // Soft Border
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: Color(0xFF916846),
+                color: ThemeColors.focusedBrown,
                 width: 2,
               ), // Focused Brown
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: Color(0xFFD48B5C),
+                color: ThemeColors.softTerracotta,
               ), // Soft Terracotta
             ),
             contentPadding: const EdgeInsets.symmetric(
@@ -875,7 +876,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           'แนบสลิปการโอนเงิน *',
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: Color(0xFFA47551), // Soft Brown
+            color: ThemeColors.softBrown, // Soft Brown
             fontSize: 16,
           ),
         ),
@@ -889,15 +890,16 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           decoration: BoxDecoration(
             border: Border.all(
               color: _hasSelectedImage()
-                  ? const Color(0xFFA3B18A) // Olive Green
-                  : const Color(0xFFD0C4B0), // Soft Border
+                  ? ThemeColors
+                        .oliveGreen // Olive Green
+                  : ThemeColors.softBrown, // Soft Border
               width: 2,
               style: _hasSelectedImage()
                   ? BorderStyle.solid
                   : BorderStyle.solid,
             ),
             borderRadius: BorderRadius.circular(16),
-            color: const Color(0xFFFFFDF6), // Ivory White
+            color: ThemeColors.ivoryWhite, // Ivory White
           ),
           child: _hasSelectedImage()
               ? Stack(
@@ -933,7 +935,8 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: const BoxDecoration(
-                            color: Color(0xFFD48B5C), // Soft Terracotta
+                            color:
+                                ThemeColors.softTerracotta, // Soft Terracotta
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -959,7 +962,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: const BoxDecoration(
-                            color: Color(0xFFE08E45), // Burnt Orange
+                            color: ThemeColors.burntOrange, // Burnt Orange
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -990,13 +993,13 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                         Icon(
                           Icons.add_photo_alternate,
                           size: 48,
-                          color: Color(0xFFE08E45), // Burnt Orange
+                          color: ThemeColors.burntOrange, // Burnt Orange
                         ),
                         SizedBox(height: 12),
                         Text(
                           'แตะเพื่อเลือกรูปภาพ',
                           style: TextStyle(
-                            color: Color(0xFFBFA18F), // Earth Clay
+                            color: ThemeColors.earthClay, // Earth Clay
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1005,7 +1008,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                         Text(
                           'สลิปการโอนเงิน',
                           style: TextStyle(
-                            color: Color(0xFFC7B9A5), // Warm Stone
+                            color: ThemeColors.warmStone, // Warm Stone
                             fontSize: 14,
                           ),
                         ),
@@ -1013,7 +1016,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                         Text(
                           'รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB',
                           style: TextStyle(
-                            color: Color(0xFFC7B9A5), // Warm Stone
+                            color: ThemeColors.warmStone, // Warm Stone
                             fontSize: 12,
                           ),
                         ),
@@ -1030,7 +1033,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
-        color: Color(0xFFFFFDF6), // Ivory White
+        color: ThemeColors.ivoryWhite, // Ivory White
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -1047,15 +1050,15 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F0E1), // Beige
+                color: ThemeColors.beige, // Beige
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFD8CAB8)), // Sandy Tan
+                border: Border.all(color: ThemeColors.sandyTan), // Sandy Tan
               ),
               child: Row(
                 children: [
                   const Icon(
                     Icons.account_balance_wallet,
-                    color: Color(0xFFA47551), // Soft Brown
+                    color: ThemeColors.softBrown, // Soft Brown
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -1064,7 +1067,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFFBFA18F), // Earth Clay
+                      color: ThemeColors.earthClay, // Earth Clay
                     ),
                   ),
                   const Spacer(),
@@ -1073,7 +1076,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFA47551), // Soft Brown
+                      color: ThemeColors.softBrown, // Soft Brown
                     ),
                   ),
                 ],
@@ -1089,9 +1092,9 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _submitPayment,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE08E45),
+                  backgroundColor: ThemeColors.burntOrange,
                   // Burnt Orange
-                  foregroundColor: const Color(0xFFFFFDF6),
+                  foregroundColor: ThemeColors.ivoryWhite,
                   // Ivory White
                   disabledBackgroundColor: const Color(0xFFDCDCDC),
                   // Disabled Grey
@@ -1099,7 +1102,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   elevation: 2,
-                  shadowColor: const Color(0xFFE08E45).withOpacity(0.3),
+                  shadowColor: ThemeColors.burntOrange.withOpacity(0.3),
                 ),
                 child: _isLoading
                     ? const Row(
@@ -1109,7 +1112,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                              color: Color(0xFFFFFDF6), // Ivory White
+                              color: ThemeColors.ivoryWhite, // Ivory White
                               strokeWidth: 2,
                             ),
                           ),
@@ -1149,17 +1152,17 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFDF6),
+        backgroundColor: ThemeColors.ivoryWhite,
         // Ivory White
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
-            Icon(Icons.help_center, color: Color(0xFFA47551), size: 24),
+            Icon(Icons.help_center, color: ThemeColors.softBrown, size: 24),
             SizedBox(width: 8),
             Text(
               'วิธีการชำระเงิน',
               style: TextStyle(
-                color: Color(0xFFA47551), // Soft Brown
+                color: ThemeColors.softBrown, // Soft Brown
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -1186,14 +1189,14 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F0E1), // Beige
+                  color: ThemeColors.beige, // Beige
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
                   '💡 หมายเหตุ: กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนส่ง เพื่อความรวดเร็วในการตรวจสอบ',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFFBFA18F), // Earth Clay
+                    color: ThemeColors.earthClay, // Earth Clay
                   ),
                 ),
               ),
@@ -1204,7 +1207,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFA47551), // Soft Brown
+              foregroundColor: ThemeColors.softBrown, // Soft Brown
             ),
             child: const Text('เข้าใจแล้ว'),
           ),
@@ -1223,7 +1226,7 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
             width: 24,
             height: 24,
             decoration: const BoxDecoration(
-              color: Color(0xFFE08E45), // Burnt Orange
+              color: ThemeColors.burntOrange, // Burnt Orange
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -1247,14 +1250,14 @@ class _BillPaymentPageState extends State<BillPaymentPage> {
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
-                    color: Color(0xFFA47551), // Soft Brown
+                    color: ThemeColors.softBrown, // Soft Brown
                   ),
                 ),
                 Text(
                   description,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xFFBFA18F), // Earth Clay
+                    color: ThemeColors.earthClay, // Earth Clay
                   ),
                 ),
               ],

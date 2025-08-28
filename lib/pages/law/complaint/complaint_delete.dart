@@ -5,6 +5,7 @@ import 'package:fullproject/domains/complaint_type_domain.dart';
 import 'package:fullproject/models/complaint_model.dart';
 import 'package:fullproject/models/complaint_type_model.dart';
 import 'package:fullproject/config/supabase_config.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'package:intl/intl.dart';
 
 class LawComplaintDeletePage extends StatefulWidget {
@@ -21,15 +22,6 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
   String? complaintTypeName;
   bool isLoading = false;
   bool isDeleting = false;
-
-  // Earthy Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
 
   @override
   void initState() {
@@ -96,15 +88,15 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
   Color getStatusColor(String? status) {
     switch (status) {
       case 'pending':
-        return burntOrange;
+        return ThemeColors.burntOrange;
       case 'in_progress':
         return Colors.blue;
       case 'resolved':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case null:
-        return warmStone;
+        return ThemeColors.warmStone;
       default:
-        return earthClay;
+        return ThemeColors.earthClay;
     }
   }
 
@@ -126,15 +118,15 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
   Color getLevelColor(String level) {
     switch (level) {
       case '1':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case '2':
         return Colors.orange;
       case '3':
-        return burntOrange;
+        return ThemeColors.burntOrange;
       case '4':
         return Colors.red;
       default:
-        return earthClay;
+        return ThemeColors.earthClay;
     }
   }
 
@@ -160,7 +152,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
@@ -226,13 +218,13 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
             const SizedBox(height: 16),
             Text(
               'คุณต้องการลบร้องเรียนนี้หรือไม่?',
-              style: TextStyle(color: earthClay, fontSize: 16),
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 16),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: beige,
+                color: ThemeColors.beige,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -241,7 +233,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                   Text(
                     'ข้อมูลที่จะถูกลบ:',
                     style: TextStyle(
-                      color: softBrown,
+                      color: ThemeColors.softBrown,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -249,24 +241,39 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                   const SizedBox(height: 8),
                   Text(
                     '• หัวข้อ: ${widget.complaint.header}',
-                    style: TextStyle(color: earthClay, fontSize: 13),
+                    style: TextStyle(
+                      color: ThemeColors.earthClay,
+                      fontSize: 13,
+                    ),
                   ),
                   Text(
                     '• บ้านเลขที่: ${houseNumber ?? widget.complaint.houseId}',
-                    style: TextStyle(color: earthClay, fontSize: 13),
+                    style: TextStyle(
+                      color: ThemeColors.earthClay,
+                      fontSize: 13,
+                    ),
                   ),
                   Text(
                     '• ประเภท: ${complaintTypeName ?? 'ไม่ระบุ'}',
-                    style: TextStyle(color: earthClay, fontSize: 13),
+                    style: TextStyle(
+                      color: ThemeColors.earthClay,
+                      fontSize: 13,
+                    ),
                   ),
                   Text(
                     '• สถานะ: ${getStatusLabel(widget.complaint.status)}',
-                    style: TextStyle(color: earthClay, fontSize: 13),
+                    style: TextStyle(
+                      color: ThemeColors.earthClay,
+                      fontSize: 13,
+                    ),
                   ),
                   if (widget.complaint.img?.isNotEmpty == true)
                     Text(
                       '• รูปภาพประกอบ: มี',
-                      style: TextStyle(color: earthClay, fontSize: 13),
+                      style: TextStyle(
+                        color: ThemeColors.earthClay,
+                        fontSize: 13,
+                      ),
                     ),
                 ],
               ),
@@ -277,7 +284,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             style: TextButton.styleFrom(
-              foregroundColor: warmStone,
+              foregroundColor: ThemeColors.warmStone,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             child: const Text(
@@ -289,7 +296,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
-              foregroundColor: ivoryWhite,
+              foregroundColor: ThemeColors.ivoryWhite,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -330,7 +337,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.check_circle, color: ivoryWhite),
+                Icon(Icons.check_circle, color: ThemeColors.ivoryWhite),
                 const SizedBox(width: 8),
                 const Text(
                   'ลบร้องเรียนสำเร็จ',
@@ -338,7 +345,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                 ),
               ],
             ),
-            backgroundColor: oliveGreen,
+            backgroundColor: ThemeColors.oliveGreen,
             duration: const Duration(seconds: 3),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -360,7 +367,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.error, color: ivoryWhite),
+                Icon(Icons.error, color: ThemeColors.ivoryWhite),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -378,7 +385,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
             ),
             action: SnackBarAction(
               label: 'ลองใหม่',
-              textColor: ivoryWhite,
+              textColor: ThemeColors.ivoryWhite,
               onPressed: () => _confirmDelete(),
             ),
           ),
@@ -400,7 +407,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
   }) {
     return Card(
       elevation: 3,
-      color: backgroundColor ?? ivoryWhite,
+      color: backgroundColor ?? ThemeColors.ivoryWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
@@ -413,10 +420,14 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: beige,
+                    color: ThemeColors.beige,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: iconColor ?? softBrown, size: 24),
+                  child: Icon(
+                    icon,
+                    color: iconColor ?? ThemeColors.softBrown,
+                    size: 24,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -424,7 +435,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: iconColor ?? softBrown,
+                    color: iconColor ?? ThemeColors.softBrown,
                   ),
                 ),
               ],
@@ -447,14 +458,17 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
             width: 120,
             child: Text(
               label,
-              style: TextStyle(color: earthClay, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: ThemeColors.earthClay,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               value,
               style: TextStyle(
-                color: valueColor ?? softBrown,
+                color: valueColor ?? ThemeColors.softBrown,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -470,10 +484,10 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
         widget.complaint.level == '3' || widget.complaint.level == '4';
 
     return Scaffold(
-      backgroundColor: beige,
+      backgroundColor: ThemeColors.beige,
       appBar: AppBar(
         backgroundColor: Colors.red,
-        foregroundColor: ivoryWhite,
+        foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
         title: const Text(
           'ลบร้องเรียน',
@@ -489,11 +503,11 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: softBrown),
+                  CircularProgressIndicator(color: ThemeColors.softBrown),
                   const SizedBox(height: 16),
                   Text(
                     'กำลังโหลดข้อมูล...',
-                    style: TextStyle(color: earthClay),
+                    style: TextStyle(color: ThemeColors.earthClay),
                   ),
                 ],
               ),
@@ -513,7 +527,11 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.delete_forever, color: ivoryWhite, size: 28),
+                        Icon(
+                          Icons.delete_forever,
+                          color: ThemeColors.ivoryWhite,
+                          size: 28,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -522,7 +540,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                               Text(
                                 'การลบข้อมูลถาวร',
                                 style: TextStyle(
-                                  color: ivoryWhite,
+                                  color: ThemeColors.ivoryWhite,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),
@@ -530,7 +548,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                               Text(
                                 'ข้อมูลที่ลบแล้วจะไม่สามารถกู้คืนได้',
                                 style: TextStyle(
-                                  color: ivoryWhite,
+                                  color: ThemeColors.ivoryWhite,
                                   fontSize: 12,
                                 ),
                               ),
@@ -548,17 +566,20 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                       padding: const EdgeInsets.all(16),
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
-                        color: burntOrange,
+                        color: ThemeColors.burntOrange,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.priority_high, color: ivoryWhite),
+                          Icon(
+                            Icons.priority_high,
+                            color: ThemeColors.ivoryWhite,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             'ร้องเรียนระดับความสำคัญสูง',
                             style: TextStyle(
-                              color: ivoryWhite,
+                              color: ThemeColors.ivoryWhite,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -646,8 +667,8 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                         'ความเป็นส่วนตัว:',
                         widget.complaint.isPrivate ? 'ส่วนตัว' : 'สาธารณะ',
                         valueColor: widget.complaint.isPrivate
-                            ? burntOrange
-                            : oliveGreen,
+                            ? ThemeColors.burntOrange
+                            : ThemeColors.oliveGreen,
                       ),
                     ],
                   ),
@@ -695,7 +716,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                             errorBuilder: (context, error, stackTrace) =>
                                 Container(
                                   height: 200,
-                                  color: beige,
+                                  color: ThemeColors.beige,
                                   child: Center(
                                     child: Column(
                                       mainAxisAlignment:
@@ -703,13 +724,15 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                                       children: [
                                         Icon(
                                           Icons.broken_image,
-                                          color: earthClay,
+                                          color: ThemeColors.earthClay,
                                           size: 48,
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
                                           'ไม่สามารถโหลดรูปภาพได้',
-                                          style: TextStyle(color: earthClay),
+                                          style: TextStyle(
+                                            color: ThemeColors.earthClay,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -727,10 +750,10 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           boxShadow: [
             BoxShadow(
-              color: softBrown.withValues(alpha: 0.1),
+              color: ThemeColors.softBrown.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, -2),
             ),
@@ -741,10 +764,13 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: isDeleting ? null : () => Navigator.pop(context),
-                icon: Icon(Icons.arrow_back, color: warmStone),
-                label: Text('ยกเลิก', style: TextStyle(color: warmStone)),
+                icon: Icon(Icons.arrow_back, color: ThemeColors.warmStone),
+                label: Text(
+                  'ยกเลิก',
+                  style: TextStyle(color: ThemeColors.warmStone),
+                ),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: warmStone),
+                  side: BorderSide(color: ThemeColors.warmStone),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -762,7 +788,9 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            ThemeColors.ivoryWhite,
+                          ),
                         ),
                       )
                     : const Icon(Icons.delete_forever),
@@ -772,7 +800,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
-                  foregroundColor: ivoryWhite,
+                  foregroundColor: ThemeColors.ivoryWhite,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),

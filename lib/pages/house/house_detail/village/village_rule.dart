@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/models/village_model.dart';
 import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class VillageRulesPage extends StatefulWidget {
   final VillageModel village;
@@ -38,19 +39,19 @@ class _VillageRulesPageState extends State<VillageRulesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFDF6), // Ivory White
+      backgroundColor: ThemeColors.ivoryWhite, // Ivory White
       appBar: AppBar(
         title: Text(
           'กฎของ${widget.village.name}',
           style: const TextStyle(
-            color: Color(0xFFFFFDF6), // Ivory White
+            color: ThemeColors.ivoryWhite, // Ivory White
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: const Color(0xFFA47551), // Soft Brown
+        backgroundColor: ThemeColors.softBrown, // Soft Brown
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFFFFFDF6)),
+          icon: const Icon(Icons.arrow_back_ios, color: ThemeColors.ivoryWhite),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -66,14 +67,14 @@ class _VillageRulesPageState extends State<VillageRulesPage> {
           Icon(
             Icons.rule_outlined,
             size: 80,
-            color: const Color(0xFFBFA18F), // Earth Clay
+            color: ThemeColors.earthClay, // Earth Clay
           ),
           const SizedBox(height: 16),
           Text(
             'ยังไม่มีกฎของหมู่บ้าน',
             style: TextStyle(
               fontSize: 18,
-              color: const Color(0xFFBFA18F), // Earth Clay
+              color: ThemeColors.earthClay, // Earth Clay
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -82,7 +83,7 @@ class _VillageRulesPageState extends State<VillageRulesPage> {
             'กฎของหมู่บ้านจะปรากฏที่นี่เมื่อมีการเพิ่ม',
             style: TextStyle(
               fontSize: 14,
-              color: const Color(0xFFC7B9A5), // Warm Stone
+              color: ThemeColors.warmStone, // Warm Stone
             ),
           ),
         ],
@@ -106,7 +107,7 @@ class _VillageRulesPageState extends State<VillageRulesPage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFFD0C4B0), // Soft Border
+          color: ThemeColors.softBorder, // Soft Border
           width: 1,
         ),
       ),

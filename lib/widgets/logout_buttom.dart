@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fullproject/navigation/app_navigation.dart';
 import 'package:fullproject/routes/app_routes.dart';
 import 'package:fullproject/services/auth_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class LogoutButtom extends StatelessWidget {
   const LogoutButtom({super.key});
@@ -19,7 +20,7 @@ class LogoutButtom extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Color(0xFFC7B9A5),
+              color: ThemeColors.warmStone,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(

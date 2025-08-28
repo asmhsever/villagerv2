@@ -3,6 +3,7 @@ import 'package:fullproject/domains/bill_domain.dart';
 import 'package:fullproject/models/bill_model.dart';
 import 'package:fullproject/pages/house/bill/pay_bill.dart';
 import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class BillDetailScreen extends StatefulWidget {
   final BillModel bill;
@@ -86,18 +87,18 @@ class _BillDetailScreenState extends State<BillDetailScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFDF6), // Ivory White
+      backgroundColor: ThemeColors.ivoryWhite, // Ivory White
       appBar: AppBar(
         title: Text(
           'บิลเลขที่ ${widget.bill.billId}',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFFFFFDF6), // Ivory White
+            color: ThemeColors.ivoryWhite, // Ivory White
           ),
         ),
-        backgroundColor: const Color(0xFFA47551),
+        backgroundColor: ThemeColors.softBrown,
         // Soft Brown
-        foregroundColor: const Color(0xFFFFFDF6),
+        foregroundColor: ThemeColors.ivoryWhite,
         // Ivory White
         elevation: 0,
         actions: [
@@ -116,11 +117,11 @@ class _BillDetailScreenState extends State<BillDetailScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: Color(0xFFA47551)),
+                  CircularProgressIndicator(color: ThemeColors.softBrown),
                   SizedBox(height: 16),
                   Text(
                     'กำลังโหลดข้อมูลบิล...',
-                    style: TextStyle(color: Color(0xFFBFA18F)),
+                    style: TextStyle(color: ThemeColors.earthClay),
                   ),
                 ],
               ),
@@ -135,19 +136,22 @@ class _BillDetailScreenState extends State<BillDetailScreen>
                   const Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: Color(0xFFD48B5C),
+                    color: ThemeColors.softTerracotta,
                   ),
                   const SizedBox(height: 16),
                   const Text(
                     'ไม่สามารถโหลดข้อมูลบิลได้',
-                    style: TextStyle(fontSize: 16, color: Color(0xFFBFA18F)),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: ThemeColors.earthClay,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _refreshBill,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE08E45),
-                      foregroundColor: const Color(0xFFFFFDF6),
+                      backgroundColor: ThemeColors.burntOrange,
+                      foregroundColor: ThemeColors.ivoryWhite,
                     ),
                     child: const Text('ลองอีกครั้ง'),
                   ),
@@ -188,7 +192,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
 
   Widget _buildStatusCard(BillModel bill) {
     return Card(
-      color: const Color(0xFFF5F0E1),
+      color: ThemeColors.beige,
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -215,7 +219,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFA47551),
+                    color: ThemeColors.softBrown,
                   ),
                 ),
               ],
@@ -246,7 +250,10 @@ class _BillDetailScreenState extends State<BillDetailScreen>
             Text(
               _getStatusDescription(bill.status),
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFFBFA18F), fontSize: 14),
+              style: const TextStyle(
+                color: ThemeColors.earthClay,
+                fontSize: 14,
+              ),
             ),
           ],
         ),
@@ -256,7 +263,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
 
   Widget _buildBillDetailsCard(BillModel bill) {
     return Card(
-      color: const Color(0xFFFBF9F3),
+      color: ThemeColors.inputFill,
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -269,12 +276,12 @@ class _BillDetailScreenState extends State<BillDetailScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFA47551).withOpacity(0.1),
+                    color: ThemeColors.softBrown.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.receipt_long,
-                    color: Color(0xFFA47551),
+                    color: ThemeColors.softBrown,
                     size: 24,
                   ),
                 ),
@@ -284,7 +291,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFA47551),
+                    color: ThemeColors.softBrown,
                   ),
                 ),
               ],
@@ -294,7 +301,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
             _buildDetailRow('บ้านเลขที่', bill.houseId.toString()),
             _buildDetailRow('วันที่ออกบิล', _formatDate(bill.billDate)),
             _buildDetailRow('วันครบกำหนด', _formatDate(bill.dueDate)),
-            const Divider(color: Color(0xFFD8CAB8)),
+            const Divider(color: ThemeColors.sandyTan),
             _buildDetailRow(
               'จำนวนเงิน',
               '฿${bill.amount.toStringAsFixed(2)}',
@@ -304,8 +311,8 @@ class _BillDetailScreenState extends State<BillDetailScreen>
               'สถานะการจ่าย',
               bill.paidStatus == 1 ? 'จ่ายแล้ว' : 'ยังไม่จ่าย',
               statusColor: bill.paidStatus == 1
-                  ? const Color(0xFFA3B18A)
-                  : const Color(0xFFE08E45),
+                  ? ThemeColors.oliveGreen
+                  : ThemeColors.burntOrange,
             ),
           ],
         ),
@@ -333,7 +340,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
               width: 6,
               height: 6,
               decoration: const BoxDecoration(
-                color: Color(0xFFA3B18A),
+                color: ThemeColors.oliveGreen,
                 shape: BoxShape.circle,
               ),
             ),
@@ -349,8 +356,8 @@ class _BillDetailScreenState extends State<BillDetailScreen>
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFD0C4B0), width: 1),
-          color: const Color(0xFFFFFDF6),
+          border: Border.all(color: ThemeColors.softBorder, width: 1),
+          color: ThemeColors.ivoryWhite,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -360,7 +367,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
             Text(
               tab['emptyMessage'],
               style: const TextStyle(
-                color: Color(0xFFBFA18F),
+                color: ThemeColors.earthClay,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -368,7 +375,10 @@ class _BillDetailScreenState extends State<BillDetailScreen>
             const SizedBox(height: 4),
             Text(
               tab['description'],
-              style: const TextStyle(color: Color(0xFFC7B9A5), fontSize: 12),
+              style: const TextStyle(
+                color: ThemeColors.warmStone,
+                fontSize: 12,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -381,10 +391,10 @@ class _BillDetailScreenState extends State<BillDetailScreen>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFFA3B18A).withOpacity(0.3),
+          color: ThemeColors.oliveGreen.withOpacity(0.3),
           width: 1,
         ),
-        color: const Color(0xFFFFFDF6),
+        color: ThemeColors.ivoryWhite,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
@@ -424,7 +434,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
 
   Widget _buildPaymentDetailsCard(BillModel bill) {
     return Card(
-      color: const Color(0xFFFBF9F3),
+      color: ThemeColors.inputFill,
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -437,12 +447,12 @@ class _BillDetailScreenState extends State<BillDetailScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFA3B18A).withOpacity(0.1),
+                    color: ThemeColors.oliveGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.payment,
-                    color: Color(0xFFA3B18A),
+                    color: ThemeColors.oliveGreen,
                     size: 24,
                   ),
                 ),
@@ -452,7 +462,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFA47551),
+                    color: ThemeColors.softBrown,
                   ),
                 ),
               ],
@@ -489,20 +499,20 @@ class _BillDetailScreenState extends State<BillDetailScreen>
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFD0C4B0), width: 1),
-          color: const Color(0xFFF5F0E1),
+          border: Border.all(color: ThemeColors.softBorder, width: 1),
+          color: ThemeColors.beige,
         ),
         child: const Row(
           children: [
             Icon(
               Icons.photo_library_outlined,
-              color: Color(0xFFBFA18F),
+              color: ThemeColors.earthClay,
               size: 20,
             ),
             SizedBox(width: 8),
             Text(
               'ยังไม่มีรูปภาพที่เกี่ยวข้อง',
-              style: TextStyle(color: Color(0xFFBFA18F), fontSize: 14),
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
             ),
           ],
         ),
@@ -512,7 +522,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(color: Color(0xFFD8CAB8)),
+        const Divider(color: ThemeColors.sandyTan),
         const SizedBox(height: 12),
 
         Row(
@@ -520,12 +530,12 @@ class _BillDetailScreenState extends State<BillDetailScreen>
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: const Color(0xFFE08E45).withOpacity(0.1),
+                color: ThemeColors.burntOrange.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: const Icon(
                 Icons.photo_library,
-                color: Color(0xFFE08E45),
+                color: ThemeColors.burntOrange,
                 size: 18,
               ),
             ),
@@ -535,7 +545,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFFA47551),
+                color: ThemeColors.softBrown,
               ),
             ),
           ],
@@ -545,20 +555,20 @@ class _BillDetailScreenState extends State<BillDetailScreen>
 
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F0E1),
+            color: ThemeColors.beige,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFD8CAB8), width: 1),
+            border: Border.all(color: ThemeColors.sandyTan, width: 1),
           ),
           child: TabBar(
             controller: _tabController,
             indicator: BoxDecoration(
-              color: const Color(0xFFA47551),
+              color: ThemeColors.softBrown,
               borderRadius: BorderRadius.circular(6),
             ),
             indicatorPadding: const EdgeInsets.all(3),
             dividerColor: Colors.transparent,
-            labelColor: const Color(0xFFFFFDF6),
-            unselectedLabelColor: const Color(0xFFBFA18F),
+            labelColor: ThemeColors.ivoryWhite,
+            unselectedLabelColor: ThemeColors.earthClay,
             labelStyle: const TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 11,
@@ -588,7 +598,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
-        color: Color(0xFFFFFDF6),
+        color: ThemeColors.ivoryWhite,
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -605,15 +615,15 @@ class _BillDetailScreenState extends State<BillDetailScreen>
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F0E1),
+                color: ThemeColors.beige,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFD8CAB8)),
+                border: Border.all(color: ThemeColors.sandyTan),
               ),
               child: Row(
                 children: [
                   const Icon(
                     Icons.info_outline,
-                    color: Color(0xFFE08E45),
+                    color: ThemeColors.burntOrange,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -622,7 +632,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
                       _getPaymentMessage(bill.status),
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(0xFFBFA18F),
+                        color: ThemeColors.earthClay,
                       ),
                     ),
                   ),
@@ -636,13 +646,13 @@ class _BillDetailScreenState extends State<BillDetailScreen>
               child: ElevatedButton(
                 onPressed: () => _navigateToPayment(bill),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE08E45),
-                  foregroundColor: const Color(0xFFFFFDF6),
+                  backgroundColor: ThemeColors.burntOrange,
+                  foregroundColor: ThemeColors.ivoryWhite,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   elevation: 2,
-                  shadowColor: const Color(0xFFE08E45).withOpacity(0.3),
+                  shadowColor: ThemeColors.burntOrange.withOpacity(0.3),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -683,7 +693,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
               '$label:',
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Color(0xFFBFA18F),
+                color: ThemeColors.earthClay,
                 fontSize: 14,
               ),
             ),
@@ -693,7 +703,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
               value,
               style: TextStyle(
                 fontWeight: isAmount ? FontWeight.bold : FontWeight.w500,
-                color: statusColor ?? const Color(0xFFA47551),
+                color: statusColor ?? ThemeColors.softBrown,
                 fontSize: isAmount ? 16 : 14,
               ),
             ),
@@ -724,7 +734,7 @@ class _BillDetailScreenState extends State<BillDetailScreen>
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('ฟีเจอร์ดาวน์โหลดจะพัฒนาในอนาคต'),
-                      backgroundColor: Color(0xFFA3B18A),
+                      backgroundColor: ThemeColors.oliveGreen,
                     ),
                   );
                 },
@@ -761,19 +771,19 @@ class _BillDetailScreenState extends State<BillDetailScreen>
   Color _getStatusColor(String status) {
     switch (status) {
       case 'PENDING':
-        return const Color(0xFFE08E45);
+        return ThemeColors.burntOrange;
       case 'UNDER_REVIEW':
-        return const Color(0xFFC7B9A5);
+        return ThemeColors.warmStone;
       case 'REJECTED':
-        return const Color(0xFFD48B5C);
+        return ThemeColors.softTerracotta;
       case 'RECEIPT_SENT':
-        return const Color(0xFFA3B18A);
+        return ThemeColors.oliveGreen;
       case 'OVERDUE':
-        return const Color(0xFFCC7748);
+        return ThemeColors.clayOrange;
       case 'REFUNDED':
-        return const Color(0xFFA3B18A);
+        return ThemeColors.oliveGreen;
       default:
-        return const Color(0xFFBFA18F);
+        return ThemeColors.earthClay;
     }
   }
 

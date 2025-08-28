@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/domains/bill_domain.dart';
 import 'package:fullproject/models/bill_model.dart';
+import 'package:fullproject/models/house_model.dart';
 import 'package:fullproject/pages/house/bill/bill_detail.dart';
+import 'package:fullproject/pages/house/widgets/appbar.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseBillPage extends StatefulWidget {
-  final int houseId;
+  final HouseModel houseData;
 
-  const HouseBillPage({super.key, required this.houseId});
+  const HouseBillPage({super.key, required this.houseData});
 
   @override
   State<HouseBillPage> createState() => _HouseBillPageState();
@@ -16,23 +19,13 @@ class _HouseBillPageState extends State<HouseBillPage> {
   late Future<List<BillModel>> _billsFuture;
   late Future<Map<String, dynamic>> _statsFuture;
 
-  String _currentFilter = 'all'; // all, paid, unpaid
-  String _currentStatus =
-      'all'; // all, DRAFT, PENDING, UNDER_REVIEW, REJECTED, RECEIPT_SENT, OVERDUE
+  String _currentFilter = 'all'; // all, paid, unpaid, under_review
 
   final List<Map<String, String>> _filterOptions = [
     {'value': 'all', 'label': 'ทั้งหมด'},
     {'value': 'unpaid', 'label': 'ยังไม่จ่าย'},
     {'value': 'paid', 'label': 'จ่ายแล้ว'},
-  ];
-
-  final List<Map<String, String>> _statusOptions = [
-    {'value': 'all', 'label': 'ทุกสถานะ'},
-    {'value': 'PENDING', 'label': 'รอชำระ'},
-    {'value': 'UNDER_REVIEW', 'label': 'กำลังตรวจสอบ'},
-    {'value': 'REJECTED', 'label': 'สลิปไม่ผ่าน'},
-    {'value': 'RECEIPT_SENT', 'label': 'เสร็จสิ้น'},
-    {'value': 'OVERDUE', 'label': 'เลยกำหนด'},
+    {'value': 'under_review', 'label': 'กำลังตรวจสอบ'},
   ];
 
   @override
@@ -47,34 +40,41 @@ class _HouseBillPageState extends State<HouseBillPage> {
   }
 
   void _loadBills() {
-    if (_currentStatus != 'all') {
-      _billsFuture = BillDomain.getByStatusInHouse(
-        widget.houseId,
-        _currentStatus,
-      );
-    } else {
-      switch (_currentFilter) {
-        case 'unpaid':
-          _billsFuture = BillDomain.getUnpaidByHouse(houseId: widget.houseId);
-          break;
-        case 'paid':
-          _billsFuture = BillDomain.getPaidByHouse(houseId: widget.houseId);
-          break;
-        default:
-          _billsFuture = BillDomain.getAllInHouse(houseId: widget.houseId);
-      }
+    switch (_currentFilter) {
+      case 'unpaid':
+        _billsFuture = BillDomain.getUnpaidByHouse(
+          houseId: widget.houseData.houseId,
+        );
+        break;
+      case 'paid':
+        _billsFuture = BillDomain.getPaidByHouse(
+          houseId: widget.houseData.houseId,
+        );
+        break;
+      case 'under_review':
+        _billsFuture = BillDomain.getByStatusInHouse(
+          houseId: widget.houseData.houseId,
+          status: "UNDER_REVIEW",
+        );
+        break;
+      default:
+        _billsFuture = BillDomain.getAllInHouse(
+          houseId: widget.houseData.houseId,
+        );
     }
   }
 
   void _loadStats() {
-    _statsFuture = BillDomain.getHousePaymentStats(widget.houseId);
+    _statsFuture = BillDomain.getHousePaymentStats(widget.houseData.houseId);
   }
 
   Future<Map<String, dynamic>> _loaddata() async {
     try {
-      final bills = await BillDomain.getHousePaymentStats(widget.houseId);
+      final bills = await BillDomain.getHousePaymentStats(
+        widget.houseData.houseId,
+      );
       final total_unpaid = await BillDomain.calUnpaidByHouse(
-        houseId: widget.houseId,
+        houseId: widget.houseData.houseId,
       );
       return {"total_unpaid": total_unpaid, "bills": bills};
     } catch (e) {
@@ -91,28 +91,6 @@ class _HouseBillPageState extends State<HouseBillPage> {
   void _changeFilter(String filter) {
     setState(() {
       _currentFilter = filter;
-      if (filter != 'all') {
-        _currentStatus = 'all'; // Reset status when changing filter
-      }
-      _loadBills();
-    });
-  }
-
-  void _changeStatus(String status) {
-    setState(() {
-      _currentStatus = status;
-      if (status != 'all') {
-        _currentFilter = 'all'; // Reset filter when changing status
-      }
-      _loadBills();
-    });
-  }
-
-  // เพิ่มฟังก์ชันสำหรับกรองบิลที่ยังไม่จ่าย
-  void _filterUnpaidBills() {
-    setState(() {
-      _currentFilter = 'unpaid';
-      _currentStatus = 'all';
       _loadBills();
     });
   }
@@ -120,17 +98,18 @@ class _HouseBillPageState extends State<HouseBillPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFDF6), // Ivory White
+      appBar: HouseAppBar(house: widget.houseData?.houseNumber),
+      backgroundColor: ThemeColors.ivoryWhite, // Ivory White
       body: RefreshIndicator(
-        color: const Color(0xFFA47551), // Soft Brown
+        color: ThemeColors.softBrown, // Soft Brown
         onRefresh: () async => _refreshData(),
         child: Column(
           children: [
-            // Stats Card with Pending Amount
-            _buildEnhancedStatsCard(),
+            // Simplified Stats Card
+            _buildSimplifiedStatsCard(),
 
-            // Filter Controls
-            _buildEnhancedFilterControls(),
+            // Simple Filter Controls
+            _buildSimpleFilterControls(),
 
             // Bills List
             Expanded(
@@ -144,7 +123,7 @@ class _HouseBillPageState extends State<HouseBillPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CircularProgressIndicator(
-                            color: Color(0xFFA47551), // Soft Brown
+                            color: ThemeColors.softBrown, // Soft Brown
                           ),
                           SizedBox(height: 16),
                           Text('กำลังโหลดข้อมูลบิล...'),
@@ -162,7 +141,8 @@ class _HouseBillPageState extends State<HouseBillPage> {
                           const Icon(
                             Icons.error_outline,
                             size: 64,
-                            color: Color(0xFFD48B5C), // Soft Terracotta
+                            color:
+                                ThemeColors.softTerracotta, // Soft Terracotta
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -172,7 +152,7 @@ class _HouseBillPageState extends State<HouseBillPage> {
                           const SizedBox(height: 16),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFE08E45),
+                              backgroundColor: ThemeColors.burntOrange,
                               // Burnt Orange
                               foregroundColor: Colors.white,
                             ),
@@ -193,7 +173,7 @@ class _HouseBillPageState extends State<HouseBillPage> {
                           const Icon(
                             Icons.receipt_long_outlined,
                             size: 64,
-                            color: Color(0xFFC7B9A5), // Warm Stone
+                            color: ThemeColors.warmStone, // Warm Stone
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -229,11 +209,10 @@ class _HouseBillPageState extends State<HouseBillPage> {
     );
   }
 
-  Widget _buildEnhancedStatsCard() {
+  Widget _buildSimplifiedStatsCard() {
     return Card(
       margin: const EdgeInsets.all(8),
-      color: const Color(0xFFF5F0E1),
-      // Beige
+      color: ThemeColors.beige,
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -246,7 +225,7 @@ class _HouseBillPageState extends State<HouseBillPage> {
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: CircularProgressIndicator(
-                    color: Color(0xFFA47551), // Soft Brown
+                    color: ThemeColors.softBrown, // Soft Brown
                   ),
                 ),
               );
@@ -259,161 +238,130 @@ class _HouseBillPageState extends State<HouseBillPage> {
             final data = snapshot.data!;
             final stats = data['bills'];
             final pendingAmount = data['total_unpaid'];
-            final totalBills = stats['total_bills'] ?? 0;
             final completedBills = stats['completed_bills'] ?? 0;
             final pendingBills = stats['pending_bills'] ?? 0;
             final rejectedBills = stats['rejected_bills'] ?? 0;
             final underReviewBills = stats['under_review_bills'] ?? 0;
             final overdueBills = stats['overdue_bills'] ?? 0;
 
+            // รวมสถานะรอชำระและตรวจสอบ
+            final waitingBills = pendingBills + underReviewBills;
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'สรุปข้อมูลบิล',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFFA47551), // Soft Brown
-                      ),
-                    ),
-                    // ปุ่มบิลที่ยังไม่จ่าย
-                    ElevatedButton.icon(
-                      onPressed: _filterUnpaidBills,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE08E45),
-                        // Burnt Orange
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                      ),
-                      icon: const Icon(Icons.filter_list, size: 18),
-                      label: const Text(
-                        'บิลยังไม่จ่าย',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                // Text(
+                //   'สรุปข้อมูลบิล',
+                //   style: TextStyle(
+                //     fontSize: 20,
+                //     fontWeight: FontWeight.bold,
+                //     color: ThemeColors.softBrown, // Soft Brown
+                //   ),
+                // ),
+                // const SizedBox(height: 16),
 
-                // ยอดเงินค้างชำระ
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFFE08E45).withOpacity(0.1),
-                        // Burnt Orange
-                        const Color(0xFFD48B5C).withOpacity(0.1),
-                        // Soft Terracotta
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFE08E45).withOpacity(0.3),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.account_balance_wallet,
-                            color: const Color(0xFFE08E45),
-                            size: 24,
+                // แถวยอดเงินและสถานะ
+                Row(
+                  children: [
+                    // ยอดเงินค้างชำระ
+                    Expanded(
+                      flex: 2,
+                      child: GestureDetector(
+                        onTap: () => _changeFilter('unpaid'),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                ThemeColors.burntOrange.withOpacity(0.15),
+                                ThemeColors.softTerracotta.withOpacity(0.15),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: ThemeColors.burntOrange.withOpacity(0.3),
+                              width: 1.5,
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'ยอดเงินค้างชำระ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFFE08E45),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.account_balance_wallet,
+                                    color: ThemeColors.burntOrange,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'ค้างชำระ',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: ThemeColors.burntOrange,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '฿${pendingAmount.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: ThemeColors.clayOrange,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'คลิกดูรายละเอียด',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: ThemeColors.earthClay,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    // สถานะแยกออกมา
+                    Expanded(
+                      flex: 3,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildSimpleStatItem(
+                              'เสร็จสิ้น',
+                              completedBills.toString(),
+                              ThemeColors.oliveGreen, // Olive Green
+                              Icons.check_circle,
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildSimpleStatItem(
+                              'รอดำเนินการ',
+                              waitingBills.toString(),
+                              ThemeColors.burntOrange, // Burnt Orange
+                              Icons.pending,
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildSimpleStatItem(
+                              'ไม่ผ่าน',
+                              rejectedBills.toString(),
+                              ThemeColors.softTerracotta, // Soft Terracotta
+                              Icons.cancel,
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '฿${pendingAmount.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFFCC7748), // Clay Orange
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'จาก ${pendingBills + rejectedBills + overdueBills} ใบ',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: const Color(0xFFBFA18F), // Earth Clay
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // สถิติแยกตามประเภท
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatItem(
-                        'ทั้งหมด',
-                        totalBills.toString(),
-                        const Color(0xFFA47551), // Soft Brown
-                        Icons.receipt_long,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildStatItem(
-                        'เสร็จสิ้น',
-                        completedBills.toString(),
-                        const Color(0xFFA3B18A), // Olive Green
-                        Icons.check_circle,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildStatItem(
-                        'รอชำระ',
-                        pendingBills.toString(),
-                        const Color(0xFFE08E45), // Burnt Orange
-                        Icons.pending,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildStatItem(
-                        'ตรวจสอบ',
-                        underReviewBills.toString(),
-                        const Color(0xFFC7B9A5), // Warm Stone
-                        Icons.search,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildStatItem(
-                        'ไม่ผ่าน',
-                        rejectedBills.toString(),
-                        const Color(0xFFD48B5C), // Soft Terracotta
-                        Icons.cancel,
                       ),
                     ),
                   ],
@@ -426,7 +374,7 @@ class _HouseBillPageState extends State<HouseBillPage> {
     );
   }
 
-  Widget _buildStatItem(
+  Widget _buildSimpleStatItem(
     String label,
     String value,
     Color color,
@@ -442,23 +390,23 @@ class _HouseBillPageState extends State<HouseBillPage> {
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             value,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: color,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
-              color: const Color(0xFFBFA18F), // Earth Clay
+              fontSize: 10,
+              color: ThemeColors.earthClay, // Earth Clay
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -468,197 +416,81 @@ class _HouseBillPageState extends State<HouseBillPage> {
     );
   }
 
-  Widget _buildEnhancedFilterControls() {
+  Widget _buildSimpleFilterControls() {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: const Color(0xFFFBF9F3),
-      // Input Fill
+      color: ThemeColors.inputFill,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.filter_alt_outlined,
-                  color: const Color(0xFFA47551), // Soft Brown
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'กรองข้อมูล',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFFA47551), // Soft Brown
-                  ),
-                ),
-              ],
+            Icon(
+              Icons.filter_alt_outlined,
+              color: ThemeColors.softBrown,
+              size: 20,
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'สถานะการจ่าย',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFFBFA18F), // Earth Clay
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _currentStatus == 'all'
-                                ? const Color(0xFFD0C4B0) // Soft Border
-                                : const Color(0xFFDCDCDC), // Disabled Grey
-                          ),
-                          color: _currentStatus == 'all'
-                              ? Colors.white
-                              : const Color(0xFFDCDCDC).withOpacity(0.3),
-                        ),
-                        child: DropdownButtonFormField<String>(
-                          value: _currentFilter,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+            const SizedBox(width: 8),
+            Text(
+              'กรองข้อมูล:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: ThemeColors.softBrown,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: ThemeColors.softBorder),
+                  color: Colors.white,
+                ),
+                child: DropdownButtonFormField<String>(
+                  value: _currentFilter,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    border: InputBorder.none,
+                  ),
+                  dropdownColor: ThemeColors.inputFill,
+                  style: TextStyle(
+                    color: ThemeColors.softBrown,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  items: _filterOptions.map((option) {
+                    return DropdownMenuItem<String>(
+                      value: option['value'],
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: _getFilterColor(option['value']!),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            border: InputBorder.none,
                           ),
-                          dropdownColor: const Color(0xFFFBF9F3),
-                          // Input Fill
-                          style: TextStyle(
-                            color: _currentStatus == 'all'
-                                ? const Color(0xFFA47551) // Soft Brown
-                                : const Color(0xFFBFA18F), // Earth Clay
-                            fontWeight: FontWeight.w500,
-                          ),
-                          items: _filterOptions.map((option) {
-                            return DropdownMenuItem<String>(
-                              value: option['value'],
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 12,
-                                    height: 12,
-                                    decoration: BoxDecoration(
-                                      color: _getFilterColor(option['value']!),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(option['label']!),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: _currentStatus == 'all'
-                              ? (value) {
-                                  if (value != null) _changeFilter(value);
-                                }
-                              : null,
-                          icon: Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: _currentStatus == 'all'
-                                ? const Color(0xFFA47551) // Soft Brown
-                                : const Color(0xFFBFA18F), // Earth Clay
-                          ),
-                        ),
+                          const SizedBox(width: 8),
+                          Text(option['label']!),
+                        ],
                       ),
-                    ],
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) _changeFilter(value);
+                  },
+                  icon: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: ThemeColors.softBrown,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'สถานะบิล',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFFBFA18F), // Earth Clay
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _currentFilter == 'all'
-                                ? const Color(0xFFD0C4B0) // Soft Border
-                                : const Color(0xFFDCDCDC), // Disabled Grey
-                          ),
-                          color: _currentFilter == 'all'
-                              ? Colors.white
-                              : const Color(0xFFDCDCDC).withOpacity(0.3),
-                        ),
-                        child: DropdownButtonFormField<String>(
-                          value: _currentStatus,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                          dropdownColor: const Color(0xFFFBF9F3),
-                          // Input Fill
-                          style: TextStyle(
-                            color: _currentFilter == 'all'
-                                ? const Color(0xFFA47551) // Soft Brown
-                                : const Color(0xFFBFA18F), // Earth Clay
-                            fontWeight: FontWeight.w500,
-                          ),
-                          items: _statusOptions.map((option) {
-                            return DropdownMenuItem<String>(
-                              value: option['value'],
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 12,
-                                    height: 12,
-                                    decoration: BoxDecoration(
-                                      color: _getStatusColor(option['value']!),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(option['label']!),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: _currentFilter == 'all'
-                              ? (value) {
-                                  if (value != null) _changeStatus(value);
-                                }
-                              : null,
-                          icon: Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: _currentFilter == 'all'
-                                ? const Color(0xFFA47551) // Soft Brown
-                                : const Color(0xFFBFA18F), // Earth Clay
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),
@@ -669,41 +501,24 @@ class _HouseBillPageState extends State<HouseBillPage> {
   Color _getFilterColor(String filter) {
     switch (filter) {
       case 'unpaid':
-        return const Color(0xFFE08E45); // Burnt Orange
+        return ThemeColors.burntOrange; // Burnt Orange
       case 'paid':
-        return const Color(0xFFA3B18A); // Olive Green
+        return ThemeColors.oliveGreen; // Olive Green
+      case 'under_review':
+        return ThemeColors.warmStone; // Warm Stone
       default:
-        return const Color(0xFFA47551); // Soft Brown
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'PENDING':
-        return const Color(0xFFE08E45); // Burnt Orange
-      case 'UNDER_REVIEW':
-        return const Color(0xFFC7B9A5); // Warm Stone
-      case 'REJECTED':
-        return const Color(0xFFD48B5C); // Soft Terracotta
-      case 'RECEIPT_SENT':
-        return const Color(0xFFA3B18A); // Olive Green
-      case 'OVERDUE':
-        return const Color(0xFFCC7748); // Clay Orange
-      default:
-        return const Color(0xFFA47551); // Soft Brown
+        return ThemeColors.softBrown; // Soft Brown
     }
   }
 
   String _getEmptyMessage() {
-    if (_currentStatus != 'all') {
-      return 'ไม่มีบิลสถานะ ${_statusOptions.firstWhere((e) => e['value'] == _currentStatus)['label']}';
-    }
-
     switch (_currentFilter) {
       case 'unpaid':
         return 'ไม่มีบิลที่ยังไม่จ่าย';
       case 'paid':
         return 'ไม่มีบิลที่จ่ายแล้ว';
+      case 'under_review':
+        return 'ไม่มีบิลที่กำลังตรวจสอบ';
       default:
         return 'ไม่มีข้อมูลบิล';
     }
@@ -736,8 +551,7 @@ class BillCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: const Color(0xFFFBF9F3),
-      // Input Fill
+      color: ThemeColors.inputFill,
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
         leading: Container(
@@ -765,7 +579,7 @@ class BillCard extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            color: const Color(0xFFA47551), // Soft Brown
+            color: ThemeColors.softBrown,
           ),
         ),
         subtitle: Column(
@@ -777,13 +591,13 @@ class BillCard extends StatelessWidget {
                 Icon(
                   Icons.account_balance_wallet_outlined,
                   size: 16,
-                  color: const Color(0xFFBFA18F), // Earth Clay
+                  color: ThemeColors.earthClay,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   'จำนวนเงิน: ฿${bill.amount.toStringAsFixed(2)}',
                   style: TextStyle(
-                    color: const Color(0xFFBFA18F), // Earth Clay
+                    color: ThemeColors.earthClay,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -795,14 +609,12 @@ class BillCard extends StatelessWidget {
                 Icon(
                   Icons.event_outlined,
                   size: 16,
-                  color: const Color(0xFFBFA18F), // Earth Clay
+                  color: ThemeColors.earthClay,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   'วันครบกำหนด: ${_formatDate(bill.dueDate)}',
-                  style: TextStyle(
-                    color: const Color(0xFFBFA18F), // Earth Clay
-                  ),
+                  style: TextStyle(color: ThemeColors.earthClay),
                 ),
               ],
             ),
@@ -823,7 +635,7 @@ class BillCard extends StatelessWidget {
                 ),
               ),
               child: Text(
-                _getStatusText(),
+                _getSimpleStatusText(),
                 style: TextStyle(
                   color: _getStatusColor(),
                   fontWeight: FontWeight.w600,
@@ -843,11 +655,11 @@ class BillCard extends StatelessWidget {
     if (bill.status == 'PENDING' && bill.paidStatus == 0) {
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFE08E45), // Burnt Orange
+          color: ThemeColors.burntOrange,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFE08E45).withOpacity(0.3),
+              color: ThemeColors.burntOrange.withOpacity(0.3),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -861,7 +673,7 @@ class BillCard extends StatelessWidget {
     } else if (bill.status == 'RECEIPT_SENT') {
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFA3B18A), // Olive Green
+          color: ThemeColors.oliveGreen,
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Padding(
@@ -872,11 +684,11 @@ class BillCard extends StatelessWidget {
     } else if (bill.status == 'REJECTED') {
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFD48B5C), // Soft Terracotta
+          color: ThemeColors.softTerracotta,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFD48B5C).withOpacity(0.3),
+              color: ThemeColors.softTerracotta.withOpacity(0.3),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -908,19 +720,18 @@ class BillCard extends StatelessWidget {
   Color _getStatusColor() {
     switch (bill.status) {
       case 'PENDING':
-        return const Color(0xFFE08E45); // Burnt Orange
       case 'UNDER_REVIEW':
-        return const Color(0xFFC7B9A5); // Warm Stone
+        return ThemeColors.sandyTan; // Burnt Orange - รวมรอชำระและตรวจสอบ
       case 'REJECTED':
-        return const Color(0xFFD48B5C); // Soft Terracotta
+        return ThemeColors.softTerracotta; // Soft Terracotta
       case 'RECEIPT_SENT':
-        return const Color(0xFFA3B18A); // Olive Green
+        return ThemeColors.oliveGreen; // Olive Green
       case 'OVERDUE':
-        return const Color(0xFFCC7748); // Clay Orange
+        return ThemeColors.clayOrange; // Clay Orange
       default:
         return bill.paidStatus == 1
-            ? const Color(0xFFA3B18A) // Olive Green
-            : const Color(0xFFE08E45); // Burnt Orange
+            ? ThemeColors.oliveGreen
+            : ThemeColors.burntOrange;
     }
   }
 
@@ -943,20 +754,20 @@ class BillCard extends StatelessWidget {
     }
   }
 
-  String _getStatusText() {
+  String _getSimpleStatusText() {
     switch (bill.status) {
       case 'PENDING':
         return 'รอชำระ';
       case 'UNDER_REVIEW':
         return 'กำลังตรวจสอบ';
       case 'REJECTED':
-        return 'สลิปไม่ผ่าน';
+        return 'ไม่ผ่าน';
       case 'RECEIPT_SENT':
         return 'เสร็จสิ้น';
       case 'OVERDUE':
         return 'เลยกำหนด';
       default:
-        return bill.paidStatus == 1 ? 'จ่ายแล้ว' : 'ยังไม่จ่าย';
+        return bill.paidStatus == 1 ? 'เสร็จสิ้น' : 'รอดำเนินการ';
     }
   }
 
@@ -983,21 +794,19 @@ class BillCard extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFBF9F3),
-        // Input Fill
+        backgroundColor: ThemeColors.inputFill,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFE08E45).withOpacity(0.2),
-                // Burnt Orange
+                color: ThemeColors.burntOrange.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.payment,
-                color: Color(0xFFE08E45),
+                color: ThemeColors.burntOrange,
                 size: 24,
               ),
             ),
@@ -1008,7 +817,7 @@ class BillCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFA47551), // Soft Brown
+                  color: ThemeColors.softBrown,
                 ),
               ),
             ),
@@ -1017,12 +826,9 @@ class BillCard extends StatelessWidget {
         content: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F0E1), // Beige
+            color: ThemeColors.beige,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: const Color(0xFFD0C4B0), // Soft Border
-              width: 1,
-            ),
+            border: Border.all(color: ThemeColors.softBorder, width: 1),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1031,7 +837,7 @@ class BillCard extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.receipt_long,
-                    color: Color(0xFFA47551), // Soft Brown
+                    color: ThemeColors.softBrown,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -1039,7 +845,7 @@ class BillCard extends StatelessWidget {
                     'บิลเลขที่: ${bill.billId}',
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFA47551), // Soft Brown
+                      color: ThemeColors.softBrown,
                     ),
                   ),
                 ],
@@ -1049,7 +855,7 @@ class BillCard extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.account_balance_wallet,
-                    color: Color(0xFFE08E45), // Burnt Orange
+                    color: ThemeColors.burntOrange,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -1058,7 +864,7 @@ class BillCard extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: Color(0xFFE08E45), // Burnt Orange
+                      color: ThemeColors.burntOrange,
                     ),
                   ),
                 ],
@@ -1067,15 +873,14 @@ class BillCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFC7B9A5).withOpacity(0.2),
-                  // Warm Stone
+                  color: ThemeColors.warmStone.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Row(
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: Color(0xFFC7B9A5), // Warm Stone
+                      color: ThemeColors.warmStone,
                       size: 16,
                     ),
                     SizedBox(width: 6),
@@ -1084,7 +889,7 @@ class BillCard extends StatelessWidget {
                         'หลังจากยืนยันการชำระ บิลจะถูกส่งไปตรวจสอบ',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFFBFA18F), // Earth Clay
+                          color: ThemeColors.earthClay,
                         ),
                       ),
                     ),
@@ -1098,7 +903,7 @@ class BillCard extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFBFA18F), // Earth Clay
+              foregroundColor: ThemeColors.earthClay,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
             child: const Text(
@@ -1112,8 +917,7 @@ class BillCard extends StatelessWidget {
               await _markAsPaid(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE08E45),
-              // Burnt Orange
+              backgroundColor: ThemeColors.burntOrange,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               shape: RoundedRectangleBorder(
@@ -1145,21 +949,19 @@ class BillCard extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFBF9F3), // Input Fill
+        backgroundColor: ThemeColors.inputFill,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: const Padding(
           padding: EdgeInsets.all(20),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(
-                color: Color(0xFFE08E45), // Burnt Orange
-              ),
+              CircularProgressIndicator(color: ThemeColors.burntOrange),
               SizedBox(width: 20),
               Text(
                 'กำลังประมวลผล...',
                 style: TextStyle(
-                  color: Color(0xFFA47551), // Soft Brown
+                  color: ThemeColors.softBrown,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -1174,7 +976,6 @@ class BillCard extends StatelessWidget {
         billId: bill.billId,
         paidStatus: 1,
         status: 'UNDER_REVIEW',
-        // เปลี่ยนสถานะเป็นรอตรวจสอบ
         paidDate: DateTime.now().toIso8601String().split('T')[0],
         paidMethod: 'manual',
       );
@@ -1186,8 +987,7 @@ class BillCard extends StatelessWidget {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: const Color(0xFFFBF9F3),
-            // Input Fill
+            backgroundColor: ThemeColors.inputFill,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -1196,13 +996,12 @@ class BillCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFA3B18A).withOpacity(0.2),
-                    // Olive Green
+                    color: ThemeColors.oliveGreen.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.check_circle,
-                    color: Color(0xFFA3B18A),
+                    color: ThemeColors.oliveGreen,
                     size: 24,
                   ),
                 ),
@@ -1211,7 +1010,7 @@ class BillCard extends StatelessWidget {
                   child: Text(
                     'สำเร็จ!',
                     style: TextStyle(
-                      color: Color(0xFFA3B18A), // Olive Green
+                      color: ThemeColors.oliveGreen,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1220,15 +1019,13 @@ class BillCard extends StatelessWidget {
             ),
             content: const Text(
               'ส่งการชำระเงินแล้ว กำลังรอการตรวจสอบ',
-              style: TextStyle(
-                color: Color(0xFFBFA18F), // Earth Clay
-              ),
+              style: TextStyle(color: ThemeColors.earthClay),
             ),
             actions: [
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFA3B18A), // Olive Green
+                  backgroundColor: ThemeColors.oliveGreen,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
@@ -1245,8 +1042,7 @@ class BillCard extends StatelessWidget {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: const Color(0xFFFBF9F3),
-            // Input Fill
+            backgroundColor: ThemeColors.inputFill,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -1255,13 +1051,12 @@ class BillCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD48B5C).withOpacity(0.2),
-                    // Soft Terracotta
+                    color: ThemeColors.softTerracotta.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.error_outline,
-                    color: Color(0xFFD48B5C),
+                    color: ThemeColors.softTerracotta,
                     size: 24,
                   ),
                 ),
@@ -1270,7 +1065,7 @@ class BillCard extends StatelessWidget {
                   child: Text(
                     'เกิดข้อผิดพลาด',
                     style: TextStyle(
-                      color: Color(0xFFD48B5C), // Soft Terracotta
+                      color: ThemeColors.softTerracotta,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1279,16 +1074,13 @@ class BillCard extends StatelessWidget {
             ),
             content: const Text(
               'ไม่สามารถชำระเงินได้ กรุณาลองใหม่อีกครั้ง',
-              style: TextStyle(
-                color: Color(0xFFBFA18F), // Earth Clay
-              ),
+              style: TextStyle(color: ThemeColors.earthClay),
             ),
             actions: [
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD48B5C),
-                  // Soft Terracotta
+                  backgroundColor: ThemeColors.softTerracotta,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
@@ -1306,29 +1098,26 @@ class BillCard extends StatelessWidget {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFFFBF9F3),
-          // Input Fill
+          backgroundColor: ThemeColors.inputFill,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           title: const Text(
             'เกิดข้อผิดพลาด',
             style: TextStyle(
-              color: Color(0xFFD48B5C), // Soft Terracotta
+              color: ThemeColors.softTerracotta,
               fontWeight: FontWeight.bold,
             ),
           ),
           content: Text(
             'เกิดข้อผิดพลาด: $e',
-            style: const TextStyle(
-              color: Color(0xFFBFA18F), // Earth Clay
-            ),
+            style: const TextStyle(color: ThemeColors.earthClay),
           ),
           actions: [
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD48B5C), // Soft Terracotta
+                backgroundColor: ThemeColors.softTerracotta,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),

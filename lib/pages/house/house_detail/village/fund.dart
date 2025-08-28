@@ -3,6 +3,7 @@ import 'package:fullproject/domains/funds_domain.dart';
 import 'package:fullproject/models/funds_model.dart';
 import 'package:fullproject/pages/house/house_detail/village/fund_detail.dart';
 import 'package:intl/intl.dart';
+import 'package:fullproject/theme/Color.dart';
 
 // Fund Page with Natural Earth Theme using FutureBuilder
 class HouseFundPage extends StatefulWidget {
@@ -22,16 +23,6 @@ class _HouseFundPageState extends State<HouseFundPage> {
   String _selectedFilter = 'all'; // 'all', 'income', 'outcome'
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
 
   Future<void> _refreshData() async {
     setState(() {});
@@ -78,9 +69,9 @@ class _HouseFundPageState extends State<HouseFundPage> {
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: beige,
+        color: ThemeColors.beige,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: sandyTan, width: 1),
+        border: Border.all(color: ThemeColors.sandyTan, width: 1),
       ),
       child: Row(
         children: [
@@ -109,10 +100,10 @@ class _HouseFundPageState extends State<HouseFundPage> {
   Widget _buildFilterTab(String filter, String label, IconData icon) {
     final isSelected = _selectedFilter == filter;
     final color = filter == 'income'
-        ? oliveGreen
+        ? ThemeColors.oliveGreen
         : filter == 'outcome'
-        ? burntOrange
-        : softBrown;
+        ? ThemeColors.burntOrange
+        : ThemeColors.softBrown;
 
     return GestureDetector(
       onTap: () {
@@ -130,12 +121,16 @@ class _HouseFundPageState extends State<HouseFundPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 16, color: isSelected ? color : warmStone),
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? color : ThemeColors.warmStone,
+            ),
             SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? color : warmStone,
+                color: isSelected ? color : ThemeColors.warmStone,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 fontSize: 13,
               ),
@@ -152,11 +147,11 @@ class _HouseFundPageState extends State<HouseFundPage> {
       margin: EdgeInsets.fromLTRB(16, 16, 16, 8),
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: softBrown,
+        color: ThemeColors.softBrown,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.2),
+            color: ThemeColors.earthClay.withOpacity(0.2),
             blurRadius: 8,
             offset: Offset(0, 4),
           ),
@@ -168,7 +163,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
           Text(
             _formatCurrency(totals['balance']!),
             style: TextStyle(
-              color: ivoryWhite,
+              color: ThemeColors.ivoryWhite,
               fontSize: 28,
               fontWeight: FontWeight.bold,
             ),
@@ -183,7 +178,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                   children: [
                     Icon(
                       Icons.trending_up_rounded,
-                      color: oliveGreen,
+                      color: ThemeColors.oliveGreen,
                       size: 18,
                     ),
                     SizedBox(width: 6),
@@ -193,7 +188,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                         Text(
                           'รายรับ',
                           style: TextStyle(
-                            color: ivoryWhite.withOpacity(0.8),
+                            color: ThemeColors.ivoryWhite.withOpacity(0.8),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -201,7 +196,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                         Text(
                           _formatCurrency(totals['income']!),
                           style: TextStyle(
-                            color: oliveGreen,
+                            color: ThemeColors.oliveGreen,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -214,7 +209,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
               Container(
                 height: 24,
                 width: 1,
-                color: ivoryWhite.withOpacity(0.2),
+                color: ThemeColors.ivoryWhite.withOpacity(0.2),
               ),
               Expanded(
                 child: Row(
@@ -222,7 +217,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                   children: [
                     Icon(
                       Icons.trending_down_rounded,
-                      color: burntOrange,
+                      color: ThemeColors.burntOrange,
                       size: 18,
                     ),
                     SizedBox(width: 6),
@@ -232,7 +227,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                         Text(
                           'รายจ่าย',
                           style: TextStyle(
-                            color: ivoryWhite.withOpacity(0.8),
+                            color: ThemeColors.ivoryWhite.withOpacity(0.8),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -240,7 +235,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                         Text(
                           _formatCurrency(totals['outcome']!),
                           style: TextStyle(
-                            color: burntOrange,
+                            color: ThemeColors.burntOrange,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -267,7 +262,10 @@ class _HouseFundPageState extends State<HouseFundPage> {
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [softBrown.withOpacity(0.7), clayOrange.withOpacity(0.7)],
+              colors: [
+                ThemeColors.softBrown.withOpacity(0.7),
+                ThemeColors.clayOrange.withOpacity(0.7),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -278,14 +276,16 @@ class _HouseFundPageState extends State<HouseFundPage> {
               Text(
                 'กำลังโหลด...',
                 style: TextStyle(
-                  color: ivoryWhite.withOpacity(0.9),
+                  color: ThemeColors.ivoryWhite.withOpacity(0.9),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               SizedBox(height: 12),
               CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  ThemeColors.ivoryWhite,
+                ),
                 strokeWidth: 2,
               ),
             ],
@@ -296,7 +296,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: beige.withOpacity(0.5),
+            color: ThemeColors.beige.withOpacity(0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -306,7 +306,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                 width: 60,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: warmStone.withOpacity(0.3),
+                  color: ThemeColors.warmStone.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -314,7 +314,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                 width: 60,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: warmStone.withOpacity(0.3),
+                  color: ThemeColors.warmStone.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -322,7 +322,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                 width: 60,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: warmStone.withOpacity(0.3),
+                  color: ThemeColors.warmStone.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -336,13 +336,15 @@ class _HouseFundPageState extends State<HouseFundPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ThemeColors.softBrown,
+                  ),
                   strokeWidth: 3,
                 ),
                 SizedBox(height: 16),
                 Text(
                   'กำลังโหลดข้อมูล...',
-                  style: TextStyle(color: earthClay, fontSize: 16),
+                  style: TextStyle(color: ThemeColors.earthClay, fontSize: 16),
                 ),
               ],
             ),
@@ -365,7 +367,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                 Container(
                   padding: EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: beige,
+                    color: ThemeColors.beige,
                     borderRadius: BorderRadius.circular(50),
                   ),
                 ),
@@ -377,7 +379,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                       ? 'ไม่มีรายการรายรับ'
                       : 'ไม่มีรายการรายจ่าย',
                   style: TextStyle(
-                    color: earthClay,
+                    color: ThemeColors.earthClay,
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -387,7 +389,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                   _selectedFilter == 'all'
                       ? 'เริ่มต้นโดยการเพิ่มรายการแรก'
                       : 'ลองเปลี่ยนตัวกรองหรือเพิ่มรายการใหม่',
-                  style: TextStyle(color: warmStone, fontSize: 14),
+                  style: TextStyle(color: ThemeColors.warmStone, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -411,20 +413,20 @@ class _HouseFundPageState extends State<HouseFundPage> {
                 Container(
                   padding: EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: burntOrange.withOpacity(0.1),
+                    color: ThemeColors.burntOrange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: Icon(
                     Icons.error_outline,
                     size: 48,
-                    color: burntOrange,
+                    color: ThemeColors.burntOrange,
                   ),
                 ),
                 SizedBox(height: 20),
                 Text(
                   'เกิดข้อผิดพลาด',
                   style: TextStyle(
-                    color: earthClay,
+                    color: ThemeColors.earthClay,
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -432,7 +434,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                 SizedBox(height: 8),
                 Text(
                   error,
-                  style: TextStyle(color: warmStone, fontSize: 14),
+                  style: TextStyle(color: ThemeColors.warmStone, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
@@ -441,8 +443,8 @@ class _HouseFundPageState extends State<HouseFundPage> {
                   icon: Icon(Icons.refresh),
                   label: Text('ลองใหม่'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: softBrown,
-                    foregroundColor: ivoryWhite,
+                    backgroundColor: ThemeColors.softBrown,
+                    foregroundColor: ThemeColors.ivoryWhite,
                   ),
                 ),
               ],
@@ -472,7 +474,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                         Container(
                           padding: EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: beige,
+                            color: ThemeColors.beige,
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: Icon(
@@ -482,7 +484,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                                 ? Icons.trending_down_outlined
                                 : Icons.account_balance_wallet_outlined,
                             size: 48,
-                            color: warmStone,
+                            color: ThemeColors.warmStone,
                           ),
                         ),
                         SizedBox(height: 20),
@@ -493,7 +495,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                               ? 'ไม่มีรายการรายจ่าย'
                               : 'ไม่มีข้อมูลกองทุน',
                           style: TextStyle(
-                            color: earthClay,
+                            color: ThemeColors.earthClay,
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                           ),
@@ -501,7 +503,10 @@ class _HouseFundPageState extends State<HouseFundPage> {
                         SizedBox(height: 8),
                         Text(
                           'ลองเปลี่ยนตัวกรองหรือเพิ่มรายการใหม่',
-                          style: TextStyle(color: warmStone, fontSize: 14),
+                          style: TextStyle(
+                            color: ThemeColors.warmStone,
+                            fontSize: 14,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -510,15 +515,17 @@ class _HouseFundPageState extends State<HouseFundPage> {
                 : RefreshIndicator(
                     key: _refreshKey,
                     onRefresh: _refreshData,
-                    color: softBrown,
-                    backgroundColor: ivoryWhite,
+                    color: ThemeColors.softBrown,
+                    backgroundColor: ThemeColors.ivoryWhite,
                     child: ListView.builder(
                       padding: EdgeInsets.only(bottom: 100),
                       itemCount: filteredFunds.length,
                       itemBuilder: (context, index) {
                         final fund = filteredFunds[index];
                         final isIncome = fund.type == 'income';
-                        final color = isIncome ? oliveGreen : burntOrange;
+                        final color = isIncome
+                            ? ThemeColors.oliveGreen
+                            : ThemeColors.burntOrange;
                         final icon = isIncome
                             ? Icons.add_circle_rounded
                             : Icons.remove_circle_rounded;
@@ -527,12 +534,15 @@ class _HouseFundPageState extends State<HouseFundPage> {
                           child: Container(
                             margin: EdgeInsets.only(bottom: 12),
                             decoration: BoxDecoration(
-                              color: beige,
+                              color: ThemeColors.beige,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: sandyTan, width: 1),
+                              border: Border.all(
+                                color: ThemeColors.sandyTan,
+                                width: 1,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: warmStone.withOpacity(0.2),
+                                  color: ThemeColors.warmStone.withOpacity(0.2),
                                   blurRadius: 8,
                                   offset: Offset(0, 2),
                                 ),
@@ -558,7 +568,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
-                                  color: softBrown,
+                                  color: ThemeColors.softBrown,
                                 ),
                               ),
                               subtitle: Padding(
@@ -568,13 +578,13 @@ class _HouseFundPageState extends State<HouseFundPage> {
                                     Icon(
                                       Icons.access_time_rounded,
                                       size: 14,
-                                      color: warmStone,
+                                      color: ThemeColors.warmStone,
                                     ),
                                     SizedBox(width: 4),
                                     Text(
                                       _formatDate(fund.createdAt),
                                       style: TextStyle(
-                                        color: earthClay,
+                                        color: ThemeColors.earthClay,
                                         fontSize: 13,
                                       ),
                                     ),
@@ -636,18 +646,18 @@ class _HouseFundPageState extends State<HouseFundPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ivoryWhite,
+      backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
         title: Text(
           'กองทุนหมู่บ้าน ${widget.villageId}',
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: ivoryWhite,
+            color: ThemeColors.ivoryWhite,
             fontSize: 20,
           ),
         ),
-        backgroundColor: softBrown,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.softBrown,
+        foregroundColor: ThemeColors.ivoryWhite,
       ),
       body: FutureBuilder<List<FundModel>>(
         future: FundDomain.getByVillageId(widget.villageId),

@@ -3,6 +3,7 @@ import 'package:fullproject/domains/vehicle_domain.dart';
 import 'package:fullproject/pages/house/house_detail/vehicle/vehicle_add.dart';
 import 'package:fullproject/pages/house/house_detail/vehicle/vehicle_edit.dart';
 import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseVehicleDetailPage extends StatefulWidget {
   final int? houseId;
@@ -23,16 +24,6 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
   Key _futureBuilderKey = UniqueKey();
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
 
   @override
   void initState() {
@@ -93,7 +84,7 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('แก้ไขรถยนต์ ID: $vehicleId'),
-        backgroundColor: burntOrange,
+        backgroundColor: ThemeColors.burntOrange,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -112,7 +103,7 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: beige,
+      backgroundColor: ThemeColors.beige,
       body: Column(
         children: [
           // Header Section
@@ -162,12 +153,15 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [softBrown.withOpacity(0.1), burntOrange.withOpacity(0.05)],
+          colors: [
+            ThemeColors.softBrown.withOpacity(0.1),
+            ThemeColors.burntOrange.withOpacity(0.05),
+          ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.1),
+            color: ThemeColors.earthClay.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -180,12 +174,12 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: burntOrange.withOpacity(0.15),
+                color: ThemeColors.burntOrange.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
                 Icons.directions_car_rounded,
-                color: burntOrange,
+                color: ThemeColors.burntOrange,
                 size: 32,
               ),
             ),
@@ -199,7 +193,7 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: softBrown,
+                      color: ThemeColors.softBrown,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -207,7 +201,7 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
                     'บ้านเลขที่ ${widget.houseId}',
                     style: TextStyle(
                       fontSize: 16,
-                      color: earthClay,
+                      color: ThemeColors.earthClay,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -225,11 +219,11 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
       child: Container(
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -239,14 +233,14 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+              valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
               strokeWidth: 3,
             ),
             const SizedBox(height: 20),
             Text(
               'กำลังโหลดข้อมูลรถยนต์...',
               style: TextStyle(
-                color: earthClay,
+                color: ThemeColors.earthClay,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -263,11 +257,11 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
         margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -279,12 +273,12 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: clayOrange.withOpacity(0.1),
+                color: ThemeColors.clayOrange.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 Icons.error_outline_rounded,
-                color: clayOrange,
+                color: ThemeColors.clayOrange,
                 size: 48,
               ),
             ),
@@ -294,14 +288,14 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: softBrown,
+                color: ThemeColors.softBrown,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               error,
               textAlign: TextAlign.center,
-              style: TextStyle(color: earthClay, fontSize: 14),
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -309,8 +303,8 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('ลองใหม่'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: burntOrange,
-                foregroundColor: ivoryWhite,
+                backgroundColor: ThemeColors.burntOrange,
+                foregroundColor: ThemeColors.ivoryWhite,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -332,11 +326,11 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
         margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -348,13 +342,13 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: warmStone.withOpacity(0.1),
+                color: ThemeColors.warmStone.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
                 Icons.directions_car_outlined,
                 size: 64,
-                color: warmStone,
+                color: ThemeColors.warmStone,
               ),
             ),
             const SizedBox(height: 20),
@@ -363,14 +357,14 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: softBrown,
+                color: ThemeColors.softBrown,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'ยังไม่มีรถยนต์ลงทะเบียนในบ้านหมายเลข ${widget.houseId}',
               textAlign: TextAlign.center,
-              style: TextStyle(color: earthClay, fontSize: 14),
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -379,8 +373,8 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
               icon: const Icon(Icons.add_rounded),
               label: const Text('เพิ่มรถยนต์'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: oliveGreen,
-                foregroundColor: ivoryWhite,
+                backgroundColor: ThemeColors.oliveGreen,
+                foregroundColor: ThemeColors.ivoryWhite,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -424,11 +418,11 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.08),
+            color: ThemeColors.earthClay.withOpacity(0.08),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -449,11 +443,11 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [sandyTan, beige],
+                      colors: [ThemeColors.sandyTan, ThemeColors.beige],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: earthClay.withOpacity(0.1),
+                        color: ThemeColors.earthClay.withOpacity(0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -464,7 +458,7 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
                       : Icon(
                           Icons.directions_car_rounded,
                           size: 40,
-                          color: earthClay,
+                          color: ThemeColors.earthClay,
                         ),
                 ),
 
@@ -481,7 +475,7 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: softBrown,
+                          color: ThemeColors.softBrown,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -490,7 +484,7 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
                       _buildInfoChip(
                         Icons.confirmation_number_rounded,
                         vehicle.number.toString(),
-                        burntOrange,
+                        ThemeColors.burntOrange,
                       ),
                       const SizedBox(height: 6),
 
@@ -498,7 +492,7 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
                       _buildInfoChip(
                         Icons.home_rounded,
                         'บ้านเลขที่ ${vehicle.houseId}',
-                        oliveGreen,
+                        ThemeColors.oliveGreen,
                       ),
                     ],
                   ),
@@ -514,17 +508,17 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: softTerracotta.withOpacity(0.15),
+                        color: ThemeColors.softTerracotta.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: softTerracotta.withOpacity(0.3),
+                          color: ThemeColors.softTerracotta.withOpacity(0.3),
                         ),
                       ),
                       child: Text(
                         'ID: ${vehicle.vehicleId}',
                         style: TextStyle(
                           fontSize: 11,
-                          color: softTerracotta,
+                          color: ThemeColors.softTerracotta,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -534,14 +528,14 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
                     // Edit Button
                     Container(
                       decoration: BoxDecoration(
-                        color: clayOrange.withOpacity(0.1),
+                        color: ThemeColors.clayOrange.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: IconButton(
                         onPressed: () => _editVehicle(vehicle),
                         icon: Icon(
                           Icons.edit_rounded,
-                          color: clayOrange,
+                          color: ThemeColors.clayOrange,
                           size: 20,
                         ),
                         padding: const EdgeInsets.all(8),
@@ -575,7 +569,7 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
             text,
             style: TextStyle(
               fontSize: 13,
-              color: earthClay,
+              color: ThemeColors.earthClay,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -590,12 +584,12 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [oliveGreen, softTerracotta],
+          colors: [ThemeColors.oliveGreen, ThemeColors.softTerracotta],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: oliveGreen.withOpacity(0.4),
+            color: ThemeColors.oliveGreen.withOpacity(0.4),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
@@ -603,13 +597,16 @@ class _HouseVehicleDetailPageState extends State<HouseVehicleDetailPage>
       ),
       child: FloatingActionButton.extended(
         onPressed: () => _addVehicle(houseId: widget.houseId!),
-        backgroundColor: burntOrange,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.burntOrange,
+        foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
-        icon: const Icon(Icons.add_rounded, color: ivoryWhite),
+        icon: const Icon(Icons.add_rounded, color: ThemeColors.ivoryWhite),
         label: Text(
           'เพิ่มรถยนต์',
-          style: TextStyle(color: ivoryWhite, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: ThemeColors.ivoryWhite,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

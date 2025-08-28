@@ -1,12 +1,14 @@
 // File: lib/pages/law/dashboard.dart
-// Purpose: Wire dashboard cards to named routes for Guard/Fund/Committee.
+// Purpose: Wire dashboard cards to named routes for Guard/Fund/Committee and Law management.
 
 import 'package:flutter/material.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/navigation/app_navigation.dart';
+import 'package:fullproject/pages/law/profile/law_page.dart';
 import 'package:fullproject/routes/app_routes.dart';
 import 'package:fullproject/pages/law/bill/bill_page.dart';
 import 'package:fullproject/services/auth_service.dart';
+import 'package:fullproject/domains/law_domain.dart';
 
 class LawDashboardPage extends StatefulWidget {
   const LawDashboardPage({super.key});
@@ -18,6 +20,8 @@ class LawDashboardPage extends StatefulWidget {
 class _LawDashboardPageState extends State<LawDashboardPage> {
   LawModel? lawModel;
   bool isLoading = true;
+  String? errorMessage;
+  Map<String, dynamic> dashboardStats = {};
 
   // Theme
   static const Color _softBrown = Color(0xFFA47551);
@@ -32,23 +36,88 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
   @override
   void initState() {
     super.initState();
-    loadCurrentUser();
+    _initializeDashboard();
   }
 
-  Future<void> loadCurrentUser() async {
+  Future<void> _initializeDashboard() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      // Load current user
+      await _loadCurrentUser();
+
+      // Load dashboard statistics if user is loaded
+      if (lawModel != null) {
+        await _loadDashboardStats();
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ${e.toString()}';
+      });
+    }
+  }
+
+  Future<void> _loadCurrentUser() async {
     try {
       final user = await AuthService.getCurrentUser();
+      if (!mounted) return;
+
       if (user is LawModel) {
+        // Get full user data from database
+        final fullUserData = await LawDomain.getById(user.lawId);
         setState(() {
-          lawModel = user;
-          isLoading = false;
+          lawModel = fullUserData;
         });
       } else {
-        if (mounted) AppNavigation.navigateTo(AppRoutes.login);
+        throw Exception('ไม่พบข้อมูลผู้ใช้');
       }
-    } catch (_) {
-      if (mounted) AppNavigation.navigateTo(AppRoutes.login);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          errorMessage = 'ไม่สามารถโหลดข้อมูลผู้ใช้ได้';
+        });
+        // Navigate to login after a delay
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) AppNavigation.navigateTo(AppRoutes.login);
+        });
+      }
+      rethrow;
     }
+  }
+
+  Future<void> _loadDashboardStats() async {
+    if (lawModel == null) return;
+
+    try {
+      // Load village statistics
+      final villageStats = await LawDomain.getVillageStats(lawModel!.villageId);
+      final totalPeople = await LawDomain.countPeopleInVillage(lawModel!.villageId);
+      final genderCount = await LawDomain.getCountByGender(lawModel!.villageId);
+
+      setState(() {
+        dashboardStats = {
+          'village_stats': villageStats,
+          'total_people': totalPeople,
+          'gender_count': genderCount,
+          'last_updated': DateTime.now(),
+        };
+      });
+    } catch (e) {
+      debugPrint('Error loading dashboard stats: $e');
+      // ไม่ throw error เพราะไม่ต้องการให้ขัดขวางการแสดง dashboard หลัก
+    }
+  }
+
+  Future<void> _refreshDashboard() async {
+    await _initializeDashboard();
   }
 
   Future<void> _logout() async {
@@ -87,26 +156,74 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     );
 
     if (confirm == true && mounted) {
-      AppNavigation.navigateTo(AppRoutes.login);
+      await AuthService.logout();
+      if (mounted) AppNavigation.navigateTo(AppRoutes.login);
     }
+  }
+
+  void _navigateToLawPage() async {
+    if (lawModel != null) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LawPage(villageId: lawModel!.villageId),
+        ),
+      );
+      // Refresh after returning
+      if (mounted) {
+        _refreshDashboard();
+      }
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: _ivoryWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text(
+          'เกิดข้อผิดพลาด',
+          style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+        ),
+        content: Text(message, style: const TextStyle(color: _earthClay)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('ตกลง', style: TextStyle(color: _burntOrange)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Loading State
     if (isLoading) {
       return Scaffold(
         backgroundColor: _ivoryWhite,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(_softBrown),
+                strokeWidth: 3,
               ),
-              SizedBox(height: 16),
-              Text(
-                'กำลังโหลดข้อมูล...',
-                style: TextStyle(color: _earthClay, fontSize: 16),
+              const SizedBox(height: 24),
+              const Text(
+                'กำลังโหลดแดชบอร์ด...',
+                style: TextStyle(
+                  color: _earthClay,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'โปรดรอสักครู่',
+                style: TextStyle(color: _warmStone, fontSize: 14),
               ),
             ],
           ),
@@ -114,13 +231,67 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
       );
     }
 
+    // Error State
+    if (errorMessage != null) {
+      return Scaffold(
+        backgroundColor: _ivoryWhite,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Colors.red[400],
+              ),
+              const SizedBox(height: 24),
+              Text(
+                errorMessage!,
+                style: const TextStyle(
+                  color: _earthClay,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: _initializeDashboard,
+                icon: const Icon(Icons.refresh),
+                label: const Text('ลองใหม่'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _burntOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // No User State
     if (lawModel == null) {
       return const Scaffold(
         backgroundColor: _ivoryWhite,
         body: Center(
-          child: Text(
-            'ไม่พบข้อมูลผู้ใช้',
-            style: TextStyle(color: _earthClay, fontSize: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.person_off, size: 64, color: _warmStone),
+              SizedBox(height: 16),
+              Text(
+                'ไม่พบข้อมูลผู้ใช้',
+                style: TextStyle(color: _earthClay, fontSize: 16),
+              ),
+            ],
           ),
         ),
       );
@@ -136,7 +307,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
             context,
             MaterialPageRoute(builder: (_) => const BillPage()),
           );
-          if (mounted) setState(() {});
+          if (mounted) _refreshDashboard();
         },
       ),
       _DashboardItem(
@@ -150,12 +321,6 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         label: 'ข่าวสาร',
         color: _softTerracotta,
         onTap: () => AppNavigation.navigateTo(AppRoutes.lawNotion),
-      ),
-      _DashboardItem(
-        icon: Icons.pets,
-        label: 'สัตว์เลี้ยง',
-        color: _oliveGreen,
-        onTap: () => AppNavigation.navigateTo(AppRoutes.notFound),
       ),
       _DashboardItem(
         icon: Icons.people,
@@ -172,28 +337,22 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         color: _warmStone,
         onTap: () => AppNavigation.navigateTo(AppRoutes.notFound),
       ),
-      // --- NEW WIRED ROUTES ---
       _DashboardItem(
         icon: Icons.person_pin,
         label: 'เจ้าหน้าที่',
         color: _softBrown,
         onTap: () => AppNavigation.navigateTo(
           AppRoutes.lawGuard,
-          arguments: {
-            'villageId': lawModel!.villageId,
-          }, // why: list depends on village
+          arguments: {'villageId': lawModel!.villageId},
         ),
       ),
-
       _DashboardItem(
         icon: Icons.account_balance_wallet,
         label: 'กองทุน',
         color: _oliveGreen,
         onTap: () => AppNavigation.navigateTo(
           AppRoutes.lawFund,
-          arguments: {
-            'villageId': lawModel!.villageId,
-          }, // why: list depends on village
+          arguments: {'villageId': lawModel!.villageId},
         ),
       ),
       _DashboardItem(
@@ -202,9 +361,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         color: _burntOrange,
         onTap: () => AppNavigation.navigateTo(
           AppRoutes.committeeList,
-          arguments: {
-            'villageId': lawModel!.villageId,
-          }, // why: list depends on village
+          arguments: {'villageId': lawModel!.villageId},
         ),
       ),
     ];
@@ -220,12 +377,20 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
-          IconButton(icon: const Icon(Icons.person), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: _navigateToLawPage,
+            tooltip: 'ข้อมูลส่วนตัว',
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+            tooltip: 'ออกจากระบบ',
+          ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: loadCurrentUser,
+        onRefresh: _refreshDashboard,
         color: _softBrown,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -237,13 +402,27 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
               const SizedBox(height: 20),
               _buildQuickStats(),
               const SizedBox(height: 24),
-              const Text(
-                'เมนูหลัก',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: _softBrown,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'เมนูหลัก',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: _softBrown,
+                    ),
+                  ),
+                  if (dashboardStats.isNotEmpty &&
+                      dashboardStats['last_updated'] != null)
+                    Text(
+                      'อัพเดต: ${_formatLastUpdated(dashboardStats['last_updated'])}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _warmStone,
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 16),
               GridView.builder(
@@ -256,8 +435,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
                   childAspectRatio: 1.1,
                 ),
                 itemCount: items.length,
-                itemBuilder: (context, index) =>
-                    _buildDashboardCard(items[index]),
+                itemBuilder: (context, index) => _buildDashboardCard(items[index]),
               ),
               const SizedBox(height: 100),
             ],
@@ -265,13 +443,29 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: _navigateToLawPage,
         backgroundColor: _burntOrange,
         foregroundColor: Colors.white,
         elevation: 4,
+        tooltip: 'ข้อมูลส่วนตัว',
         child: const Icon(Icons.person),
       ),
     );
+  }
+
+  String _formatLastUpdated(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) {
+      return 'เมื่อสักครู่';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} นาทีที่แล้ว';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} ชั่วโมงที่แล้ว';
+    } else {
+      return '${difference.inDays} วันที่แล้ว';
+    }
   }
 
   Widget _buildWelcomeCard() {
@@ -301,31 +495,40 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
             backgroundColor: Colors.white.withValues(alpha: 0.2),
             child: lawModel!.img != null && lawModel!.img!.isNotEmpty
                 ? ClipOval(
-                    child: Image.network(
-                      lawModel!.img!,
-                      width: 64,
-                      height: 64,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Text(
-                        lawModel!.firstName!.isNotEmpty
-                            ? lawModel!.firstName!.substring(0, 1).toUpperCase()
-                            : 'N',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  )
-                : Text(
-                    lawModel!.firstName != null ? lawModel!.firstName! : 'N',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+              child: Image.network(
+                lawModel!.img!,
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    strokeWidth: 2,
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) => Text(
+                  lawModel!.firstName != null && lawModel!.firstName!.isNotEmpty
+                      ? lawModel!.firstName!.substring(0, 1).toUpperCase()
+                      : 'N',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
+                ),
+              ),
+            )
+                : Text(
+              lawModel!.firstName != null && lawModel!.firstName!.isNotEmpty
+                  ? lawModel!.firstName!.substring(0, 1).toUpperCase()
+                  : 'N',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -337,7 +540,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
                   style: TextStyle(color: Colors.white70, fontSize: 16),
                 ),
                 Text(
-                  lawModel!.firstName!,
+                  lawModel!.fullName,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -358,8 +561,9 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
-              onPressed: () {},
+              onPressed: _navigateToLawPage,
               icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+              tooltip: 'ดูข้อมูลส่วนตัว',
             ),
           ),
         ],
@@ -370,22 +574,20 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
   Widget _buildQuickStats() {
     return Row(
       children: [
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.location_on,
-            title: 'หมู่บ้าน',
-            value: 'ID: ${lawModel!.villageId}',
-            color: _oliveGreen,
-          ),
+        _buildStatCard(
+          icon: Icons.location_on,
+          title: 'หมู่บ้าน',
+          value: 'ID: ${lawModel!.villageId}',
+          color: _oliveGreen,
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.badge,
-            title: 'รหัสผู้ใช้',
-            value: 'ID: ${lawModel!.userId}',
-            color: _softTerracotta,
-          ),
+        _buildStatCard(
+          icon: Icons.people,
+          title: 'ประชากร',
+          value: dashboardStats['total_people'] != null
+              ? '${dashboardStats['total_people']} คน'
+              : 'กำลังโหลด...',
+          color: _softTerracotta,
         ),
       ],
     );
@@ -397,43 +599,46 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     required String value,
     required Color color,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _sandyTan.withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: _warmStone.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _sandyTan.withValues(alpha: 0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: _warmStone.withValues(alpha: 0.1),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 8),
-          Text(title, style: const TextStyle(fontSize: 12, color: _warmStone)),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: _earthClay,
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: color, size: 24),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(title, style: const TextStyle(fontSize: 12, color: _warmStone)),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: _earthClay,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

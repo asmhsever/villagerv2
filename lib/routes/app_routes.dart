@@ -10,6 +10,7 @@ class AppRoutes {
   static const String houseComplaintForm = '/house/complaint_form';
 
   static const String lawDashboard = '/law/dashboard';
+  static const String lawPage = '/law/lawPage';
   static const String lawComplaint = '/law/complaint';
   static const String lawBill = '/law/bill';
   static const String lawNotion = '/law/notion';

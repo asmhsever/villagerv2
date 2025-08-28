@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:fullproject/domains/vehicle_domain.dart';
 import 'package:fullproject/models/vehicle_model.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseAddVehiclePage extends StatefulWidget {
   final int houseId;
@@ -35,16 +36,6 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
   bool _isSubmitting = false;
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
 
   @override
   void initState() {
@@ -115,7 +106,9 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? clayOrange : oliveGreen,
+        backgroundColor: isError
+            ? ThemeColors.clayOrange
+            : ThemeColors.oliveGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -188,13 +181,16 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: ivoryWhite,
+          backgroundColor: ThemeColors.ivoryWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
             'เลือกรูปภาพ',
-            style: TextStyle(color: softBrown, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: ThemeColors.softBrown,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -203,14 +199,17 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: oliveGreen.withOpacity(0.1),
+                    color: ThemeColors.oliveGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.photo_library_rounded, color: oliveGreen),
+                  child: Icon(
+                    Icons.photo_library_rounded,
+                    color: ThemeColors.oliveGreen,
+                  ),
                 ),
                 title: Text(
                   'เลือกจากแกลเลอรี่',
-                  style: TextStyle(color: earthClay),
+                  style: TextStyle(color: ThemeColors.earthClay),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -221,12 +220,18 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: burntOrange.withOpacity(0.1),
+                    color: ThemeColors.burntOrange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.camera_alt_rounded, color: burntOrange),
+                  child: Icon(
+                    Icons.camera_alt_rounded,
+                    color: ThemeColors.burntOrange,
+                  ),
                 ),
-                title: Text('ถ่ายภาพ', style: TextStyle(color: earthClay)),
+                title: Text(
+                  'ถ่ายภาพ',
+                  style: TextStyle(color: ThemeColors.earthClay),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImageFromCamera();
@@ -249,7 +254,7 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: beige,
+      backgroundColor: ThemeColors.beige,
       appBar: _buildAppBar(),
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -283,18 +288,21 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: ivoryWhite.withOpacity(0.9),
+          color: ThemeColors.ivoryWhite.withOpacity(0.9),
           borderRadius: BorderRadius.circular(12),
         ),
         child: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_rounded, color: softBrown),
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: ThemeColors.softBrown,
+          ),
         ),
       ),
       title: Text(
         'เพิ่มรถยนต์',
         style: TextStyle(
-          color: softBrown,
+          color: ThemeColors.softBrown,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -309,12 +317,15 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [softBrown.withOpacity(0.1), burntOrange.withOpacity(0.05)],
+          colors: [
+            ThemeColors.softBrown.withOpacity(0.1),
+            ThemeColors.burntOrange.withOpacity(0.05),
+          ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.1),
+            color: ThemeColors.earthClay.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -325,12 +336,12 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: oliveGreen.withOpacity(0.15),
+              color: ThemeColors.oliveGreen.withOpacity(0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(
               Icons.add_circle_outline_rounded,
-              color: oliveGreen,
+              color: ThemeColors.oliveGreen,
               size: 32,
             ),
           ),
@@ -344,7 +355,7 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: softBrown,
+                    color: ThemeColors.softBrown,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -352,7 +363,7 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
                   'บ้านเลขที่ ${widget.houseId}',
                   style: TextStyle(
                     fontSize: 16,
-                    color: earthClay,
+                    color: ThemeColors.earthClay,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -368,11 +379,11 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.1),
+            color: ThemeColors.earthClay.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -386,7 +397,7 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: softBrown,
+              color: ThemeColors.softBrown,
             ),
           ),
           const SizedBox(height: 20),
@@ -446,32 +457,32 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
     return TextFormField(
       controller: controller,
       validator: validator,
-      style: TextStyle(color: earthClay, fontSize: 16),
+      style: TextStyle(color: ThemeColors.earthClay, fontSize: 16),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: warmStone),
-        prefixIcon: Icon(icon, color: softBrown),
+        labelStyle: TextStyle(color: ThemeColors.warmStone),
+        prefixIcon: Icon(icon, color: ThemeColors.softBrown),
         filled: true,
-        fillColor: beige.withOpacity(0.5),
+        fillColor: ThemeColors.beige.withOpacity(0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: sandyTan, width: 1),
+          borderSide: BorderSide(color: ThemeColors.sandyTan, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: softBrown, width: 2),
+          borderSide: BorderSide(color: ThemeColors.softBrown, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: clayOrange, width: 1),
+          borderSide: BorderSide(color: ThemeColors.clayOrange, width: 1),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: clayOrange, width: 2),
+          borderSide: BorderSide(color: ThemeColors.clayOrange, width: 2),
         ),
       ),
     );
@@ -486,7 +497,7 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: softBrown,
+            color: ThemeColors.softBrown,
           ),
         ),
         const SizedBox(height: 12),
@@ -502,7 +513,7 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
       height: 200,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: sandyTan, width: 2),
+        border: Border.all(color: ThemeColors.sandyTan, width: 2),
       ),
       child: Stack(
         children: [
@@ -516,11 +527,11 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
                   : !kIsWeb && _selectedImageFile != null
                   ? Image.file(_selectedImageFile!, fit: BoxFit.cover)
                   : Container(
-                      color: beige,
+                      color: ThemeColors.beige,
                       child: Icon(
                         Icons.directions_car_rounded,
                         size: 60,
-                        color: warmStone,
+                        color: ThemeColors.warmStone,
                       ),
                     ),
             ),
@@ -530,7 +541,7 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
             right: 8,
             child: Container(
               decoration: BoxDecoration(
-                color: clayOrange,
+                color: ThemeColors.clayOrange,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -542,7 +553,10 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
               ),
               child: IconButton(
                 onPressed: _removeImage,
-                icon: const Icon(Icons.close_rounded, color: ivoryWhite),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: ThemeColors.ivoryWhite,
+                ),
                 padding: const EdgeInsets.all(8),
                 constraints: const BoxConstraints(),
               ),
@@ -560,10 +574,10 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
         width: double.infinity,
         height: 150,
         decoration: BoxDecoration(
-          color: beige.withOpacity(0.5),
+          color: ThemeColors.beige.withOpacity(0.5),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: sandyTan,
+            color: ThemeColors.sandyTan,
             width: 2,
             style: BorderStyle.solid,
           ),
@@ -574,13 +588,13 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: oliveGreen.withOpacity(0.1),
+                color: ThemeColors.oliveGreen.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(50),
               ),
               child: Icon(
                 Icons.add_photo_alternate_rounded,
                 size: 32,
-                color: oliveGreen,
+                color: ThemeColors.oliveGreen,
               ),
             ),
             const SizedBox(height: 12),
@@ -589,13 +603,13 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: earthClay,
+                color: ThemeColors.earthClay,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'แตะเพื่อเลือกรูปภาพ',
-              style: TextStyle(fontSize: 12, color: warmStone),
+              style: TextStyle(fontSize: 12, color: ThemeColors.warmStone),
             ),
           ],
         ),
@@ -610,12 +624,12 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [oliveGreen, softTerracotta],
+          colors: [ThemeColors.oliveGreen, ThemeColors.softTerracotta],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: oliveGreen.withOpacity(0.3),
+            color: ThemeColors.oliveGreen.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -637,7 +651,9 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            ThemeColors.ivoryWhite,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -646,7 +662,7 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: ivoryWhite,
+                          color: ThemeColors.ivoryWhite,
                         ),
                       ),
                     ],
@@ -654,14 +670,18 @@ class _HouseAddVehiclePageState extends State<HouseAddVehiclePage>
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.save_rounded, color: ivoryWhite, size: 24),
+                      Icon(
+                        Icons.save_rounded,
+                        color: ThemeColors.ivoryWhite,
+                        size: 24,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'บันทึกรถยนต์',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: ivoryWhite,
+                          color: ThemeColors.ivoryWhite,
                         ),
                       ),
                     ],

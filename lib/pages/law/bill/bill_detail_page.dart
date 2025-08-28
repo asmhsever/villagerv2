@@ -4,6 +4,7 @@ import 'package:fullproject/models/bill_model.dart';
 import 'package:fullproject/pages/law/bill/bill_edit_page.dart';
 import 'package:fullproject/domains/bill_domain.dart';
 import 'package:fullproject/config/supabase_config.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
@@ -26,14 +27,6 @@ class _BillDetailPageState extends State<BillDetailPage> {
   bool _isLoading = false;
 
   // ===== Palette (match LawDashboardPage) =====
-  static const Color _softBrown = Color(0xFFA47551);
-  static const Color _ivoryWhite = Color(0xFFFFFDF6);
-  static const Color _sandyTan = Color(0xFFD8CAB8);
-  static const Color _earthClay = Color(0xFFBFA18F);
-  static const Color _warmStone = Color(0xFFC7B9A5);
-  static const Color _oliveGreen = Color(0xFFA3B18A);
-  static const Color _burntOrange = Color(0xFFE08E45);
-  static const Color _softTerracotta = Color(0xFFD48B5C);
 
   // แมปประเภทบริการให้เป็นภาษาไทย
   final Map<String, String> _serviceTranslations = const {
@@ -57,19 +50,19 @@ class _BillDetailPageState extends State<BillDetailPage> {
     'PENDING': {
       'name': 'รอชำระ',
       'icon': Icons.schedule,
-      'color': Color(0xFFD48B5C), // _softTerracotta
+      'color': Color(0xFFD48B5C), // ThemeColors.softTerracotta
       'description': 'รอการชำระเงินจากลูกบ้าน',
     },
     'UNDER_REVIEW': {
       'name': 'กำลังตรวจสอบ',
       'icon': Icons.search,
-      'color': Color(0xFFA47551), // _softBrown
+      'color': ThemeColors.softBrown, // ThemeColors.softBrown
       'description': 'กำลังตรวจสอบหลักฐานการชำระเงิน',
     },
     'RECEIPT_SENT': {
       'name': 'ส่งใบเสร็จแล้ว',
       'icon': Icons.check_circle,
-      'color': Color(0xFFA3B18A), // _oliveGreen
+      'color': ThemeColors.oliveGreen, // ThemeColors.oliveGreen
       'description': 'ชำระเงินสมบูรณ์และส่งใบเสร็จแล้ว',
     },
     'REJECTED': {
@@ -127,7 +120,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
   String getPaidStatus(int status) => status == 1 ? 'ชำระแล้ว' : 'ยังไม่ชำระ';
 
   Color getPaidStatusColor(int status) =>
-      status == 1 ? _oliveGreen : _softTerracotta;
+      status == 1 ? ThemeColors.oliveGreen : ThemeColors.softTerracotta;
 
   String _getServiceNameTh(String? englishName) =>
       _serviceTranslations[englishName] ?? englishName ?? 'ไม่ระบุประเภท';
@@ -139,7 +132,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
 
   Color _getStatusColor() {
     return _billStatuses[currentBill.status.toUpperCase()]?['color'] ??
-        (currentBill.paidStatus == 1 ? _oliveGreen : _softTerracotta);
+        (currentBill.paidStatus == 1
+            ? ThemeColors.oliveGreen
+            : ThemeColors.softTerracotta);
   }
 
   IconData _getStatusIcon() {
@@ -165,18 +160,18 @@ class _BillDetailPageState extends State<BillDetailPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: _ivoryWhite,
+          backgroundColor: ThemeColors.ivoryWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           title: Row(
             children: [
-              Icon(Icons.swap_horiz, color: _softBrown),
+              Icon(Icons.swap_horiz, color: ThemeColors.softBrown),
               const SizedBox(width: 8),
               Text(
                 'เปลี่ยนสถานะบิล',
                 style: TextStyle(
-                  color: _softBrown,
+                  color: ThemeColors.softBrown,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -189,7 +184,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
               children: [
                 Text(
                   'เลือกสถานะใหม่สำหรับบิล #${currentBill.billId}',
-                  style: TextStyle(color: _earthClay),
+                  style: TextStyle(color: ThemeColors.earthClay),
                 ),
                 const SizedBox(height: 16),
                 ..._billStatuses.entries.map((entry) {
@@ -216,7 +211,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                             border: Border.all(
                               color: isCurrentStatus
                                   ? statusData['color']
-                                  : _sandyTan.withValues(alpha: 0.3),
+                                  : ThemeColors.sandyTan.withValues(alpha: 0.3),
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -240,7 +235,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                             fontWeight: FontWeight.w600,
                                             color: isCurrentStatus
                                                 ? statusData['color']
-                                                : _earthClay,
+                                                : ThemeColors.earthClay,
                                           ),
                                         ),
                                         if (isCurrentStatus) ...[
@@ -272,7 +267,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                       statusData['description'],
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: _earthClay.withValues(
+                                        color: ThemeColors.earthClay.withValues(
                                           alpha: 0.8,
                                         ),
                                       ),
@@ -283,7 +278,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
                               if (!isCurrentStatus)
                                 Icon(
                                   Icons.arrow_forward_ios,
-                                  color: _earthClay.withValues(alpha: 0.5),
+                                  color: ThemeColors.earthClay.withValues(
+                                    alpha: 0.5,
+                                  ),
                                   size: 16,
                                 ),
                             ],
@@ -299,7 +296,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(foregroundColor: _warmStone),
+              style: TextButton.styleFrom(
+                foregroundColor: ThemeColors.warmStone,
+              ),
               child: const Text('ยกเลิก'),
             ),
           ],
@@ -326,11 +325,14 @@ class _BillDetailPageState extends State<BillDetailPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: _ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'ยืนยันการเปลี่ยนสถานะ',
-          style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: ThemeColors.softBrown,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -338,7 +340,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
           children: [
             Text(
               'ต้องการเปลี่ยนสถานะบิล #${currentBill.billId} เป็น',
-              style: TextStyle(color: _earthClay),
+              style: TextStyle(color: ThemeColors.earthClay),
             ),
             const SizedBox(height: 12),
             Container(
@@ -367,7 +369,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
                         ),
                         Text(
                           statusData['description'],
-                          style: TextStyle(fontSize: 12, color: _earthClay),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: ThemeColors.earthClay,
+                          ),
                         ),
                       ],
                     ),
@@ -379,7 +384,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
             Text(
               'การดำเนินการนี้จะอัพเดทสถานะในระบบทันที',
               style: TextStyle(
-                color: _earthClay.withValues(alpha: 0.7),
+                color: ThemeColors.earthClay.withValues(alpha: 0.7),
                 fontSize: 12,
               ),
             ),
@@ -388,7 +393,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(foregroundColor: _warmStone),
+            style: TextButton.styleFrom(foregroundColor: ThemeColors.warmStone),
             child: const Text('ยกเลิก'),
           ),
           ElevatedButton(
@@ -466,7 +471,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
             content: Text(
               'เปลี่ยนสถานะเป็น "${_billStatuses[newStatus]?['name']}" สำเร็จ',
             ),
-            backgroundColor: _oliveGreen,
+            backgroundColor: ThemeColors.oliveGreen,
           ),
         );
       } else {
@@ -498,18 +503,18 @@ class _BillDetailPageState extends State<BillDetailPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              backgroundColor: _ivoryWhite,
+              backgroundColor: ThemeColors.ivoryWhite,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
               title: Row(
                 children: [
-                  Icon(Icons.receipt, color: _oliveGreen),
+                  Icon(Icons.receipt, color: ThemeColors.oliveGreen),
                   const SizedBox(width: 8),
                   Text(
                     'อัปโหลดใบเสร็จ',
                     style: TextStyle(
-                      color: _softBrown,
+                      color: ThemeColors.softBrown,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -523,7 +528,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                   children: [
                     Text(
                       'กรุณาอัปโหลดรูปใบเสร็จสำหรับบิล #${currentBill.billId}',
-                      style: TextStyle(color: _earthClay),
+                      style: TextStyle(color: ThemeColors.earthClay),
                     ),
                     const SizedBox(height: 16),
 
@@ -532,10 +537,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
                       width: double.infinity,
                       height: 200,
                       decoration: BoxDecoration(
-                        color: _sandyTan.withValues(alpha: 0.3),
+                        color: ThemeColors.sandyTan.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _warmStone,
+                          color: ThemeColors.warmStone,
                           style: BorderStyle.solid,
                           width: 2,
                         ),
@@ -556,13 +561,13 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                 Icon(
                                   Icons.add_photo_alternate,
                                   size: 48,
-                                  color: _earthClay,
+                                  color: ThemeColors.earthClay,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'แตะเพื่อเลือกรูปใบเสร็จ',
                                   style: TextStyle(
-                                    color: _earthClay,
+                                    color: ThemeColors.earthClay,
                                     fontSize: 16,
                                   ),
                                 ),
@@ -570,7 +575,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                 Text(
                                   'รองรับไฟล์ JPG, PNG',
                                   style: TextStyle(
-                                    color: _earthClay.withValues(alpha: 0.7),
+                                    color: ThemeColors.earthClay.withValues(
+                                      alpha: 0.7,
+                                    ),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -598,13 +605,16 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                 });
                               }
                             },
-                            icon: Icon(Icons.photo_library, color: _softBrown),
+                            icon: Icon(
+                              Icons.photo_library,
+                              color: ThemeColors.softBrown,
+                            ),
                             label: Text(
                               'เลือกจากแกลเลอรี่',
-                              style: TextStyle(color: _softBrown),
+                              style: TextStyle(color: ThemeColors.softBrown),
                             ),
                             style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: _softBrown),
+                              side: BorderSide(color: ThemeColors.softBrown),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
@@ -625,13 +635,16 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                 });
                               }
                             },
-                            icon: Icon(Icons.camera_alt, color: _softBrown),
+                            icon: Icon(
+                              Icons.camera_alt,
+                              color: ThemeColors.softBrown,
+                            ),
                             label: Text(
                               'ถ่ายรูป',
-                              style: TextStyle(color: _softBrown),
+                              style: TextStyle(color: ThemeColors.softBrown),
                             ),
                             style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: _softBrown),
+                              side: BorderSide(color: ThemeColors.softBrown),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
@@ -644,24 +657,26 @@ class _BillDetailPageState extends State<BillDetailPage> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: _oliveGreen.withValues(alpha: 0.1),
+                          color: ThemeColors.oliveGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: _oliveGreen.withValues(alpha: 0.3),
+                            color: ThemeColors.oliveGreen.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.check_circle,
-                              color: _oliveGreen,
+                              color: ThemeColors.oliveGreen,
                               size: 16,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               'เลือกรูปแล้ว - พร้อมอัปโหลด',
                               style: TextStyle(
-                                color: _oliveGreen,
+                                color: ThemeColors.oliveGreen,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -675,7 +690,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  style: TextButton.styleFrom(foregroundColor: _warmStone),
+                  style: TextButton.styleFrom(
+                    foregroundColor: ThemeColors.warmStone,
+                  ),
                   child: const Text('ยกเลิก'),
                 ),
                 ElevatedButton.icon(
@@ -697,8 +714,8 @@ class _BillDetailPageState extends State<BillDetailPage> {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: selectedImage != null
-                        ? _oliveGreen
-                        : _warmStone,
+                        ? ThemeColors.oliveGreen
+                        : ThemeColors.warmStone,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -754,7 +771,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                   Text('ส่งใบเสร็จสำเร็จ! สถานะอัปเดทเป็น "ส่งใบเสร็จแล้ว"'),
                 ],
               ),
-              backgroundColor: _oliveGreen,
+              backgroundColor: ThemeColors.oliveGreen,
               duration: const Duration(seconds: 3),
             ),
           );
@@ -801,7 +818,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: const BoxDecoration(
-                    color: _softBrown,
+                    color: ThemeColors.softBrown,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
@@ -852,7 +869,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                           loadingProgress.expectedTotalBytes!
                                     : null,
                                 valueColor: const AlwaysStoppedAnimation<Color>(
-                                  _softBrown,
+                                  ThemeColors.softBrown,
                                 ),
                               ),
                             ),
@@ -861,7 +878,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                         errorBuilder: (context, error, stackTrace) => Container(
                           height: 200,
                           decoration: BoxDecoration(
-                            color: _sandyTan,
+                            color: ThemeColors.sandyTan,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Column(
@@ -870,12 +887,12 @@ class _BillDetailPageState extends State<BillDetailPage> {
                               Icon(
                                 Icons.error_outline,
                                 size: 48,
-                                color: _earthClay,
+                                color: ThemeColors.earthClay,
                               ),
                               SizedBox(height: 8),
                               Text(
                                 'ไม่สามารถโหลดรูปภาพได้',
-                                style: TextStyle(color: _earthClay),
+                                style: TextStyle(color: ThemeColors.earthClay),
                               ),
                             ],
                           ),
@@ -899,18 +916,23 @@ class _BillDetailPageState extends State<BillDetailPage> {
       return Container(
         height: 120,
         decoration: BoxDecoration(
-          color: _sandyTan.withValues(alpha: 0.3),
+          color: ThemeColors.sandyTan.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _warmStone.withValues(alpha: 0.5)),
+          border: Border.all(
+            color: ThemeColors.warmStone.withValues(alpha: 0.5),
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 32, color: _earthClay),
+            Icon(icon, size: 32, color: ThemeColors.earthClay),
             const SizedBox(height: 8),
             Text(
               'ไม่มี$title',
-              style: const TextStyle(color: _earthClay, fontSize: 12),
+              style: const TextStyle(
+                color: ThemeColors.earthClay,
+                fontSize: 12,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -924,10 +946,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
         height: 120,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _warmStone),
+          border: Border.all(color: ThemeColors.warmStone),
           boxShadow: [
             BoxShadow(
-              color: _warmStone.withValues(alpha: 0.1),
+              color: ThemeColors.warmStone.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -945,7 +967,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
                   return Container(
-                    color: _sandyTan,
+                    color: ThemeColors.sandyTan,
                     child: Center(
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
@@ -953,22 +975,29 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                   loadingProgress.expectedTotalBytes!
                             : null,
                         valueColor: const AlwaysStoppedAnimation<Color>(
-                          _softBrown,
+                          ThemeColors.softBrown,
                         ),
                       ),
                     ),
                   );
                 },
                 errorBuilder: (context, error, stackTrace) => Container(
-                  color: _sandyTan,
+                  color: ThemeColors.sandyTan,
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, size: 32, color: _earthClay),
+                      Icon(
+                        Icons.error_outline,
+                        size: 32,
+                        color: ThemeColors.earthClay,
+                      ),
                       SizedBox(height: 4),
                       Text(
                         'ไม่สามารถโหลดรูปได้',
-                        style: TextStyle(color: _earthClay, fontSize: 10),
+                        style: TextStyle(
+                          color: ThemeColors.earthClay,
+                          fontSize: 10,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -1109,11 +1138,14 @@ class _BillDetailPageState extends State<BillDetailPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: _ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'ยืนยันการลบ',
-          style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: ThemeColors.softBrown,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1121,7 +1153,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
           children: [
             Text(
               'คุณต้องการลบบิลนี้หรือไม่?',
-              style: TextStyle(color: _earthClay),
+              style: TextStyle(color: ThemeColors.earthClay),
             ),
             const SizedBox(height: 8),
             Text(
@@ -1138,7 +1170,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(foregroundColor: _warmStone),
+            style: TextButton.styleFrom(foregroundColor: ThemeColors.warmStone),
             child: const Text('ยกเลิก'),
           ),
           ElevatedButton(
@@ -1162,7 +1194,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text('ลบบิลสำเร็จ'),
-              backgroundColor: _oliveGreen,
+              backgroundColor: ThemeColors.oliveGreen,
             ),
           );
           Navigator.pop(context, true);
@@ -1189,17 +1221,20 @@ class _BillDetailPageState extends State<BillDetailPage> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: _ivoryWhite,
+          backgroundColor: ThemeColors.ivoryWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           title: Text(
             'ยืนยันการเปลี่ยนสถานะ',
-            style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: ThemeColors.softBrown,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Text(
             'ต้องการเปลี่ยนสถานะเป็น "ยังไม่ชำระ" หรือไม่?',
-            style: TextStyle(color: _earthClay),
+            style: TextStyle(color: ThemeColors.earthClay),
           ),
           actions: [
             TextButton(
@@ -1209,7 +1244,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _softTerracotta,
+                backgroundColor: ThemeColors.softTerracotta,
                 foregroundColor: Colors.white,
               ),
               child: const Text('ยืนยัน'),
@@ -1251,7 +1286,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text('อัพเดทสถานะสำเร็จ'),
-                backgroundColor: _softTerracotta,
+                backgroundColor: ThemeColors.softTerracotta,
               ),
             );
           }
@@ -1272,17 +1307,20 @@ class _BillDetailPageState extends State<BillDetailPage> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: _ivoryWhite,
+          backgroundColor: ThemeColors.ivoryWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           title: Text(
             'ยืนยันการชำระเงิน',
-            style: TextStyle(color: _softBrown, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: ThemeColors.softBrown,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Text(
             'ยืนยันว่าได้รับชำระเงินแล้วหรือไม่?',
-            style: TextStyle(color: _earthClay),
+            style: TextStyle(color: ThemeColors.earthClay),
           ),
           actions: [
             TextButton(
@@ -1292,7 +1330,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _oliveGreen,
+                backgroundColor: ThemeColors.oliveGreen,
                 foregroundColor: Colors.white,
               ),
               child: const Text('ยืนยันการชำระ'),
@@ -1334,7 +1372,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text('อัพเดทสถานะสำเร็จ'),
-                backgroundColor: _oliveGreen,
+                backgroundColor: ThemeColors.oliveGreen,
               ),
             );
           }
@@ -1360,7 +1398,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
     final Color stateColor = _getStatusColor();
 
     return Scaffold(
-      backgroundColor: _ivoryWhite,
+      backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
         title: Text(
           'บิล #${currentBill.billId}',
@@ -1369,7 +1407,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: _softBrown,
+        backgroundColor: ThemeColors.softBrown,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
@@ -1398,8 +1436,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
       body: _isLoading
           ? Center(
               child: CircularProgressIndicator(
-                valueColor: const AlwaysStoppedAnimation<Color>(_softBrown),
-                backgroundColor: _sandyTan.withValues(alpha: 0.5),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  ThemeColors.softBrown,
+                ),
+                backgroundColor: ThemeColors.sandyTan.withValues(alpha: 0.5),
               ),
             )
           : SingleChildScrollView(
@@ -1441,7 +1481,9 @@ class _BillDetailPageState extends State<BillDetailPage> {
                               else if (currentBill.paidStatus == 0)
                                 Text(
                                   'เหลืออีก ${_getDaysUntilDue()} วัน',
-                                  style: TextStyle(color: _softTerracotta),
+                                  style: TextStyle(
+                                    color: ThemeColors.softTerracotta,
+                                  ),
                                 ),
                             ],
                           ),
@@ -1474,7 +1516,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                           valueStyle: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: _softBrown,
+                            color: ThemeColors.softBrown,
                           ),
                         ),
                         _buildInfoRow('สถานะ', _getStatusText()),
@@ -1559,7 +1601,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                     'รูปบิล',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
-                                      color: _earthClay,
+                                      color: ThemeColors.earthClay,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -1581,7 +1623,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                                     'สลิปการโอน',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
-                                      color: _earthClay,
+                                      color: ThemeColors.earthClay,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -1607,7 +1649,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                               'ใบเสร็จการชำระเงิน',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: _earthClay,
+                                color: ThemeColors.earthClay,
                                 fontSize: 14,
                               ),
                             ),
@@ -1638,7 +1680,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                           icon: const Icon(Icons.swap_horiz),
                           label: const Text('เปลี่ยนสถานะบิล'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _softBrown,
+                            backgroundColor: ThemeColors.softBrown,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -1665,12 +1707,12 @@ class _BillDetailPageState extends State<BillDetailPage> {
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: currentBill.paidStatus == 1
-                                ? _softTerracotta
-                                : _oliveGreen,
+                                ? ThemeColors.softTerracotta
+                                : ThemeColors.oliveGreen,
                             side: BorderSide(
                               color: currentBill.paidStatus == 1
-                                  ? _softTerracotta
-                                  : _oliveGreen,
+                                  ? ThemeColors.softTerracotta
+                                  : ThemeColors.oliveGreen,
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -1699,7 +1741,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
               )
             : const Icon(Icons.picture_as_pdf),
         label: Text(_isLoading ? 'กำลังสร้าง...' : 'Export PDF'),
-        backgroundColor: _burntOrange,
+        backgroundColor: ThemeColors.burntOrange,
         foregroundColor: Colors.white,
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -1713,10 +1755,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _sandyTan.withValues(alpha: 0.3)),
+        border: Border.all(color: ThemeColors.sandyTan.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: _warmStone.withValues(alpha: 0.08),
+            color: ThemeColors.warmStone.withValues(alpha: 0.08),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -1733,7 +1775,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
       style: const TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 18,
-        color: _softBrown,
+        color: ThemeColors.softBrown,
       ),
     );
   }
@@ -1748,7 +1790,10 @@ class _BillDetailPageState extends State<BillDetailPage> {
             width: 120,
             child: Text(
               '$label:',
-              style: TextStyle(fontWeight: FontWeight.w600, color: _earthClay),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: ThemeColors.earthClay,
+              ),
             ),
           ),
           Expanded(child: Text(value, style: valueStyle ?? const TextStyle())),

@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:fullproject/domains/complaint_domain.dart';
 import 'package:fullproject/extensions/context_extensions.dart';
 import 'package:fullproject/models/complaint_model.dart';
+import 'package:fullproject/models/house_model.dart';
 import 'package:fullproject/pages/house/complaint/complaint_detail.dart';
 import 'package:fullproject/pages/house/complaint/complaint_form.dart';
+import 'package:fullproject/pages/house/widgets/appbar.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseComplaintPage extends StatefulWidget {
-  final int houseId; // ดูเฉพาะบ้านนี้เท่านั้น
+  final HouseModel houseData; // ดูเฉพาะบ้านนี้เท่านั้น
 
-  const HouseComplaintPage({Key? key, required this.houseId}) : super(key: key);
+  const HouseComplaintPage({Key? key, required this.houseData})
+    : super(key: key);
 
   @override
   State<HouseComplaintPage> createState() => _HouseComplaintPageState();
@@ -31,16 +35,6 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
   String _typeFilter = 'all';
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
 
   @override
   void initState() {
@@ -74,7 +68,7 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
   }
 
   void _loadComplaints() {
-    _complaintsFuture = ComplaintDomain.getAllInHouse(widget.houseId);
+    _complaintsFuture = ComplaintDomain.getAllInHouse(widget.houseData.houseId);
     _complaintsFuture.then((complaints) {
       setState(() {
         _allComplaints = complaints;
@@ -141,7 +135,8 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: beige,
+      appBar: HouseAppBar(house: widget.houseData?.houseNumber),
+      backgroundColor: ThemeColors.beige,
       body: Column(
         children: [
           // Filter Section
@@ -150,8 +145,8 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
           // Complaint List
           Expanded(
             child: RefreshIndicator(
-              color: softBrown,
-              backgroundColor: ivoryWhite,
+              color: ThemeColors.softBrown,
+              backgroundColor: ThemeColors.ivoryWhite,
               onRefresh: () async => _refreshComplaints(),
               child: FutureBuilder<List<ComplaintModel>>(
                 future: _complaintsFuture,
@@ -185,11 +180,11 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.1),
+            color: ThemeColors.earthClay.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -202,14 +197,18 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Icon(Icons.filter_list_rounded, color: softBrown, size: 20),
+                Icon(
+                  Icons.filter_list_rounded,
+                  color: ThemeColors.softBrown,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'ตัวกรอง',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: softBrown,
+                    color: ThemeColors.softBrown,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -219,7 +218,7 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: softBrown.withOpacity(0.1),
+                    color: ThemeColors.softBrown.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -227,7 +226,7 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: softBrown,
+                      color: ThemeColors.softBrown,
                     ),
                   ),
                 ),
@@ -246,7 +245,10 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
                     },
                     child: Text(
                       'ล้างทั้งหมด',
-                      style: TextStyle(color: clayOrange, fontSize: 12),
+                      style: TextStyle(
+                        color: ThemeColors.clayOrange,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
               ],
@@ -281,7 +283,7 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: earthClay,
+              color: ThemeColors.earthClay,
             ),
           ),
         ),
@@ -303,24 +305,28 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       height: 40,
       decoration: BoxDecoration(
-        color: sandyTan,
+        color: ThemeColors.sandyTan,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: warmStone, width: 1),
+        border: Border.all(color: ThemeColors.warmStone, width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _statusFilter,
           isExpanded: true,
-          style: TextStyle(color: earthClay, fontSize: 14),
-          dropdownColor: ivoryWhite,
-          icon: Icon(Icons.keyboard_arrow_down, color: earthClay, size: 20),
+          style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
+          dropdownColor: ThemeColors.ivoryWhite,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: ThemeColors.earthClay,
+            size: 20,
+          ),
           items: statusOptions.entries.map((entry) {
             return DropdownMenuItem<String>(
               value: entry.key,
               child: Text(
                 entry.value,
                 style: TextStyle(
-                  color: earthClay,
+                  color: ThemeColors.earthClay,
                   fontWeight: _statusFilter == entry.key
                       ? FontWeight.w600
                       : FontWeight.w400,
@@ -354,24 +360,28 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       height: 40,
       decoration: BoxDecoration(
-        color: sandyTan,
+        color: ThemeColors.sandyTan,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: warmStone, width: 1),
+        border: Border.all(color: ThemeColors.warmStone, width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _levelFilter,
           isExpanded: true,
-          style: TextStyle(color: earthClay, fontSize: 14),
-          dropdownColor: ivoryWhite,
-          icon: Icon(Icons.keyboard_arrow_down, color: earthClay, size: 20),
+          style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
+          dropdownColor: ThemeColors.ivoryWhite,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: ThemeColors.earthClay,
+            size: 20,
+          ),
           items: levelOptions.entries.map((entry) {
             return DropdownMenuItem<String>(
               value: entry.key,
               child: Text(
                 entry.value,
                 style: TextStyle(
-                  color: earthClay,
+                  color: ThemeColors.earthClay,
                   fontWeight: _levelFilter == entry.key
                       ? FontWeight.w600
                       : FontWeight.w400,
@@ -405,24 +415,28 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       height: 40,
       decoration: BoxDecoration(
-        color: sandyTan,
+        color: ThemeColors.sandyTan,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: warmStone, width: 1),
+        border: Border.all(color: ThemeColors.warmStone, width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _typeFilter,
           isExpanded: true,
-          style: TextStyle(color: earthClay, fontSize: 14),
-          dropdownColor: ivoryWhite,
-          icon: Icon(Icons.keyboard_arrow_down, color: earthClay, size: 20),
+          style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
+          dropdownColor: ThemeColors.ivoryWhite,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: ThemeColors.earthClay,
+            size: 20,
+          ),
           items: typeOptions.entries.map((entry) {
             return DropdownMenuItem<String>(
               value: entry.key,
               child: Text(
                 entry.value,
                 style: TextStyle(
-                  color: earthClay,
+                  color: ThemeColors.earthClay,
                   fontWeight: _typeFilter == entry.key
                       ? FontWeight.w600
                       : FontWeight.w400,
@@ -449,13 +463,13 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+            valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
             strokeWidth: 3,
           ),
           const SizedBox(height: 16),
           Text(
             'กำลังโหลดข้อมูลร้องเรียน...',
-            style: TextStyle(color: earthClay, fontSize: 16),
+            style: TextStyle(color: ThemeColors.earthClay, fontSize: 16),
           ),
         ],
       ),
@@ -468,11 +482,11 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
         margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -481,12 +495,16 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline_rounded, size: 48, color: clayOrange),
+            Icon(
+              Icons.error_outline_rounded,
+              size: 48,
+              color: ThemeColors.clayOrange,
+            ),
             const SizedBox(height: 16),
             Text(
               'เกิดข้อผิดพลาดในการโหลดข้อมูล',
               style: TextStyle(
-                color: earthClay,
+                color: ThemeColors.earthClay,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -496,8 +514,8 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
             ElevatedButton(
               onPressed: _refreshComplaints,
               style: ElevatedButton.styleFrom(
-                backgroundColor: burntOrange,
-                foregroundColor: ivoryWhite,
+                backgroundColor: ThemeColors.burntOrange,
+                foregroundColor: ThemeColors.ivoryWhite,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -516,11 +534,11 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
         margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -529,12 +547,16 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.feedback_outlined, size: 48, color: warmStone),
+            Icon(
+              Icons.feedback_outlined,
+              size: 48,
+              color: ThemeColors.warmStone,
+            ),
             const SizedBox(height: 16),
             Text(
               'ไม่พบข้อมูลร้องเรียนที่ตรงกับเงื่อนไข',
               style: TextStyle(
-                color: earthClay,
+                color: ThemeColors.earthClay,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -543,7 +565,7 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
             const SizedBox(height: 8),
             Text(
               'ลองปรับเปลี่ยนตัวกรองหรือสร้างร้องเรียนใหม่',
-              style: TextStyle(color: warmStone, fontSize: 14),
+              style: TextStyle(color: ThemeColors.warmStone, fontSize: 14),
               textAlign: TextAlign.center,
             ),
           ],
@@ -584,12 +606,12 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [burntOrange, softTerracotta],
+          colors: [ThemeColors.burntOrange, ThemeColors.softTerracotta],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: burntOrange.withOpacity(0.3),
+            color: ThemeColors.burntOrange.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -599,21 +621,25 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _addComplaint(houseId: widget.houseId),
+          onTap: () => _addComplaint(houseId: widget.houseData.houseId),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
             width: double.infinity,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add_rounded, color: ivoryWhite, size: 24),
+                Icon(
+                  Icons.add_rounded,
+                  color: ThemeColors.ivoryWhite,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'สร้างร้องเรียนใหม่',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: ivoryWhite,
+                    color: ThemeColors.ivoryWhite,
                   ),
                 ),
               ],
@@ -649,28 +675,16 @@ class ComplaintCard extends StatelessWidget {
     this.onStatusUpdate,
   }) : super(key: key);
 
-  // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
-
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.08),
+            color: ThemeColors.earthClay.withOpacity(0.08),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -700,7 +714,7 @@ class ComplaintCard extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: softBrown,
+                              color: ThemeColors.softBrown,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -708,7 +722,10 @@ class ComplaintCard extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             _formatDate(complaint.createAt),
-                            style: TextStyle(fontSize: 12, color: earthClay),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: ThemeColors.earthClay,
+                            ),
                           ),
                         ],
                       ),
@@ -722,7 +739,11 @@ class ComplaintCard extends StatelessWidget {
                 // Description
                 Text(
                   complaint.description,
-                  style: TextStyle(color: earthClay, fontSize: 14, height: 1.4),
+                  style: TextStyle(
+                    color: ThemeColors.earthClay,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -753,18 +774,18 @@ class ComplaintCard extends StatelessWidget {
 
     switch (complaint.status?.toLowerCase()) {
       case 'resolved':
-        color = oliveGreen;
+        color = ThemeColors.oliveGreen;
         icon = Icons.check_circle_rounded;
         text = 'เสร็จสิ้น';
         break;
       case 'in_progress':
-        color = burntOrange;
+        color = ThemeColors.burntOrange;
         icon = Icons.sync_rounded;
         text = 'ดำเนินการ';
         break;
       case 'pending':
       default:
-        color = softTerracotta;
+        color = ThemeColors.softTerracotta;
         icon = Icons.pending_rounded;
         text = 'รอดำเนินการ';
     }
@@ -786,24 +807,24 @@ class ComplaintCard extends StatelessWidget {
     switch (complaint.level) {
       case '1':
         text = 'ต่ำ';
-        color = oliveGreen;
+        color = ThemeColors.oliveGreen;
         break;
       case '2':
         text = 'ปกติ';
-        color = burntOrange;
+        color = ThemeColors.burntOrange;
         break;
       case '3':
         text = 'สูง';
-        color = softTerracotta;
+        color = ThemeColors.softTerracotta;
         break;
       case '4':
       case '5':
         text = 'เร่งด่วน';
-        color = clayOrange;
+        color = ThemeColors.clayOrange;
         break;
       default:
         text = 'ปกติ';
-        color = warmStone;
+        color = ThemeColors.warmStone;
     }
 
     return Container(
@@ -838,23 +859,23 @@ class ComplaintCard extends StatelessWidget {
     switch (complaint.typeComplaint) {
       case 1:
         text = 'สาธารณูปโภค';
-        color = softTerracotta;
+        color = ThemeColors.softTerracotta;
         break;
       case 2:
         text = 'ความปลอดภัย';
-        color = clayOrange;
+        color = ThemeColors.clayOrange;
         break;
       case 3:
         text = 'สิ่งแวดล้อม';
-        color = oliveGreen;
+        color = ThemeColors.oliveGreen;
         break;
       case 4:
         text = 'การบริการ';
-        color = burntOrange;
+        color = ThemeColors.burntOrange;
         break;
       default:
         text = 'อื่นๆ';
-        color = warmStone;
+        color = ThemeColors.warmStone;
     }
 
     return Container(
@@ -879,19 +900,19 @@ class ComplaintCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: softBrown.withOpacity(0.15),
+        color: ThemeColors.softBrown.withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: softBrown.withOpacity(0.3)),
+        border: Border.all(color: ThemeColors.softBrown.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.lock_rounded, color: softBrown, size: 12),
+          Icon(Icons.lock_rounded, color: ThemeColors.softBrown, size: 12),
           const SizedBox(width: 2),
           Text(
             'ส่วนตัว',
             style: TextStyle(
-              color: softBrown,
+              color: ThemeColors.softBrown,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),

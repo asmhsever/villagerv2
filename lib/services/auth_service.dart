@@ -85,6 +85,7 @@ class AuthService {
           await prefs.setInt('house_id', model.houseId);
           await prefs.setInt('village_id', model.villageId);
           await prefs.setString('owner', model.owner ?? '');
+          await prefs.setString('house_number', model.houseNumber ?? '');
         }
         break;
       default:
@@ -133,11 +134,13 @@ class AuthService {
           final villageId = prefs.getInt('village_id');
           final houseId = prefs.getInt('house_id');
           final owner = prefs.getString('owner');
+          final houseNumber = prefs.getString('house_number');
           return HouseModel(
             houseId: houseId ?? 0,
             villageId: villageId ?? 0,
             userId: userId ?? 0,
             owner: owner ?? "",
+            houseNumber: houseNumber ?? "",
           );
           break;
         default:

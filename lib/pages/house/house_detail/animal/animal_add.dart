@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:fullproject/domains/animal_domain.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseAddAnimalPage extends StatefulWidget {
   final int houseId;
@@ -16,19 +17,6 @@ class HouseAddAnimalPage extends StatefulWidget {
 
 class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softBorder = Color(0xFFD0C4B0);
-  static const Color focusedBrown = Color(0xFF916846);
-  static const Color inputFill = Color(0xFFFBF9F3);
-  static const Color clayOrange = Color(0xFFCE8964);
-  static const Color softTerracotta = Color(0xFFD2B48C);
 
   // Form Controllers
   final _formKey = GlobalKey<FormState>();
@@ -117,13 +105,16 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: ivoryWhite,
+          backgroundColor: ThemeColors.ivoryWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
             'เลือกรูปภาพ',
-            style: TextStyle(color: softBrown, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: ThemeColors.softBrown,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -132,14 +123,17 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: oliveGreen.withOpacity(0.1),
+                    color: ThemeColors.oliveGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.photo_library_rounded, color: oliveGreen),
+                  child: Icon(
+                    Icons.photo_library_rounded,
+                    color: ThemeColors.oliveGreen,
+                  ),
                 ),
                 title: Text(
                   'เลือกจากแกลเลอรี่',
-                  style: TextStyle(color: earthClay),
+                  style: TextStyle(color: ThemeColors.earthClay),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -150,12 +144,18 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: burntOrange.withOpacity(0.1),
+                    color: ThemeColors.burntOrange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.camera_alt_rounded, color: burntOrange),
+                  child: Icon(
+                    Icons.camera_alt_rounded,
+                    color: ThemeColors.burntOrange,
+                  ),
                 ),
-                title: Text('ถ่ายภาพ', style: TextStyle(color: earthClay)),
+                title: Text(
+                  'ถ่ายภาพ',
+                  style: TextStyle(color: ThemeColors.earthClay),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImageFromCamera();
@@ -178,13 +178,16 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ivoryWhite,
+      backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
-        backgroundColor: softBrown,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.softBrown,
+        foregroundColor: ThemeColors.ivoryWhite,
         title: const Text(
           'เพิ่มสัตว์เลี้ยง',
-          style: TextStyle(fontWeight: FontWeight.w600, color: ivoryWhite),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: ThemeColors.ivoryWhite,
+          ),
         ),
         elevation: 0,
         leading: IconButton(
@@ -204,21 +207,21 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: beige,
+                  color: ThemeColors.beige,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: sandyTan, width: 1),
+                  border: Border.all(color: ThemeColors.sandyTan, width: 1),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: burntOrange,
+                        color: ThemeColors.burntOrange,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
                         Icons.add_circle_outline,
-                        color: ivoryWhite,
+                        color: ThemeColors.ivoryWhite,
                         size: 32,
                       ),
                     ),
@@ -232,7 +235,7 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
-                              color: softBrown,
+                              color: ThemeColors.softBrown,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -240,7 +243,7 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                             'สำหรับบ้านหมายเลข ${widget.houseId}',
                             style: const TextStyle(
                               fontSize: 14,
-                              color: earthClay,
+                              color: ThemeColors.earthClay,
                             ),
                           ),
                         ],
@@ -258,35 +261,47 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _nameController,
-                style: const TextStyle(color: softBrown, fontSize: 16),
+                style: const TextStyle(
+                  color: ThemeColors.softBrown,
+                  fontSize: 16,
+                ),
                 decoration: InputDecoration(
                   hintText: 'กรอกชื่อสัตว์เลี้ยง',
-                  hintStyle: TextStyle(color: warmStone),
+                  hintStyle: TextStyle(color: ThemeColors.warmStone),
                   filled: true,
-                  fillColor: inputFill,
+                  fillColor: ThemeColors.inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: softBorder, width: 1),
+                    borderSide: const BorderSide(
+                      color: ThemeColors.softBorder,
+                      width: 1,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: softBorder, width: 1),
+                    borderSide: const BorderSide(
+                      color: ThemeColors.softBorder,
+                      width: 1,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: focusedBrown, width: 2),
+                    borderSide: const BorderSide(
+                      color: ThemeColors.focusedBrown,
+                      width: 2,
+                    ),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: Colors.red, width: 1),
                   ),
-                  prefixIcon: Icon(Icons.pets, color: warmStone),
+                  prefixIcon: Icon(Icons.pets, color: ThemeColors.warmStone),
                   contentPadding: const EdgeInsets.all(16),
                 ),
                 validator: (value) {
@@ -308,35 +323,50 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _typeController,
-                style: const TextStyle(color: softBrown, fontSize: 16),
+                style: const TextStyle(
+                  color: ThemeColors.softBrown,
+                  fontSize: 16,
+                ),
                 decoration: InputDecoration(
                   hintText: 'กรอกประเภทสัตว์เลี้ยง (เช่น สุนัข, แมว, นก)',
-                  hintStyle: TextStyle(color: warmStone),
+                  hintStyle: TextStyle(color: ThemeColors.warmStone),
                   filled: true,
-                  fillColor: inputFill,
+                  fillColor: ThemeColors.inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: softBorder, width: 1),
+                    borderSide: const BorderSide(
+                      color: ThemeColors.softBorder,
+                      width: 1,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: softBorder, width: 1),
+                    borderSide: const BorderSide(
+                      color: ThemeColors.softBorder,
+                      width: 1,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: focusedBrown, width: 2),
+                    borderSide: const BorderSide(
+                      color: ThemeColors.focusedBrown,
+                      width: 2,
+                    ),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: Colors.red, width: 1),
                   ),
-                  prefixIcon: Icon(Icons.category_rounded, color: warmStone),
+                  prefixIcon: Icon(
+                    Icons.category_rounded,
+                    color: ThemeColors.warmStone,
+                  ),
                   contentPadding: const EdgeInsets.all(16),
                 ),
                 validator: (value) {
@@ -358,7 +388,7 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                 ),
               ),
               const SizedBox(height: 12),
@@ -369,10 +399,12 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                     width: 150,
                     height: 150,
                     decoration: BoxDecoration(
-                      color: inputFill,
+                      color: ThemeColors.inputFill,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: _hasSelectedImage() ? focusedBrown : softBorder,
+                        color: _hasSelectedImage()
+                            ? ThemeColors.focusedBrown
+                            : ThemeColors.softBorder,
                         width: 2,
                       ),
                     ),
@@ -410,13 +442,13 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                               Icon(
                                 Icons.add_a_photo_outlined,
                                 size: 48,
-                                color: warmStone,
+                                color: ThemeColors.warmStone,
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'เพิ่มรูปภาพ',
                                 style: TextStyle(
-                                  color: warmStone,
+                                  color: ThemeColors.warmStone,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -424,7 +456,7 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                               Text(
                                 '(ไม่บังคับ)',
                                 style: TextStyle(
-                                  color: warmStone,
+                                  color: ThemeColors.warmStone,
                                   fontSize: 12,
                                 ),
                               ),
@@ -443,9 +475,9 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _submitForm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: burntOrange,
-                    foregroundColor: ivoryWhite,
-                    disabledBackgroundColor: warmStone,
+                    backgroundColor: ThemeColors.burntOrange,
+                    foregroundColor: ThemeColors.ivoryWhite,
+                    disabledBackgroundColor: ThemeColors.warmStone,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -458,7 +490,7 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              ivoryWhite,
+                              ThemeColors.ivoryWhite,
                             ),
                           ),
                         )
@@ -551,7 +583,7 @@ class _HouseAddAnimalPageState extends State<HouseAddAnimalPage> {
             Text(message),
           ],
         ),
-        backgroundColor: oliveGreen,
+        backgroundColor: ThemeColors.oliveGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),

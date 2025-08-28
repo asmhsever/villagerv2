@@ -6,6 +6,7 @@ import 'package:fullproject/domains/notion_domain.dart';
 import 'package:fullproject/services/auth_service.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/pages/law/notion/notion_add_page.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class LawNotionPage extends StatefulWidget {
   const LawNotionPage({super.key});
@@ -63,30 +64,28 @@ class _LawNotionPageState extends State<LawNotionPage> {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: const Color(0xFFFFFDF6),
+        backgroundColor: ThemeColors.ivoryWhite,
         title: const Text(
           "ยืนยันการลบ",
           style: TextStyle(
-            color: Color(0xFFA47551),
+            color: ThemeColors.softBrown,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
           "คุณต้องการลบข่าว '${notion.header}' ใช่หรือไม่?",
-          style: const TextStyle(color: Color(0xFFBFA18F)),
+          style: const TextStyle(color: ThemeColors.earthClay),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFBFA18F),
-            ),
+            style: TextButton.styleFrom(foregroundColor: ThemeColors.earthClay),
             child: const Text("ยกเลิก"),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE08E45),
+              backgroundColor: ThemeColors.burntOrange,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -105,8 +104,10 @@ class _LawNotionPageState extends State<LawNotionPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('ลบข่าวสารเรียบร้อยแล้ว'),
-            backgroundColor: const Color(0xFFA3B18A),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            backgroundColor: ThemeColors.oliveGreen,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }
@@ -119,13 +120,13 @@ class _LawNotionPageState extends State<LawNotionPage> {
         width: 80,
         height: 80,
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F0E1),
+          color: ThemeColors.beige,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFD8CAB8), width: 1),
+          border: Border.all(color: ThemeColors.sandyTan, width: 1),
         ),
         child: const Icon(
           Icons.article_outlined,
-          color: Color(0xFFBFA18F),
+          color: ThemeColors.earthClay,
           size: 32,
         ),
       );
@@ -152,10 +153,12 @@ class _LawNotionPageState extends State<LawNotionPage> {
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return Container(
-              color: const Color(0xFFF5F0E1),
+              color: ThemeColors.beige,
               child: const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFA47551)),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ThemeColors.softBrown,
+                  ),
                   strokeWidth: 2,
                 ),
               ),
@@ -163,10 +166,10 @@ class _LawNotionPageState extends State<LawNotionPage> {
           },
           errorBuilder: (context, error, stackTrace) {
             return Container(
-              color: const Color(0xFFF5F0E1),
+              color: ThemeColors.beige,
               child: const Icon(
                 Icons.broken_image_outlined,
-                color: Color(0xFFBFA18F),
+                color: ThemeColors.earthClay,
                 size: 32,
               ),
             );
@@ -185,27 +188,27 @@ class _LawNotionPageState extends State<LawNotionPage> {
 
     switch (type.toUpperCase()) {
       case 'SECURITY':
-        chipColor = const Color(0xFFCC7748); // Clay Orange - เร่งด่วน
+        chipColor = ThemeColors.clayOrange; // Clay Orange - เร่งด่วน
         textColor = Colors.white;
         displayText = 'ความปลอดภัย';
         break;
       case 'MAINTENANCE':
-        chipColor = const Color(0xFFA3B18A); // Olive Green - ดูแลรักษา
+        chipColor = ThemeColors.oliveGreen; // Olive Green - ดูแลรักษา
         textColor = Colors.white;
         displayText = 'ซ่อมบำรุง';
         break;
       case 'GENERAL':
-        chipColor = const Color(0xFFC7B9A5); // Warm Stone - ทั่วไป
+        chipColor = ThemeColors.warmStone; // Warm Stone - ทั่วไป
         textColor = Colors.white;
         displayText = 'ข้อมูลทั่วไป';
         break;
       case 'SOCIAL':
-        chipColor = const Color(0xFFD48B5C); // Soft Terracotta - สังคม
+        chipColor = ThemeColors.softTerracotta; // Soft Terracotta - สังคม
         textColor = Colors.white;
         displayText = 'กิจกรรม';
         break;
       default:
-        chipColor = const Color(0xFFBFA18F);
+        chipColor = ThemeColors.earthClay;
         textColor = Colors.white;
         displayText = type;
     }
@@ -244,26 +247,26 @@ class _LawNotionPageState extends State<LawNotionPage> {
           200: Color(0xFFD4C5BB),
           300: Color(0xFFC2ADA0),
           400: Color(0xFFB5998B),
-          500: Color(0xFFA47551),
+          500: ThemeColors.softBrown,
           600: Color(0xFF9C6D4A),
           700: Color(0xFF926240),
           800: Color(0xFF885837),
           900: Color(0xFF764627),
         }),
-        scaffoldBackgroundColor: const Color(0xFFFFFDF6),
-        cardColor: const Color(0xFFD8CAB8),
+        scaffoldBackgroundColor: ThemeColors.ivoryWhite,
+        cardColor: ThemeColors.sandyTan,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFA47551),
+          backgroundColor: ThemeColors.softBrown,
           foregroundColor: Colors.white,
           elevation: 2,
-          shadowColor: Color(0xFFBFA18F),
+          shadowColor: ThemeColors.earthClay,
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Color(0xFFE08E45),
+          backgroundColor: ThemeColors.burntOrange,
           foregroundColor: Colors.white,
         ),
         cardTheme: const CardThemeData(
-          color: Color(0xFFFFFDF6),
+          color: ThemeColors.ivoryWhite,
           elevation: 3,
           shadowColor: Color(0x4DBFA18F), // Using direct hex with alpha
           shape: RoundedRectangleBorder(
@@ -288,10 +291,7 @@ class _LawNotionPageState extends State<LawNotionPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFFFDF6),
-                Color(0xFFF5F0E1),
-              ],
+              colors: [ThemeColors.ivoryWhite, ThemeColors.beige],
             ),
           ),
           child: FutureBuilder<List<NotionModel>>(
@@ -300,7 +300,9 @@ class _LawNotionPageState extends State<LawNotionPage> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFA47551)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ThemeColors.softBrown,
+                    ),
                   ),
                 );
               } else if (snapshot.hasError) {
@@ -311,7 +313,7 @@ class _LawNotionPageState extends State<LawNotionPage> {
                       Icon(
                         Icons.error_outline,
                         size: 64,
-                        color: const Color(0xFFE08E45),
+                        color: ThemeColors.burntOrange,
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -319,13 +321,13 @@ class _LawNotionPageState extends State<LawNotionPage> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFFA47551),
+                          color: ThemeColors.softBrown,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '${snapshot.error}',
-                        style: TextStyle(color: const Color(0xFFBFA18F)),
+                        style: TextStyle(color: ThemeColors.earthClay),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -339,7 +341,7 @@ class _LawNotionPageState extends State<LawNotionPage> {
                       Icon(
                         Icons.article_outlined,
                         size: 64,
-                        color: const Color(0xFFBFA18F),
+                        color: ThemeColors.earthClay,
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -347,13 +349,13 @@ class _LawNotionPageState extends State<LawNotionPage> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFFA47551),
+                          color: ThemeColors.softBrown,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'แตะปุ่ม + เพื่อเพิ่มข่าวสารใหม่',
-                        style: TextStyle(color: const Color(0xFFBFA18F)),
+                        style: TextStyle(color: ThemeColors.earthClay),
                       ),
                     ],
                   ),
@@ -392,7 +394,7 @@ class _LawNotionPageState extends State<LawNotionPage> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
-                                            color: Color(0xFFA47551),
+                                            color: ThemeColors.softBrown,
                                           ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
@@ -405,11 +407,12 @@ class _LawNotionPageState extends State<LawNotionPage> {
                                   const SizedBox(height: 8),
 
                                   // รายละเอียด
-                                  if (notion.description != null && notion.description!.isNotEmpty)
+                                  if (notion.description != null &&
+                                      notion.description!.isNotEmpty)
                                     Text(
                                       notion.description!,
                                       style: const TextStyle(
-                                        color: Color(0xFFBFA18F),
+                                        color: ThemeColors.earthClay,
                                         fontSize: 14,
                                         height: 1.3,
                                       ),
@@ -424,7 +427,7 @@ class _LawNotionPageState extends State<LawNotionPage> {
                                       Icon(
                                         Icons.schedule,
                                         size: 14,
-                                        color: const Color(0xFFBFA18F),
+                                        color: ThemeColors.earthClay,
                                       ),
                                       const SizedBox(width: 4),
                                       Expanded(
@@ -432,7 +435,7 @@ class _LawNotionPageState extends State<LawNotionPage> {
                                           _formatDate(notion.createDate),
                                           style: const TextStyle(
                                             fontSize: 12,
-                                            color: Color(0xFFBFA18F),
+                                            color: ThemeColors.earthClay,
                                           ),
                                         ),
                                       ),
@@ -441,13 +444,15 @@ class _LawNotionPageState extends State<LawNotionPage> {
                                       Material(
                                         color: Colors.transparent,
                                         child: InkWell(
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                           onTap: () => _navigateToEdit(notion),
                                           child: Container(
                                             padding: const EdgeInsets.all(8),
                                             child: const Icon(
                                               Icons.edit_outlined,
-                                              color: Color(0xFFE08E45),
+                                              color: ThemeColors.burntOrange,
                                               size: 20,
                                             ),
                                           ),
@@ -458,13 +463,15 @@ class _LawNotionPageState extends State<LawNotionPage> {
                                       Material(
                                         color: Colors.transparent,
                                         child: InkWell(
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                           onTap: () => _confirmDelete(notion),
                                           child: Container(
                                             padding: const EdgeInsets.all(8),
                                             child: const Icon(
                                               Icons.delete_outline,
-                                              color: Color(0xFFD48B5C),
+                                              color: ThemeColors.softTerracotta,
                                               size: 20,
                                             ),
                                           ),

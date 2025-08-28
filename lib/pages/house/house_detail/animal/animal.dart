@@ -3,6 +3,7 @@ import 'package:fullproject/domains/animal_domain.dart';
 import 'package:fullproject/pages/house/house_detail/animal/animal_add.dart';
 import 'package:fullproject/pages/house/house_detail/animal/animal_edit.dart';
 import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseAnimalDetailPage extends StatefulWidget {
   final int? houseId;
@@ -15,17 +16,6 @@ class HouseAnimalDetailPage extends StatefulWidget {
 
 class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
-  static const Color warmAmber = Color(0xFFDA9856);
 
   void _addAnimal({required int houseId}) async {
     final result = await Navigator.push(
@@ -58,14 +48,16 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ivoryWhite,
+      backgroundColor: ThemeColors.ivoryWhite,
       body: FutureBuilder(
         future: AnimalDomain.getByHouse(houseId: widget.houseId!),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  ThemeColors.softBrown,
+                ),
               ),
             );
           }
@@ -74,12 +66,16 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, color: clayOrange, size: 64),
+                  Icon(
+                    Icons.error_outline,
+                    color: ThemeColors.clayOrange,
+                    size: 64,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'เกิดข้อผิดพลาด: ${snapshot.error}',
                     style: const TextStyle(
-                      color: clayOrange,
+                      color: ThemeColors.clayOrange,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -95,12 +91,16 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.pets_outlined, color: warmStone, size: 80),
+                  Icon(
+                    Icons.pets_outlined,
+                    color: ThemeColors.warmStone,
+                    size: 80,
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     'ยังไม่มีสัตว์เลี้ยงในบ้านหมายเลข ${widget.houseId}',
                     style: const TextStyle(
-                      color: earthClay,
+                      color: ThemeColors.earthClay,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                     ),
@@ -114,8 +114,8 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                     icon: const Icon(Icons.add),
                     label: const Text('เพิ่มสัตว์เลี้ยงคนแรก'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: burntOrange,
-                      foregroundColor: ivoryWhite,
+                      backgroundColor: ThemeColors.burntOrange,
+                      foregroundColor: ThemeColors.ivoryWhite,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
                         vertical: 12,
@@ -144,20 +144,20 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                   vertical: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: beige,
+                  color: ThemeColors.beige,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: sandyTan, width: 1),
+                  border: Border.all(color: ThemeColors.sandyTan, width: 1),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.pets, color: softBrown, size: 28),
+                    Icon(Icons.pets, color: ThemeColors.softBrown, size: 28),
                     const SizedBox(width: 12),
                     Text(
                       'พบสัตว์เลี้ยง ${animals.length} ตัว',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: softBrown,
+                        color: ThemeColors.softBrown,
                       ),
                     ),
                   ],
@@ -174,12 +174,15 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
-                          color: ivoryWhite,
+                          color: ThemeColors.ivoryWhite,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: sandyTan, width: 1),
+                          border: Border.all(
+                            color: ThemeColors.sandyTan,
+                            width: 1,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: warmStone.withOpacity(0.1),
+                              color: ThemeColors.warmStone.withOpacity(0.1),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -195,8 +198,11 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                                 height: 80,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12),
-                                  color: beige,
-                                  border: Border.all(color: sandyTan, width: 1),
+                                  color: ThemeColors.beige,
+                                  border: Border.all(
+                                    color: ThemeColors.sandyTan,
+                                    width: 1,
+                                  ),
                                 ),
                                 child:
                                     animal.img != null && animal.img != "null"
@@ -207,7 +213,7 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                                     : Icon(
                                         _getAnimalIcon(animal.type.toString()),
                                         size: 40,
-                                        color: warmStone,
+                                        color: ThemeColors.warmStone,
                                       ),
                               ),
                               const SizedBox(width: 16),
@@ -221,7 +227,7 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                                       style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w600,
-                                        color: softBrown,
+                                        color: ThemeColors.softBrown,
                                       ),
                                     ),
                                     const SizedBox(height: 6),
@@ -232,14 +238,14 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                                             animal.type.toString(),
                                           ),
                                           size: 16,
-                                          color: earthClay,
+                                          color: ThemeColors.earthClay,
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
                                           animal.type.toString(),
                                           style: const TextStyle(
                                             fontSize: 14,
-                                            color: earthClay,
+                                            color: ThemeColors.earthClay,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -251,14 +257,14 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                                         Icon(
                                           Icons.tag,
                                           size: 16,
-                                          color: earthClay,
+                                          color: ThemeColors.earthClay,
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
                                           'ID: ${animal.animalId}',
                                           style: const TextStyle(
                                             fontSize: 12,
-                                            color: earthClay,
+                                            color: ThemeColors.earthClay,
                                           ),
                                         ),
                                       ],
@@ -278,8 +284,8 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                                       },
                                       icon: const Icon(Icons.edit_outlined),
                                       style: IconButton.styleFrom(
-                                        backgroundColor: oliveGreen,
-                                        foregroundColor: ivoryWhite,
+                                        backgroundColor: ThemeColors.oliveGreen,
+                                        foregroundColor: ThemeColors.ivoryWhite,
                                         shape: const CircleBorder(),
                                         padding: const EdgeInsets.all(8),
                                       ),
@@ -302,7 +308,7 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
                                       animal.type.toString(),
                                       style: const TextStyle(
                                         fontSize: 11,
-                                        color: ivoryWhite,
+                                        color: ThemeColors.ivoryWhite,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -326,11 +332,11 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
         onPressed: () {
           _addAnimal(houseId: widget.houseId!);
         },
-        backgroundColor: burntOrange,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.burntOrange,
+        foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
         tooltip: 'เพิ่มสัตว์เลี้ยง',
-        icon: const Icon(Icons.add_rounded, color: ivoryWhite),
+        icon: const Icon(Icons.add_rounded, color: ThemeColors.ivoryWhite),
         label: Text("เพิ่มสัตว์เลี้ยง"),
       ),
     );
@@ -356,15 +362,15 @@ class _HouseAnimalDetailPageState extends State<HouseAnimalDetailPage> {
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
       case 'dog':
-        return clayOrange;
+        return ThemeColors.clayOrange;
       case 'cat':
-        return softTerracotta;
+        return ThemeColors.softTerracotta;
       case 'bird':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case 'rabbit':
-        return softBrown;
+        return ThemeColors.softBrown;
       default:
-        return warmStone;
+        return ThemeColors.warmStone;
     }
   }
 }

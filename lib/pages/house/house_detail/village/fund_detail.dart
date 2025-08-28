@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/models/funds_model.dart';
 import 'package:intl/intl.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseFundDetailPage extends StatelessWidget {
   final FundModel fund;
@@ -8,16 +9,6 @@ class HouseFundDetailPage extends StatelessWidget {
   const HouseFundDetailPage({Key? key, required this.fund}) : super(key: key);
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
 
   String _formatCurrency(double amount) {
     final formatter = NumberFormat('#,##0.00');
@@ -47,25 +38,25 @@ class HouseFundDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = fund.type == 'income';
-    final color = isIncome ? oliveGreen : burntOrange;
+    final color = isIncome ? ThemeColors.oliveGreen : ThemeColors.burntOrange;
     final icon = isIncome
         ? Icons.trending_up_rounded
         : Icons.trending_down_rounded;
     final typeText = isIncome ? 'รายรับ' : 'รายจ่าย';
 
     return Scaffold(
-      backgroundColor: ivoryWhite,
+      backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
         title: Text(
           'รายละเอียดรายการ',
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: ivoryWhite,
+            color: ThemeColors.ivoryWhite,
             fontSize: 20,
           ),
         ),
-        backgroundColor: softBrown,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.softBrown,
+        foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
         centerTitle: true,
       ),
@@ -99,18 +90,18 @@ class HouseFundDetailPage extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: ivoryWhite.withOpacity(0.2),
+                      color: ThemeColors.ivoryWhite.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(icon, color: ivoryWhite, size: 20),
+                        Icon(icon, color: ThemeColors.ivoryWhite, size: 20),
                         SizedBox(width: 8),
                         Text(
                           typeText,
                           style: TextStyle(
-                            color: ivoryWhite,
+                            color: ThemeColors.ivoryWhite,
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
@@ -123,7 +114,7 @@ class HouseFundDetailPage extends StatelessWidget {
                   Text(
                     '${isIncome ? '+' : '-'}${_formatCurrency(fund.amount)}',
                     style: TextStyle(
-                      color: ivoryWhite,
+                      color: ThemeColors.ivoryWhite,
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
                     ),
@@ -133,7 +124,7 @@ class HouseFundDetailPage extends StatelessWidget {
                   Text(
                     fund.createdAt!.toIso8601String(),
                     style: TextStyle(
-                      color: ivoryWhite.withOpacity(0.9),
+                      color: ThemeColors.ivoryWhite.withOpacity(0.9),
                       fontSize: 16,
                     ),
                   ),
@@ -146,12 +137,12 @@ class HouseFundDetailPage extends StatelessWidget {
               margin: EdgeInsets.symmetric(horizontal: 16),
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: beige,
+                color: ThemeColors.beige,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: sandyTan, width: 1),
+                border: Border.all(color: ThemeColors.sandyTan, width: 1),
                 boxShadow: [
                   BoxShadow(
-                    color: warmStone.withOpacity(0.2),
+                    color: ThemeColors.warmStone.withOpacity(0.2),
                     blurRadius: 8,
                     offset: Offset(0, 2),
                   ),
@@ -163,12 +154,16 @@ class HouseFundDetailPage extends StatelessWidget {
                   // Section Title
                   Row(
                     children: [
-                      Icon(Icons.info_outline, color: softBrown, size: 24),
+                      Icon(
+                        Icons.info_outline,
+                        color: ThemeColors.softBrown,
+                        size: 24,
+                      ),
                       SizedBox(width: 8),
                       Text(
                         'รายละเอียด',
                         style: TextStyle(
-                          color: softBrown,
+                          color: ThemeColors.softBrown,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -222,12 +217,12 @@ class HouseFundDetailPage extends StatelessWidget {
                 margin: EdgeInsets.symmetric(horizontal: 16),
                 padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: beige,
+                  color: ThemeColors.beige,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: sandyTan, width: 1),
+                  border: Border.all(color: ThemeColors.sandyTan, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: warmStone.withOpacity(0.2),
+                      color: ThemeColors.warmStone.withOpacity(0.2),
                       blurRadius: 8,
                       offset: Offset(0, 2),
                     ),
@@ -241,14 +236,14 @@ class HouseFundDetailPage extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.receipt_long_outlined,
-                          color: softBrown,
+                          color: ThemeColors.softBrown,
                           size: 24,
                         ),
                         SizedBox(width: 8),
                         Text(
                           'หลักฐานการทำรายการ',
                           style: TextStyle(
-                            color: softBrown,
+                            color: ThemeColors.softBrown,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -266,10 +261,13 @@ class HouseFundDetailPage extends StatelessWidget {
                         height: 200,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: sandyTan, width: 2),
+                          border: Border.all(
+                            color: ThemeColors.sandyTan,
+                            width: 2,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: warmStone.withOpacity(0.3),
+                              color: ThemeColors.warmStone.withOpacity(0.3),
                               blurRadius: 8,
                               offset: Offset(0, 4),
                             ),
@@ -284,7 +282,7 @@ class HouseFundDetailPage extends StatelessWidget {
                               if (loadingProgress == null) return child;
                               return Container(
                                 decoration: BoxDecoration(
-                                  color: ivoryWhite,
+                                  color: ThemeColors.ivoryWhite,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Center(
@@ -294,7 +292,7 @@ class HouseFundDetailPage extends StatelessWidget {
                                       CircularProgressIndicator(
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                              softBrown,
+                                              ThemeColors.softBrown,
                                             ),
                                         strokeWidth: 2,
                                       ),
@@ -302,7 +300,7 @@ class HouseFundDetailPage extends StatelessWidget {
                                       Text(
                                         'กำลังโหลดรูปภาพ...',
                                         style: TextStyle(
-                                          color: earthClay,
+                                          color: ThemeColors.earthClay,
                                           fontSize: 14,
                                         ),
                                       ),
@@ -314,7 +312,9 @@ class HouseFundDetailPage extends StatelessWidget {
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
                                 decoration: BoxDecoration(
-                                  color: burntOrange.withOpacity(0.1),
+                                  color: ThemeColors.burntOrange.withOpacity(
+                                    0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Center(
@@ -324,13 +324,13 @@ class HouseFundDetailPage extends StatelessWidget {
                                       Icon(
                                         Icons.broken_image_outlined,
                                         size: 48,
-                                        color: burntOrange,
+                                        color: ThemeColors.burntOrange,
                                       ),
                                       SizedBox(height: 8),
                                       Text(
                                         'ไม่สามารถโหลดรูปภาพได้',
                                         style: TextStyle(
-                                          color: burntOrange,
+                                          color: ThemeColors.burntOrange,
                                           fontSize: 14,
                                         ),
                                       ),
@@ -352,17 +352,18 @@ class HouseFundDetailPage extends StatelessWidget {
                             _showFullScreenImage(context, fund.receiptImg!),
                         icon: Icon(
                           Icons.zoom_in_outlined,
-                          color: softTerracotta,
+                          color: ThemeColors.softTerracotta,
                         ),
                         label: Text(
                           'ดูขนาดเต็ม',
                           style: TextStyle(
-                            color: softTerracotta,
+                            color: ThemeColors.softTerracotta,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         style: TextButton.styleFrom(
-                          backgroundColor: softTerracotta.withOpacity(0.1),
+                          backgroundColor: ThemeColors.softTerracotta
+                              .withOpacity(0.1),
                           padding: EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 8,
@@ -392,10 +393,10 @@ class HouseFundDetailPage extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: softBrown.withOpacity(0.1),
+            color: ThemeColors.softBrown.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: softBrown, size: 20),
+          child: Icon(icon, color: ThemeColors.softBrown, size: 20),
         ),
         SizedBox(width: 12),
         Expanded(
@@ -405,7 +406,7 @@ class HouseFundDetailPage extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  color: warmStone,
+                  color: ThemeColors.warmStone,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -414,7 +415,7 @@ class HouseFundDetailPage extends StatelessWidget {
               Text(
                 value,
                 style: TextStyle(
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),

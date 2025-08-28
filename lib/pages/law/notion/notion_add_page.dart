@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fullproject/domains/notion_domain.dart';
 import 'package:fullproject/models/law_model.dart';
-import 'package:fullproject/models/notion_model.dart';
 import 'package:fullproject/services/auth_service.dart';
 
 class LawNotionAddPage extends StatefulWidget {
@@ -37,10 +37,10 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
 
   // Map สำหรับสี type
   final Map<String, Color> _typeColors = {
-    'GENERAL': Color(0xFFC7B9A5),
-    'MAINTENANCE': Color(0xFFA3B18A),
-    'SECURITY': Color(0xFFCC7748),
-    'SOCIAL': Color(0xFFD48B5C),
+    'GENERAL': ThemeColors.warmStone,
+    'MAINTENANCE': ThemeColors.oliveGreen,
+    'SECURITY': ThemeColors.clayOrange,
+    'SOCIAL': ThemeColors.softTerracotta,
   };
 
   Future<void> _pickImage() async {
@@ -74,8 +74,10 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('ไม่สามารถเลือกรูปภาพได้: $e'),
-            backgroundColor: const Color(0xFFCC7748),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            backgroundColor: ThemeColors.clayOrange,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }
@@ -93,9 +95,9 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFDF6),
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFD8CAB8), width: 1),
+        border: Border.all(color: ThemeColors.sandyTan, width: 1),
       ),
       child: Column(
         children: [
@@ -105,7 +107,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
               children: [
                 Icon(
                   Icons.image_outlined,
-                  color: const Color(0xFFA47551),
+                  color: ThemeColors.softBrown,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -114,7 +116,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFFA47551),
+                    color: ThemeColors.softBrown,
                   ),
                 ),
                 const Spacer(),
@@ -124,7 +126,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                     icon: const Icon(Icons.close, size: 16),
                     label: const Text('ลบ'),
                     style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFFCC7748),
+                      foregroundColor: ThemeColors.clayOrange,
                     ),
                   ),
               ],
@@ -149,15 +151,9 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: kIsWeb && _selectedImageBytes != null
-                    ? Image.memory(
-                  _selectedImageBytes!,
-                  fit: BoxFit.cover,
-                )
+                    ? Image.memory(_selectedImageBytes!, fit: BoxFit.cover)
                     : _selectedImageFile != null
-                    ? Image.file(
-                  _selectedImageFile!,
-                  fit: BoxFit.cover,
-                )
+                    ? Image.file(_selectedImageFile!, fit: BoxFit.cover)
                     : const SizedBox.shrink(),
               ),
             ),
@@ -167,7 +163,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
               margin: const EdgeInsets.symmetric(horizontal: 16),
               height: 120,
               child: Material(
-                color: const Color(0xFFF5F0E1),
+                color: ThemeColors.beige,
                 borderRadius: BorderRadius.circular(12),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
@@ -176,7 +172,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0xFFD8CAB8),
+                        color: ThemeColors.sandyTan,
                         style: BorderStyle.solid,
                         width: 2,
                       ),
@@ -187,13 +183,13 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                         Icon(
                           Icons.add_photo_alternate_outlined,
                           size: 32,
-                          color: const Color(0xFFBFA18F),
+                          color: ThemeColors.earthClay,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'แตะเพื่อเลือกรูปภาพ',
                           style: TextStyle(
-                            color: const Color(0xFFBFA18F),
+                            color: ThemeColors.earthClay,
                             fontSize: 14,
                           ),
                         ),
@@ -213,9 +209,9 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
   Widget _buildTypeSelector() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFDF6),
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFD8CAB8), width: 1),
+        border: Border.all(color: ThemeColors.sandyTan, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +222,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
               children: [
                 Icon(
                   Icons.category_outlined,
-                  color: const Color(0xFFA47551),
+                  color: ThemeColors.softBrown,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -235,7 +231,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFFA47551),
+                    color: ThemeColors.softBrown,
                   ),
                 ),
               ],
@@ -248,7 +244,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
               runSpacing: 8,
               children: _typeLabels.entries.map((entry) {
                 final isSelected = _selectedType == entry.key;
-                final color = _typeColors[entry.key] ?? const Color(0xFFBFA18F);
+                final color = _typeColors[entry.key] ?? ThemeColors.earthClay;
 
                 return Material(
                   borderRadius: BorderRadius.circular(20),
@@ -260,20 +256,22 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                       });
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: isSelected ? color : Colors.transparent,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: color,
-                          width: 2,
-                        ),
+                        border: Border.all(color: color, width: 2),
                       ),
                       child: Text(
                         entry.value,
                         style: TextStyle(
                           color: isSelected ? Colors.white : color,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                           fontSize: 14,
                         ),
                       ),
@@ -299,8 +297,10 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('ไม่สามารถระบุผู้ใช้ได้'),
-            backgroundColor: const Color(0xFFCC7748),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            backgroundColor: ThemeColors.clayOrange,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
         return;
@@ -331,8 +331,10 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('เพิ่มข่าวสารเรียบร้อยแล้ว'),
-            backgroundColor: const Color(0xFFA3B18A),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            backgroundColor: ThemeColors.oliveGreen,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
         Navigator.pop(context, true);
@@ -342,9 +344,13 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('ไม่สามารถเพิ่มข่าวสารได้ กรุณาลองใหม่อีกครั้ง'),
-            backgroundColor: const Color(0xFFCC7748),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            content: const Text(
+              'ไม่สามารถเพิ่มข่าวสารได้ กรุณาลองใหม่อีกครั้ง',
+            ),
+            backgroundColor: ThemeColors.clayOrange,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -364,44 +370,50 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
           200: Color(0xFFD4C5BB),
           300: Color(0xFFC2ADA0),
           400: Color(0xFFB5998B),
-          500: Color(0xFFA47551),
+          500: ThemeColors.softBrown,
           600: Color(0xFF9C6D4A),
           700: Color(0xFF926240),
           800: Color(0xFF885837),
           900: Color(0xFF764627),
         }),
-        scaffoldBackgroundColor: const Color(0xFFFFFDF6),
+        scaffoldBackgroundColor: ThemeColors.ivoryWhite,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFA47551),
+          backgroundColor: ThemeColors.softBrown,
           foregroundColor: Colors.white,
           elevation: 2,
-          shadowColor: Color(0xFFBFA18F),
+          shadowColor: ThemeColors.earthClay,
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFFFBF9F3),
+          fillColor: ThemeColors.inputFill,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFD0C4B0)),
+            borderSide: const BorderSide(color: ThemeColors.softBorder),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFD0C4B0)),
+            borderSide: const BorderSide(color: ThemeColors.softBorder),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF916846), width: 2),
+            borderSide: const BorderSide(
+              color: ThemeColors.focusedBrown,
+              width: 2,
+            ),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFCC7748), width: 2),
+            borderSide: const BorderSide(
+              color: ThemeColors.clayOrange,
+              width: 2,
+            ),
           ),
-          labelStyle: const TextStyle(color: Color(0xFFBFA18F)),
-          hintStyle: const TextStyle(color: Color(0xFFBFA18F)),
+          labelStyle: const TextStyle(color: ThemeColors.earthClay),
+          hintStyle: const TextStyle(color: ThemeColors.earthClay),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFE08E45),
+            backgroundColor: ThemeColors.burntOrange,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -423,10 +435,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFFFDF6),
-                Color(0xFFF5F0E1),
-              ],
+              colors: [ThemeColors.ivoryWhite, ThemeColors.beige],
             ),
           ),
           child: SingleChildScrollView(
@@ -442,7 +451,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFFA47551),
+                      color: ThemeColors.softBrown,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -450,7 +459,10 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                     controller: _headerController,
                     decoration: const InputDecoration(
                       hintText: 'กรอกหัวข้อข่าวสาร...',
-                      prefixIcon: Icon(Icons.title, color: Color(0xFFBFA18F)),
+                      prefixIcon: Icon(
+                        Icons.title,
+                        color: ThemeColors.earthClay,
+                      ),
                     ),
                     validator: (value) => value == null || value.trim().isEmpty
                         ? 'กรุณากรอกหัวข้อข่าว'
@@ -472,7 +484,7 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFFA47551),
+                      color: ThemeColors.softBrown,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -497,27 +509,27 @@ class _LawNotionAddPageState extends State<LawNotionAddPage> {
                       onPressed: _isSaving ? null : _submit,
                       child: _isSaving
                           ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
                           : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.save, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'บันทึกข่าวสาร',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.save, size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  'บันทึกข่าวสาร',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                   const SizedBox(height: 16),

@@ -6,6 +6,7 @@ import 'package:fullproject/pages/law/bill/bill_add_page.dart';
 import 'package:fullproject/pages/law/bill/bill_detail_page.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:fullproject/services/auth_service.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'package:intl/intl.dart';
 
 class BillPage extends StatefulWidget {
@@ -20,32 +21,33 @@ class _BillPageState extends State<BillPage> {
   LawModel? law;
   Map<int, String> houseMap = {};
   Map<int, String> serviceMap = {};
-  String? filterStatus; // เปลี่ยนจาก int เป็น String เพื่อให้ตรงกับ BillModel.status
+  String?
+  filterStatus; // เปลี่ยนจาก int เป็น String เพื่อให้ตรงกับ BillModel.status
   bool _isLoading = false;
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   // 🎨 Warm Natural Color Scheme
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softBorder = Color(0xFFD0C4B0);
-  static const Color inputFill = Color(0xFFFBF9F3);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
-  static const Color neutralText = earthClay;
-  static const Color primaryBorder = softBorder;
-
-  // 🌸 Deeper Card Background Colors
-  static const Color lightCream = Color(0xFFF5F1EC);
-  static const Color softBeige = Color(0xFFF2EDE6);
-  static const Color paleIvory = Color(0xFFF0EBE4);
-  static const Color whisperTan = Color(0xFFEDE7E0);
+  // static const Color ThemeColors.softBrown = Color(0xFFA47551);
+  // static const Color ThemeColors.ivoryWhite = Color(0xFFFFFDF6);
+  // static const Color ThemeColors.sandyTan = Color(0xFFD8CAB8);
+  // static const Color ThemeColors.earthClay = Color(0xFFBFA18F);
+  // static const Color ThemeColors.warmStone = Color(0xFFC7B9A5);
+  // static const Color ThemeColors.oliveGreen = Color(0xFFA3B18A);
+  // static const Color ThemeColors.burntOrange = Color(0xFFE08E45);
+  // static const Color ThemeColors.softBorder = Color(0xFFD0C4B0);
+  // static const Color ThemeColors.inputFill = Color(0xFFFBF9F3);
+  // static const Color ThemeColors.softTerracotta = Color(0xFFD48B5C);
+  // static const Color ThemeColors.clayOrange = Color(0xFFCC7748);
+  // static const Color ThemeColors.sandyTan = ThemeColors.earthClay;
+  // static const Color ThemeColors.ThemeColors.softBorder = ThemeColors.softBorder;
+  //
+  // // 🌸 Deeper Card Background Colors
+  // static const Color ThemeColors.lightCinnamon = Color(0xFFF5F1EC);
+  // static const Color ThemeColors.beige = Color(0xFFF2EDE6);
+  // static const Color paleIvory = Color(0xFFF0EBE4);
+  // static const Color ThemeColors.sandyTan = Color(0xFFEDE7E0);
 
   @override
   void initState() {
@@ -88,9 +90,7 @@ class _BillPageState extends State<BillPage> {
               .from('house')
               .select('house_id, house_number')
               .eq('village_id', law!.villageId),
-          SupabaseConfig.client
-              .from('service')
-              .select('service_id, name'),
+          SupabaseConfig.client.from('service').select('service_id, name'),
         ]);
 
         final houseResponse = results[0];
@@ -98,14 +98,14 @@ class _BillPageState extends State<BillPage> {
 
         final Map<int, String> newHouseMap = {};
         for (var house in houseResponse) {
-          newHouseMap[house['house_id'] as int] =
-              (house['house_number'] ?? '').toString();
+          newHouseMap[house['house_id'] as int] = (house['house_number'] ?? '')
+              .toString();
         }
 
         final Map<int, String> newServiceMap = {};
         for (var service in serviceResponse) {
-          newServiceMap[service['service_id'] as int] =
-              (service['name'] ?? '').toString();
+          newServiceMap[service['service_id'] as int] = (service['name'] ?? '')
+              .toString();
         }
 
         if (mounted) {
@@ -151,7 +151,7 @@ class _BillPageState extends State<BillPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: clayOrange,
+          backgroundColor: ThemeColors.clayOrange,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -255,19 +255,19 @@ class _BillPageState extends State<BillPage> {
   Color _getStatusColor(BillModel bill) {
     switch (bill.status.toUpperCase()) {
       case 'RECEIPT_SENT':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case 'PENDING':
-        return softTerracotta;
+        return ThemeColors.softTerracotta;
       case 'UNDER_REVIEW':
-        return softBrown;
+        return ThemeColors.softBrown;
       case 'REJECTED':
-        return clayOrange;
+        return ThemeColors.clayOrange;
       case 'OVERDUE':
-        return clayOrange;
+        return ThemeColors.clayOrange;
       default:
-        if (bill.paidStatus == 1) return oliveGreen;
-        if (_isOverdue(bill)) return clayOrange;
-        return softTerracotta;
+        if (bill.paidStatus == 1) return ThemeColors.oliveGreen;
+        if (_isOverdue(bill)) return ThemeColors.clayOrange;
+        return ThemeColors.softTerracotta;
     }
   }
 
@@ -317,14 +317,21 @@ class _BillPageState extends State<BillPage> {
       'total': _bills.length,
       'unpaid': _bills.where((b) => b.paidStatus == 0).length,
       'paid': _bills.where((b) => b.paidStatus == 1).length,
-      'pending': _bills.where((b) => b.status.toUpperCase() == 'PENDING').length,
-      'under_review': _bills.where((b) => b.status.toUpperCase() == 'UNDER_REVIEW').length,
+      'pending': _bills
+          .where((b) => b.status.toUpperCase() == 'PENDING')
+          .length,
+      'under_review': _bills
+          .where((b) => b.status.toUpperCase() == 'UNDER_REVIEW')
+          .length,
       'overdue': _bills.where((b) => _isOverdue(b)).length,
     };
   }
 
   List<TextSpan> _highlightSearchText(
-      String text, String query, TextStyle baseStyle) {
+    String text,
+    String query,
+    TextStyle baseStyle,
+  ) {
     if (query.isEmpty) {
       return [TextSpan(text: text, style: baseStyle)];
     }
@@ -338,42 +345,45 @@ class _BillPageState extends State<BillPage> {
 
     while (index != -1) {
       if (index > start) {
-        spans.add(TextSpan(
-          text: text.substring(start, index),
-          style: baseStyle,
-        ));
+        spans.add(
+          TextSpan(text: text.substring(start, index), style: baseStyle),
+        );
       }
 
-      spans.add(TextSpan(
-        text: text.substring(index, index + query.length),
-        style: baseStyle.copyWith(
-          backgroundColor: softBrown.withValues(alpha: 0.15),
-          fontWeight: FontWeight.bold,
-          color: softBrown,
+      spans.add(
+        TextSpan(
+          text: text.substring(index, index + query.length),
+          style: baseStyle.copyWith(
+            backgroundColor: ThemeColors.softBrown.withValues(alpha: 0.15),
+            fontWeight: FontWeight.bold,
+            color: ThemeColors.softBrown,
+          ),
         ),
-      ));
+      );
 
       start = index + query.length;
       index = lowerText.indexOf(lowerQuery, start);
     }
 
     if (start < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(start),
-        style: baseStyle,
-      ));
+      spans.add(TextSpan(text: text.substring(start), style: baseStyle));
     }
 
     return spans;
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: lightCream, // เปลี่ยนเป็นสีอ่อนขึ้น
+        color: ThemeColors.lightCinnamon, // เปลี่ยนเป็นสีอ่อนขึ้น
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primaryBorder, width: 1),
+        border: Border.all(color: ThemeColors.softBorder, width: 1),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -399,7 +409,7 @@ class _BillPageState extends State<BillPage> {
             title,
             style: const TextStyle(
               fontSize: 12,
-              color: neutralText,
+              color: ThemeColors.sandyTan,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -418,22 +428,19 @@ class _BillPageState extends State<BillPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: softBrown,
+          backgroundColor: ThemeColors.softBrown,
           foregroundColor: Colors.white,
           title: const Text(
             'จัดการค่าส่วนกลาง',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
           ),
         ),
         body: const Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+            valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
           ),
         ),
       );
@@ -443,17 +450,14 @@ class _BillPageState extends State<BillPage> {
     final filteredBills = _filterBills(_bills);
 
     return Scaffold(
-      backgroundColor: ivoryWhite,
+      backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: softBrown,
+        backgroundColor: ThemeColors.softBrown,
         foregroundColor: Colors.white,
         title: const Text(
           'จัดการค่าส่วนกลาง',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
         ),
         actions: [
           Container(
@@ -474,375 +478,394 @@ class _BillPageState extends State<BillPage> {
       ),
       body: _bills.isEmpty && !_isLoading
           ? Center(
-        child: Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: softBeige, // เปลี่ยนเป็นสีอ่อนขึ้น
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: primaryBorder),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
+              child: Container(
+                margin: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: softBrown.withValues(alpha: 0.1),
+                  color: ThemeColors.beige, // เปลี่ยนเป็นสีอ่อนขึ้น
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: ThemeColors.softBorder),
                 ),
-                child: const Icon(
-                  Icons.receipt_long_rounded,
-                  size: 64,
-                  color: softBrown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: ThemeColors.softBrown.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.receipt_long_rounded,
+                        size: 64,
+                        color: ThemeColors.softBrown,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'ไม่มีข้อมูลค่าส่วนกลาง',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'เริ่มต้นด้วยการเพิ่มบิลใหม่',
+                      style: TextStyle(
+                        color: ThemeColors.sandyTan,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: _navigateToAddForm,
+                      icon: const Icon(Icons.add_rounded),
+                      label: const Text('เพิ่มบิลแรก'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ThemeColors.burntOrange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'ไม่มีข้อมูลค่าส่วนกลาง',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'เริ่มต้นด้วยการเพิ่มบิลใหม่',
-                style: TextStyle(
-                  color: neutralText,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: _navigateToAddForm,
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('เพิ่มบิลแรก'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: burntOrange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      )
+            )
           : RefreshIndicator(
-        onRefresh: _refreshBills,
-        color: softBrown,
-        child: Column(
-          children: [
-            // สถิติโดยรวม
-            Container(
-              margin: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      'ทั้งหมด',
-                      '${stats['total']}',
-                      Icons.receipt_long_rounded,
-                      softBrown,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      'ยังไม่จ่าย',
-                      '${stats['unpaid']}',
-                      Icons.schedule_rounded,
-                      softTerracotta,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      'จ่ายแล้ว',
-                      '${stats['paid']}',
-                      Icons.check_circle_rounded,
-                      oliveGreen,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ช่องค้นหาและตัวกรอง
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0),
+              onRefresh: _refreshBills,
+              color: ThemeColors.softBrown,
               child: Column(
                 children: [
-                  // ช่องค้นหา
+                  // สถิติโดยรวม
                   Container(
-                    decoration: BoxDecoration(
-                      color: paleIvory, // เปลี่ยนเป็นสีอ่อนขึ้น
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: primaryBorder),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText:
-                        'ค้นหาบ้านเลขที่, ประเภทบริการ, จำนวนเงิน, หรือสถานะ...',
-                        hintStyle: const TextStyle(color: neutralText),
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: softBrown,
-                        ),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                          icon: const Icon(Icons.clear_rounded,
-                              color: neutralText),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        )
-                            : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: inputFill,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
-                      ),
-                      onChanged: (value) {
-                        setState(() => _searchQuery = value);
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // ตัวกรองสถานะ
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: whisperTan, // เปลี่ยนเป็นสีอ่อนขึ้น
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: primaryBorder),
-                    ),
+                    margin: const EdgeInsets.all(16.0),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.filter_alt_rounded,
-                          color: softBrown,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'กรองสถานะ:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: neutralText,
+                        Expanded(
+                          child: _buildStatCard(
+                            'ทั้งหมด',
+                            '${stats['total']}',
+                            Icons.receipt_long_rounded,
+                            ThemeColors.softBrown,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Container(
-                            padding:
-                            const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: inputFill,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: primaryBorder),
-                            ),
-                            child: DropdownButton<String?>(
-                              value: filterStatus,
-                              isExpanded: true,
-                              underline: const SizedBox(),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: null,
-                                  child: Text('ทั้งหมด'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'unpaid',
-                                  child: Text('ยังไม่ชำระ'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'paid',
-                                  child: Text('ชำระแล้ว'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'UNDER_REVIEW',
-                                  child: Text('กำลังตรวจสอบ'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'RECEIPT_SENT',
-                                  child: Text('ส่งใบเสร็จแล้ว'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'REJECTED',
-                                  child: Text('ถูกปฏิเสธ'),
-                                ),
-                              ],
-                              onChanged: (value) =>
-                                  setState(() => filterStatus = value),
-                            ),
+                          child: _buildStatCard(
+                            'ยังไม่จ่าย',
+                            '${stats['unpaid']}',
+                            Icons.schedule_rounded,
+                            ThemeColors.softTerracotta,
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: softBrown.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'แสดง ${filteredBills.length} รายการ',
-                            style: const TextStyle(
-                              color: softBrown,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildStatCard(
+                            'จ่ายแล้ว',
+                            '${stats['paid']}',
+                            Icons.check_circle_rounded,
+                            ThemeColors.oliveGreen,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
 
-            const SizedBox(height: 16),
-
-            // รายการบิล
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                itemCount: filteredBills.length,
-                itemBuilder: (context, index) {
-                  final bill = filteredBills[index];
-                  final houseNumber =
-                      houseMap[bill.houseId] ?? '${bill.houseId}';
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12.0),
-                    decoration: BoxDecoration(
-                      color: lightCream, // เปลี่ยนเป็นสีอ่อนขึ้น
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: primaryBorder),
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16),
-                      leading: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: _getStatusColor(bill)
-                              .withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          _getStatusIcon(bill),
-                          color: _getStatusColor(bill),
-                          size: 24,
-                        ),
-                      ),
-                      title: RichText(
-                        text: TextSpan(
-                          children: _highlightSearchText(
-                            'บ้านเลขที่ $houseNumber',
-                            _searchQuery,
-                            const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
+                  // ช่องค้นหาและตัวกรอง
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      children: [
+                        // ช่องค้นหา
+                        Container(
+                          decoration: BoxDecoration(
+                            color:
+                                ThemeColors.softBrown, // เปลี่ยนเป็นสีอ่อนขึ้น
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: ThemeColors.softBorder),
                           ),
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 8),
-                          RichText(
-                            text: TextSpan(
-                              children: _highlightSearchText(
-                                '${_getServiceNameTh(bill.service)} - ฿${formatCurrency(bill.amount)}',
-                                _searchQuery,
-                                const TextStyle(
-                                  color: neutralText,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText:
+                                  'ค้นหาบ้านเลขที่, ประเภทบริการ, จำนวนเงิน, หรือสถานะ...',
+                              hintStyle: const TextStyle(
+                                color: ThemeColors.sandyTan,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.search_rounded,
+                                color: ThemeColors.softBrown,
+                              ),
+                              suffixIcon: _searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(
+                                        Icons.clear_rounded,
+                                        color: ThemeColors.sandyTan,
+                                      ),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        setState(() => _searchQuery = '');
+                                      },
+                                    )
+                                  : null,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: ThemeColors.inputFill,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
                               ),
                             ),
+                            onChanged: (value) {
+                              setState(() => _searchQuery = value);
+                            },
                           ),
-                          const SizedBox(height: 8),
-                          Row(
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ตัวกรองสถานะ
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color:
+                                ThemeColors.sandyTan, // เปลี่ยนเป็นสีอ่อนขึ้น
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: ThemeColors.softBorder),
+                          ),
+                          child: Row(
                             children: [
                               const Icon(
-                                Icons.calendar_today_rounded,
-                                size: 16,
-                                color: softBrown,
+                                Icons.filter_alt_rounded,
+                                color: ThemeColors.softBrown,
+                                size: 20,
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'ครบกำหนด: ${formatDate(bill.dueDate)}',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: neutralText,
-                                  fontWeight: FontWeight.w500,
+                              const SizedBox(width: 8),
+                              const Text(
+                                'กรองสถานะ:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: ThemeColors.sandyTan,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: ThemeColors.inputFill,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: ThemeColors.softBorder,
+                                    ),
+                                  ),
+                                  child: DropdownButton<String?>(
+                                    value: filterStatus,
+                                    isExpanded: true,
+                                    underline: const SizedBox(),
+                                    items: const [
+                                      DropdownMenuItem(
+                                        value: null,
+                                        child: Text('ทั้งหมด'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'unpaid',
+                                        child: Text('ยังไม่ชำระ'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'paid',
+                                        child: Text('ชำระแล้ว'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'UNDER_REVIEW',
+                                        child: Text('กำลังตรวจสอบ'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'RECEIPT_SENT',
+                                        child: Text('ส่งใบเสร็จแล้ว'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'REJECTED',
+                                        child: Text('ถูกปฏิเสธ'),
+                                      ),
+                                    ],
+                                    onChanged: (value) =>
+                                        setState(() => filterStatus = value),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: ThemeColors.softBrown.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'แสดง ${filteredBills.length} รายการ',
+                                  style: const TextStyle(
+                                    color: ThemeColors.softBrown,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                      trailing: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
                         ),
-                        decoration: BoxDecoration(
-                          color: _getStatusColor(bill)
-                              .withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: _getStatusColor(bill)
-                                .withValues(alpha: 0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          _getStatusText(bill),
-                          style: TextStyle(
-                            color: _getStatusColor(bill),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      onTap: () => _navigateToDetail(bill),
+                      ],
                     ),
-                  );
-                },
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // รายการบิล
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      itemCount: filteredBills.length,
+                      itemBuilder: (context, index) {
+                        final bill = filteredBills[index];
+                        final houseNumber =
+                            houseMap[bill.houseId] ?? '${bill.houseId}';
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12.0),
+                          decoration: BoxDecoration(
+                            color:
+                                ThemeColors.creamWhite, // เปลี่ยนเป็นสีอ่อนขึ้น
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: ThemeColors.softBorder),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(16),
+                            leading: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(
+                                  bill,
+                                ).withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                _getStatusIcon(bill),
+                                color: _getStatusColor(bill),
+                                size: 24,
+                              ),
+                            ),
+                            title: RichText(
+                              text: TextSpan(
+                                children: _highlightSearchText(
+                                  'บ้านเลขที่ $houseNumber',
+                                  _searchQuery,
+                                  const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 8),
+                                RichText(
+                                  text: TextSpan(
+                                    children: _highlightSearchText(
+                                      '${_getServiceNameTh(bill.service)} - ฿${formatCurrency(bill.amount)}',
+                                      _searchQuery,
+                                      const TextStyle(
+                                        color: ThemeColors.sandyTan,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.calendar_today_rounded,
+                                      size: 16,
+                                      color: ThemeColors.softBrown,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'ครบกำหนด: ${formatDate(bill.dueDate)}',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: ThemeColors.sandyTan,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(
+                                  bill,
+                                ).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: _getStatusColor(
+                                    bill,
+                                  ).withValues(alpha: 0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                _getStatusText(bill),
+                                style: TextStyle(
+                                  color: _getStatusColor(bill),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            onTap: () => _navigateToDetail(bill),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _navigateToAddForm,
-        backgroundColor: burntOrange,
+        backgroundColor: ThemeColors.burntOrange,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
         label: const Text(
           'เพิ่มค่าส่วนกลาง',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

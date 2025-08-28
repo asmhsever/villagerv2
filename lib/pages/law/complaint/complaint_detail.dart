@@ -10,6 +10,7 @@ import 'package:fullproject/models/complaint_type_model.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:fullproject/pages/law/complaint/complaint_delete.dart';
 import 'package:fullproject/pages/law/complaint/complaint_success.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'package:intl/intl.dart';
 
 class LawComplaintDetailPage extends StatefulWidget {
@@ -29,21 +30,6 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
   bool isUpdatingStatus = false;
 
   // Palette
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-
-  static const Color softBorder = Color(0xFFD0C4B0);
-  static const Color focusedBrown = Color(0xFF916846);
-  static const Color inputFill = Color(0xFFFBF9F3);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
-  static const Color warmAmber = Color(0xFFDA9856);
 
   // Valid status options
   static const List<String> _statusOptions = <String>[
@@ -116,7 +102,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
             ),
           ],
         ),
-        backgroundColor: clayOrange,
+        backgroundColor: ThemeColors.clayOrange,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.all(16),
@@ -155,7 +141,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
             ),
           ],
         ),
-        backgroundColor: oliveGreen,
+        backgroundColor: ThemeColors.oliveGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.all(16),
@@ -198,19 +184,19 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
   Color getStatusColor(String? status) {
     switch (status?.toLowerCase()) {
       case 'pending':
-        return warmAmber;
+        return ThemeColors.warmAmber;
       case 'received':
-        return focusedBrown; // distinguish from pending
+        return ThemeColors.focusedBrown; // distinguish from pending
       case 'in_progress':
-        return softTerracotta;
+        return ThemeColors.softTerracotta;
       case 'resolved':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case 'rejected':
-        return clayOrange;
+        return ThemeColors.clayOrange;
       case null:
-        return warmStone;
+        return ThemeColors.warmStone;
       default:
-        return earthClay;
+        return ThemeColors.earthClay;
     }
   }
 
@@ -232,15 +218,15 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
   Color getLevelColor(String level) {
     switch (level) {
       case '1':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case '2':
-        return warmAmber;
+        return ThemeColors.warmAmber;
       case '3':
-        return softTerracotta;
+        return ThemeColors.softTerracotta;
       case '4':
-        return clayOrange;
+        return ThemeColors.clayOrange;
       default:
-        return earthClay;
+        return ThemeColors.earthClay;
     }
   }
 
@@ -288,7 +274,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
@@ -322,7 +308,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
         ),
         content: Text(
           'เปลี่ยนสถานะเป็น "${getStatusLabel(newStatus)}" ใช่หรือไม่?',
-          style: const TextStyle(color: earthClay),
+          style: const TextStyle(color: ThemeColors.earthClay),
         ),
         actions: [
           TextButton(
@@ -333,7 +319,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: getStatusColor(newStatus),
-              foregroundColor: ivoryWhite,
+              foregroundColor: ThemeColors.ivoryWhite,
             ),
             child: const Text('ยืนยัน'),
           ),
@@ -393,10 +379,10 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
   }) {
     return Card(
       elevation: 4,
-      color: backgroundColor ?? ivoryWhite,
+      color: backgroundColor ?? ThemeColors.ivoryWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.only(bottom: 20),
-      shadowColor: softBrown.withValues(alpha: 0.2),
+      shadowColor: ThemeColors.softBrown.withValues(alpha: 0.2),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -404,8 +390,10 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              backgroundColor ?? ivoryWhite,
-              (backgroundColor ?? ivoryWhite).withValues(alpha: 0.8),
+              backgroundColor ?? ThemeColors.ivoryWhite,
+              (backgroundColor ?? ThemeColors.ivoryWhite).withValues(
+                alpha: 0.8,
+              ),
             ],
           ),
         ),
@@ -419,17 +407,21 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: sandyTan,
+                      color: ThemeColors.sandyTan,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: softBrown.withValues(alpha: 0.1),
+                          color: ThemeColors.softBrown.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Icon(icon, color: iconColor ?? softBrown, size: 28),
+                    child: Icon(
+                      icon,
+                      color: iconColor ?? ThemeColors.softBrown,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -438,7 +430,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: iconColor ?? softBrown,
+                        color: iconColor ?? ThemeColors.softBrown,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -465,9 +457,9 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: inputFill,
+          color: ThemeColors.inputFill,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: softBorder, width: 1),
+          border: Border.all(color: ThemeColors.softBorder, width: 1),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,7 +469,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
               child: Text(
                 label,
                 style: const TextStyle(
-                  color: earthClay,
+                  color: ThemeColors.earthClay,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),
@@ -487,7 +479,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
               child: Text(
                 value,
                 style: TextStyle(
-                  color: valueColor ?? softBrown,
+                  color: valueColor ?? ThemeColors.softBrown,
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
                 ),
@@ -512,10 +504,10 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
           if (loadingProgress == null) return child;
           return Container(
             height: 200,
-            color: beige,
+            color: ThemeColors.beige,
             child: Center(
               child: CircularProgressIndicator(
-                color: softBrown,
+                color: ThemeColors.softBrown,
                 value: loadingProgress.expectedTotalBytes != null
                     ? loadingProgress.cumulativeBytesLoaded /
                           loadingProgress.expectedTotalBytes!
@@ -526,16 +518,20 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
         },
         errorBuilder: (context, error, stackTrace) => Container(
           height: 200,
-          color: beige,
+          color: ThemeColors.beige,
           child: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.broken_image, color: earthClay, size: 48),
+                Icon(
+                  Icons.broken_image,
+                  color: ThemeColors.earthClay,
+                  size: 48,
+                ),
                 SizedBox(height: 8),
                 Text(
                   'ไม่สามารถโหลดรูปภาพได้',
-                  style: TextStyle(color: earthClay),
+                  style: TextStyle(color: ThemeColors.earthClay),
                 ),
               ],
             ),
@@ -551,15 +547,15 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
         currentComplaint.level == '3' || currentComplaint.level == '4';
 
     return Scaffold(
-      backgroundColor: inputFill,
+      backgroundColor: ThemeColors.inputFill,
       appBar: AppBar(
-        backgroundColor: softBrown,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.softBrown,
+        foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [softBrown, focusedBrown],
+              colors: [ThemeColors.softBrown, ThemeColors.focusedBrown],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -600,7 +596,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              color: ivoryWhite,
+              color: ThemeColors.ivoryWhite,
               itemBuilder: (context) => [
                 PopupMenuItem(
                   value: 'delete',
@@ -611,12 +607,14 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: clayOrange.withValues(alpha: 0.1),
+                            color: ThemeColors.clayOrange.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             Icons.delete_rounded,
-                            color: clayOrange,
+                            color: ThemeColors.clayOrange,
                             size: 18,
                           ),
                         ),
@@ -624,7 +622,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                         Text(
                           'ลบ',
                           style: TextStyle(
-                            color: clayOrange,
+                            color: ThemeColors.clayOrange,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -642,15 +640,18 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: softBrown),
+                  CircularProgressIndicator(color: ThemeColors.softBrown),
                   SizedBox(height: 16),
-                  Text('กำลังโหลด...', style: TextStyle(color: earthClay)),
+                  Text(
+                    'กำลังโหลด...',
+                    style: TextStyle(color: ThemeColors.earthClay),
+                  ),
                 ],
               ),
             )
           : RefreshIndicator(
-              color: softBrown,
-              backgroundColor: ivoryWhite,
+              color: ThemeColors.softBrown,
+              backgroundColor: ThemeColors.ivoryWhite,
               onRefresh: _refreshData,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -664,14 +665,19 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                         margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [clayOrange, softTerracotta],
+                            colors: [
+                              ThemeColors.clayOrange,
+                              ThemeColors.softTerracotta,
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: clayOrange.withValues(alpha: 0.3),
+                              color: ThemeColors.clayOrange.withValues(
+                                alpha: 0.3,
+                              ),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -687,7 +693,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                               ),
                               child: const Icon(
                                 Icons.priority_high,
-                                color: ivoryWhite,
+                                color: ThemeColors.ivoryWhite,
                                 size: 24,
                               ),
                             ),
@@ -699,7 +705,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                   Text(
                                     'ร้องเรียนระดับความสำคัญสูง',
                                     style: TextStyle(
-                                      color: ivoryWhite,
+                                      color: ThemeColors.ivoryWhite,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
@@ -707,7 +713,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                   Text(
                                     'ต้องดำเนินการโดยเร่งด่วน',
                                     style: TextStyle(
-                                      color: ivoryWhite,
+                                      color: ThemeColors.ivoryWhite,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -721,19 +727,24 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                     // Header Summary Card
                     Card(
                       elevation: 8,
-                      color: ivoryWhite,
+                      color: ThemeColors.ivoryWhite,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
                       margin: const EdgeInsets.only(bottom: 24),
-                      shadowColor: softBrown.withValues(alpha: 0.15),
+                      shadowColor: ThemeColors.softBrown.withValues(
+                        alpha: 0.15,
+                      ),
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [ivoryWhite, inputFill],
+                            colors: [
+                              ThemeColors.ivoryWhite,
+                              ThemeColors.inputFill,
+                            ],
                           ),
                         ),
                         child: Padding(
@@ -777,7 +788,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                           style: const TextStyle(
                                             fontSize: 22,
                                             fontWeight: FontWeight.bold,
-                                            color: softBrown,
+                                            color: ThemeColors.softBrown,
                                             letterSpacing: 0.5,
                                           ),
                                         ),
@@ -786,7 +797,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                           'บ้านเลขที่ ${houseNumber ?? currentComplaint.houseId}',
                                           style: const TextStyle(
                                             fontSize: 16,
-                                            color: earthClay,
+                                            color: ThemeColors.earthClay,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -823,7 +834,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                     child: Text(
                                       getStatusLabel(currentComplaint.status),
                                       style: const TextStyle(
-                                        color: ivoryWhite,
+                                        color: ThemeColors.ivoryWhite,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
                                       ),
@@ -837,9 +848,11 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      softBorder,
-                                      softBorder.withValues(alpha: 0.3),
-                                      softBorder,
+                                      ThemeColors.softBorder,
+                                      ThemeColors.softBorder.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      ThemeColors.softBorder,
                                     ],
                                   ),
                                 ),
@@ -854,7 +867,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                           'ระดับความสำคัญ',
                                           style: TextStyle(
                                             fontSize: 13,
-                                            color: earthClay,
+                                            color: ThemeColors.earthClay,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -894,7 +907,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                   Container(
                                     width: 1,
                                     height: 50,
-                                    color: softBorder,
+                                    color: ThemeColors.softBorder,
                                   ),
                                   Expanded(
                                     child: Column(
@@ -903,7 +916,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                           'ประเภท',
                                           style: TextStyle(
                                             fontSize: 13,
-                                            color: earthClay,
+                                            color: ThemeColors.earthClay,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -911,7 +924,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                         Text(
                                           complaintTypeName ?? 'ไม่ระบุ',
                                           style: const TextStyle(
-                                            color: softBrown,
+                                            color: ThemeColors.softBrown,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 14,
                                           ),
@@ -950,15 +963,15 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                           'ความเป็นส่วนตัว:',
                           currentComplaint.isPrivate ? 'ส่วนตัว' : 'สาธารณะ',
                           valueColor: currentComplaint.isPrivate
-                              ? burntOrange
-                              : oliveGreen,
+                              ? ThemeColors.burntOrange
+                              : ThemeColors.oliveGreen,
                           trailing: Icon(
                             currentComplaint.isPrivate
                                 ? Icons.lock
                                 : Icons.public,
                             color: currentComplaint.isPrivate
-                                ? burntOrange
-                                : oliveGreen,
+                                ? ThemeColors.burntOrange
+                                : ThemeColors.oliveGreen,
                             size: 16,
                           ),
                         ),
@@ -966,7 +979,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                         const Text(
                           'รายละเอียดปัญหา:',
                           style: TextStyle(
-                            color: earthClay,
+                            color: ThemeColors.earthClay,
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
@@ -979,13 +992,18 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                             gradient: const LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [sandyTan, beige],
+                              colors: [ThemeColors.sandyTan, ThemeColors.beige],
                             ),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: softBorder, width: 1),
+                            border: Border.all(
+                              color: ThemeColors.softBorder,
+                              width: 1,
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: softBrown.withValues(alpha: 0.1),
+                                color: ThemeColors.softBrown.withValues(
+                                  alpha: 0.1,
+                                ),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -995,7 +1013,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                             currentComplaint.description,
                             style: const TextStyle(
                               fontSize: 15,
-                              color: softBrown,
+                              color: ThemeColors.softBrown,
                               height: 1.6,
                               fontWeight: FontWeight.w500,
                             ),
@@ -1008,17 +1026,23 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                     _buildInfoCard(
                       title: 'การจัดการคำร้อง',
                       icon: Icons.admin_panel_settings,
-                      backgroundColor: softBrown.withValues(alpha: 0.05),
-                      iconColor: softBrown,
+                      backgroundColor: ThemeColors.softBrown.withValues(
+                        alpha: 0.05,
+                      ),
+                      iconColor: ThemeColors.softBrown,
                       children: [
                         Row(
                           children: const [
-                            Icon(Icons.assignment, color: earthClay, size: 20),
+                            Icon(
+                              Icons.assignment,
+                              color: ThemeColors.earthClay,
+                              size: 20,
+                            ),
                             SizedBox(width: 8),
                             Text(
                               'อัปเดตสถานะคำร้อง:',
                               style: TextStyle(
-                                color: earthClay,
+                                color: ThemeColors.earthClay,
                                 fontWeight: FontWeight.w500,
                                 fontSize: 16,
                               ),
@@ -1033,9 +1057,9 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            border: Border.all(color: warmStone),
+                            border: Border.all(color: ThemeColors.warmStone),
                             borderRadius: BorderRadius.circular(8),
-                            color: ivoryWhite,
+                            color: ThemeColors.ivoryWhite,
                           ),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
@@ -1047,15 +1071,15 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                   : null,
                               hint: const Text(
                                 'เลือกสถานะ',
-                                style: TextStyle(color: earthClay),
+                                style: TextStyle(color: ThemeColors.earthClay),
                               ),
                               isExpanded: true,
                               icon: const Icon(
                                 Icons.arrow_drop_down,
-                                color: softBrown,
+                                color: ThemeColors.softBrown,
                               ),
                               style: const TextStyle(
-                                color: softBrown,
+                                color: ThemeColors.softBrown,
                                 fontSize: 16,
                               ),
                               onChanged: isUpdatingStatus
@@ -1086,7 +1110,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                             const Spacer(),
                                             Icon(
                                               Icons.arrow_forward,
-                                              color: oliveGreen,
+                                              color: ThemeColors.oliveGreen,
                                               size: 16,
                                             ),
                                           ],

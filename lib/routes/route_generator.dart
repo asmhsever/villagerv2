@@ -13,6 +13,7 @@ import 'package:fullproject/pages/notfound_age.dart';
 import 'package:fullproject/pages/splash_page.dart';
 import 'package:fullproject/pages/welcome_page.dart';
 import 'package:fullproject/pages/login_page.dart';
+import '../pages/law/profile/law_page.dart';
 import 'app_routes.dart';
 
 class RouteGenerator {
@@ -64,7 +65,13 @@ class RouteGenerator {
       //   }
       //
       //   return _createRoute(LawProfilePage(lawId: lawId));
-
+      case AppRoutes.lawPage:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final villageId = args?['villageId'];
+        if (villageId is int) {
+          return _createRoute(LawPage(villageId: villageId));
+        }
+        return _createRoute(const NotFoundPage());
       case AppRoutes.committeeList:
         final args = settings.arguments as Map<String, dynamic>;
         final villageId = args['villageId'] as int;

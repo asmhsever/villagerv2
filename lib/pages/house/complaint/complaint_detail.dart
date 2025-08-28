@@ -4,6 +4,7 @@ import 'package:fullproject/models/complaint_model.dart';
 import 'package:fullproject/pages/house/complaint/complaint_delete.dart';
 import 'package:fullproject/pages/house/complaint/complaint_edit.dart';
 import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 // หน้าสำหรับดูรายละเอียดร้องเรียน (Enhanced UI with Natural Theme)
 class ComplaintDetailScreen extends StatefulWidget {
@@ -20,16 +21,6 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   late Future<ComplaintModel?> _complaintFuture;
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
 
   @override
   void initState() {
@@ -40,10 +31,10 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: beige,
+      backgroundColor: ThemeColors.beige,
       appBar: AppBar(
-        backgroundColor: softBrown,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.softBrown,
+        foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
         title: Text(
           'ร้องเรียน #${widget.complaint.complaintId}',
@@ -53,7 +44,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: softBrown.withOpacity(0.3),
+              color: ThemeColors.softBrown.withOpacity(0.3),
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
@@ -78,13 +69,18 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ThemeColors.softBrown,
+                    ),
                     strokeWidth: 3,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'กำลังโหลดข้อมูล...',
-                    style: TextStyle(color: earthClay, fontSize: 16),
+                    style: TextStyle(
+                      color: ThemeColors.earthClay,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -97,11 +93,11 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 margin: const EdgeInsets.all(24),
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: ivoryWhite,
+                  color: ThemeColors.ivoryWhite,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: earthClay.withOpacity(0.1),
+                      color: ThemeColors.earthClay.withOpacity(0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -113,13 +109,13 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                     Icon(
                       Icons.error_outline_rounded,
                       size: 48,
-                      color: clayOrange,
+                      color: ThemeColors.clayOrange,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'ไม่สามารถโหลดข้อมูลร้องเรียนได้',
                       style: TextStyle(
-                        color: earthClay,
+                        color: ThemeColors.earthClay,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -167,12 +163,15 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [ivoryWhite, sandyTan.withOpacity(0.3)],
+          colors: [
+            ThemeColors.ivoryWhite,
+            ThemeColors.sandyTan.withOpacity(0.3),
+          ],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.1),
+            color: ThemeColors.earthClay.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -197,7 +196,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: softBrown,
+              color: ThemeColors.softBrown,
             ),
           ),
           const SizedBox(height: 16),
@@ -213,8 +212,8 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                     icon: const Icon(Icons.edit_rounded, size: 18),
                     label: const Text('แก้ไข'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: burntOrange,
-                      foregroundColor: ivoryWhite,
+                      backgroundColor: ThemeColors.burntOrange,
+                      foregroundColor: ThemeColors.ivoryWhite,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -230,8 +229,8 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                     icon: const Icon(Icons.delete_rounded, size: 18),
                     label: const Text('ลบ'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: clayOrange,
-                      foregroundColor: ivoryWhite,
+                      backgroundColor: ThemeColors.clayOrange,
+                      foregroundColor: ThemeColors.ivoryWhite,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -250,11 +249,11 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   Widget _buildMainInfoSection(ComplaintModel complaint) {
     return Container(
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.08),
+            color: ThemeColors.earthClay.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -310,11 +309,11 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   Widget _buildAdditionalInfoSection(ComplaintModel complaint) {
     return Container(
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.08),
+            color: ThemeColors.earthClay.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -354,11 +353,11 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   Widget _buildImageSection(String imageUrl) {
     return Container(
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.08),
+            color: ThemeColors.earthClay.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -371,13 +370,17 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.image_rounded, color: softBrown, size: 20),
+                Icon(
+                  Icons.image_rounded,
+                  color: ThemeColors.softBrown,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'รูปภาพประกอบ',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: softBrown,
+                    color: ThemeColors.softBrown,
                     fontSize: 16,
                   ),
                 ),
@@ -390,7 +393,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                      color: earthClay.withOpacity(0.15),
+                      color: ThemeColors.earthClay.withOpacity(0.15),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -419,10 +422,10 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: beige,
+              color: ThemeColors.beige,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: softBrown, size: 20),
+            child: Icon(icon, color: ThemeColors.softBrown, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -433,7 +436,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: earthClay,
+                    color: ThemeColors.earthClay,
                     fontSize: 14,
                   ),
                 ),
@@ -442,7 +445,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                   value,
                   style: TextStyle(
                     fontSize: isLarge ? 16 : 15,
-                    color: softBrown,
+                    color: ThemeColors.softBrown,
                     fontWeight: isLarge ? FontWeight.w500 : FontWeight.normal,
                     height: 1.4,
                   ),
@@ -464,10 +467,10 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: beige,
+                color: ThemeColors.beige,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: softBrown, size: 16),
+              child: Icon(icon, color: ThemeColors.softBrown, size: 16),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -475,7 +478,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: earthClay,
+                  color: ThemeColors.earthClay,
                   fontSize: 13,
                 ),
               ),
@@ -489,7 +492,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
             value,
             style: TextStyle(
               fontSize: 14,
-              color: softBrown,
+              color: ThemeColors.softBrown,
               fontWeight: FontWeight.w500,
               height: 1.3,
             ),
@@ -505,7 +508,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     return Divider(
       height: 1,
       thickness: 1,
-      color: warmStone.withOpacity(0.3),
+      color: ThemeColors.warmStone.withOpacity(0.3),
       indent: 20,
       endIndent: 20,
     );
@@ -517,14 +520,14 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
 
     switch (status?.toLowerCase()) {
       case 'in_progress':
-        badgeColor = burntOrange;
+        badgeColor = ThemeColors.burntOrange;
         break;
       case 'resolved':
-        badgeColor = oliveGreen;
+        badgeColor = ThemeColors.oliveGreen;
         break;
       case 'pending':
       default:
-        badgeColor = clayOrange;
+        badgeColor = ThemeColors.clayOrange;
         break;
     }
 
@@ -553,17 +556,17 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     switch (level) {
       case '4':
       case '5':
-        badgeColor = clayOrange;
+        badgeColor = ThemeColors.clayOrange;
         break;
       case '3':
-        badgeColor = burntOrange;
+        badgeColor = ThemeColors.burntOrange;
         break;
       case '1':
-        badgeColor = oliveGreen;
+        badgeColor = ThemeColors.oliveGreen;
         break;
       case '2':
       default:
-        badgeColor = softTerracotta;
+        badgeColor = ThemeColors.softTerracotta;
         break;
     }
 

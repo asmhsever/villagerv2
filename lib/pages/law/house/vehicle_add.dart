@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fullproject/domains/vehicle_domain.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -30,31 +31,37 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
   bool _hasUnsavedChanges = false;
   String? _selectedVehicleType = 'รถยนต์'; // Default
 
-  // 🌾 ธีมสีใหม่ - แก้ไข withValues เป็น withOpacity
-  static const Color _softBrown = Color(0xFFA47551);
-  static const Color _ivoryWhite = Color(0xFFFFFDF6);
-  static const Color _beige = Color(0xFFF5F0E1);
-  static const Color _sandyTan = Color(0xFFD8CAB8);
-  static const Color _earthClay = Color(0xFFBFA18F);
-  static const Color _warmStone = Color(0xFFC7B9A5);
-  static const Color _oliveGreen = Color(0xFFA3B18A);
-  static const Color _burntOrange = Color(0xFFE08E45);
-  static const Color _softTerracotta = Color(0xFFD48B5C);
-  static const Color _clayOrange = Color(0xFFCC7748);
-  static const Color _warmAmber = Color(0xFFDA9856);
-  static const Color _softerBurntOrange = Color(0xFFDB8142);
-  static const Color _softBorder = Color(0xFFD0C4B0);
-  static const Color _focusedBrown = Color(0xFF916846);
-  static const Color _inputFill = Color(0xFFFBF9F3);
-  static const Color _disabledGrey = Color(0xFFDCDCDC);
-
   final List<Map<String, dynamic>> vehicleTypes = [
-    {'type': 'รถยนต์', 'icon': Icons.directions_car, 'color': _softBrown},
-    {'type': 'รถจักรยานยนต์', 'icon': Icons.two_wheeler, 'color': _clayOrange},
-    {'type': 'รถบรรทุก', 'icon': Icons.local_shipping, 'color': _oliveGreen},
-    {'type': 'รถตู้', 'icon': Icons.airport_shuttle, 'color': _softTerracotta},
-    {'type': 'รถสปอร์ต', 'icon': Icons.sports_bar, 'color': _burntOrange},
-    {'type': 'อื่นๆ', 'icon': Icons.directions_car, 'color': _warmAmber},
+    {
+      'type': 'รถยนต์',
+      'icon': Icons.directions_car,
+      'color': ThemeColors.softBrown,
+    },
+    {
+      'type': 'รถจักรยานยนต์',
+      'icon': Icons.two_wheeler,
+      'color': ThemeColors.clayOrange,
+    },
+    {
+      'type': 'รถบรรทุก',
+      'icon': Icons.local_shipping,
+      'color': ThemeColors.oliveGreen,
+    },
+    {
+      'type': 'รถตู้',
+      'icon': Icons.airport_shuttle,
+      'color': ThemeColors.softTerracotta,
+    },
+    {
+      'type': 'รถสปอร์ต',
+      'icon': Icons.sports_bar,
+      'color': ThemeColors.burntOrange,
+    },
+    {
+      'type': 'อื่นๆ',
+      'icon': Icons.directions_car,
+      'color': ThemeColors.warmAmber,
+    },
   ];
 
   final List<String> popularBrands = [
@@ -139,25 +146,34 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: _warmAmber, size: 28),
+            Icon(
+              Icons.warning_amber_rounded,
+              color: ThemeColors.warmAmber,
+              size: 28,
+            ),
             const SizedBox(width: 12),
-            Text('ยืนยันการออก', style: TextStyle(color: _earthClay)),
+            Text(
+              'ยืนยันการออก',
+              style: TextStyle(color: ThemeColors.earthClay),
+            ),
           ],
         ),
         content: Text(
           'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?',
-          style: TextStyle(color: _earthClay),
+          style: TextStyle(color: ThemeColors.earthClay),
         ),
-        backgroundColor: _ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(foregroundColor: _warmStone),
+            style: TextButton.styleFrom(foregroundColor: ThemeColors.warmStone),
             child: const Text('ยกเลิก'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: _clayOrange),
+            style: TextButton.styleFrom(
+              foregroundColor: ThemeColors.clayOrange,
+            ),
             child: const Text('ออก'),
           ),
         ],
@@ -190,11 +206,11 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
       builder: (BuildContext context) {
         return Container(
           decoration: BoxDecoration(
-            color: _ivoryWhite,
+            color: ThemeColors.ivoryWhite,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             boxShadow: [
               BoxShadow(
-                color: _warmStone.withValues(alpha: 0.3),
+                color: ThemeColors.warmStone.withValues(alpha: 0.3),
                 spreadRadius: 1,
                 blurRadius: 10,
                 offset: const Offset(0, -2),
@@ -211,7 +227,7 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                   height: 4,
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: _softBorder,
+                    color: ThemeColors.softBorder,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -221,7 +237,7 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: _softBrown,
+                    color: ThemeColors.softBrown,
                   ),
                 ),
 
@@ -233,15 +249,21 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: _oliveGreen.withValues(alpha: 0.2),
+                        color: ThemeColors.oliveGreen.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(Icons.photo_camera, color: _oliveGreen),
+                      child: Icon(
+                        Icons.photo_camera,
+                        color: ThemeColors.oliveGreen,
+                      ),
                     ),
-                    title: Text('ถ่ายรูป', style: TextStyle(color: _earthClay)),
+                    title: Text(
+                      'ถ่ายรูป',
+                      style: TextStyle(color: ThemeColors.earthClay),
+                    ),
                     subtitle: Text(
                       'ใช้กล้องถ่ายรูปใหม่',
-                      style: TextStyle(color: _warmStone),
+                      style: TextStyle(color: ThemeColors.warmStone),
                     ),
                     onTap: () => Navigator.pop(context, 'camera'),
                   ),
@@ -251,18 +273,21 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _burntOrange.withValues(alpha: 0.2),
+                      color: ThemeColors.burntOrange.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(Icons.photo_library, color: _burntOrange),
+                    child: Icon(
+                      Icons.photo_library,
+                      color: ThemeColors.burntOrange,
+                    ),
                   ),
                   title: Text(
                     kIsWeb ? 'เลือกรูปภาพ' : 'เลือกจากแกลเลอรี่',
-                    style: TextStyle(color: _earthClay),
+                    style: TextStyle(color: ThemeColors.earthClay),
                   ),
                   subtitle: Text(
                     kIsWeb ? 'เลือกรูปจากเครื่อง' : 'เลือกรูปจากคลังภาพ',
-                    style: TextStyle(color: _warmStone),
+                    style: TextStyle(color: ThemeColors.warmStone),
                   ),
                   onTap: () => Navigator.pop(context, 'gallery'),
                 ),
@@ -272,18 +297,18 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: _clayOrange.withValues(alpha: 0.2),
+                        color: ThemeColors.clayOrange.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(Icons.delete, color: _clayOrange),
+                      child: Icon(Icons.delete, color: ThemeColors.clayOrange),
                     ),
                     title: Text(
                       'ลบรูปภาพ',
-                      style: TextStyle(color: _clayOrange),
+                      style: TextStyle(color: ThemeColors.clayOrange),
                     ),
                     subtitle: Text(
                       'ลบรูปภาพปัจจุบัน',
-                      style: TextStyle(color: _warmStone),
+                      style: TextStyle(color: ThemeColors.warmStone),
                     ),
                     onTap: () => Navigator.pop(context, 'delete'),
                   ),
@@ -348,17 +373,17 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.error, color: _ivoryWhite),
+                Icon(Icons.error, color: ThemeColors.ivoryWhite),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e',
-                    style: TextStyle(color: _ivoryWhite),
+                    style: TextStyle(color: ThemeColors.ivoryWhite),
                   ),
                 ),
               ],
             ),
-            backgroundColor: _clayOrange,
+            backgroundColor: ThemeColors.clayOrange,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -449,14 +474,17 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.error, color: _ivoryWhite),
+            Icon(Icons.error, color: ThemeColors.ivoryWhite),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(message, style: TextStyle(color: _ivoryWhite)),
+              child: Text(
+                message,
+                style: TextStyle(color: ThemeColors.ivoryWhite),
+              ),
             ),
           ],
         ),
-        backgroundColor: _clayOrange,
+        backgroundColor: ThemeColors.clayOrange,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 4),
       ),
@@ -468,14 +496,17 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.check_circle, color: _ivoryWhite),
+            Icon(Icons.check_circle, color: ThemeColors.ivoryWhite),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(message, style: TextStyle(color: _ivoryWhite)),
+              child: Text(
+                message,
+                style: TextStyle(color: ThemeColors.ivoryWhite),
+              ),
             ),
           ],
         ),
-        backgroundColor: _oliveGreen,
+        backgroundColor: ThemeColors.oliveGreen,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
       ),
@@ -513,21 +544,26 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: _beige,
+        backgroundColor: ThemeColors.beige,
         appBar: AppBar(
           title: Text(
             'เพิ่มยานพาหนะใหม่',
-            style: TextStyle(color: _ivoryWhite, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: ThemeColors.ivoryWhite,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          backgroundColor: _softBrown,
-          foregroundColor: _ivoryWhite,
+          backgroundColor: ThemeColors.softBrown,
+          foregroundColor: ThemeColors.ivoryWhite,
           elevation: 2,
-          shadowColor: _warmStone.withValues(alpha: 0.5),
+          shadowColor: ThemeColors.warmStone.withValues(alpha: 0.5),
           actions: [
             if (_hasUnsavedChanges)
               TextButton(
                 onPressed: _resetForm,
-                style: TextButton.styleFrom(foregroundColor: _ivoryWhite),
+                style: TextButton.styleFrom(
+                  foregroundColor: ThemeColors.ivoryWhite,
+                ),
                 child: const Text('รีเซ็ต'),
               ),
           ],
@@ -578,12 +614,12 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _softBorder),
+        border: Border.all(color: ThemeColors.softBorder),
         boxShadow: [
           BoxShadow(
-            color: _warmStone.withValues(alpha: 0.1),
+            color: ThemeColors.warmStone.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -615,7 +651,7 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: _earthClay,
+                  color: ThemeColors.earthClay,
                 ),
               ),
             ],
@@ -656,7 +692,7 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                       : Container(
                           width: double.infinity,
                           height: 200,
-                          color: _warmStone,
+                          color: ThemeColors.warmStone,
                         ),
                 ),
                 Positioned(
@@ -664,11 +700,11 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                   right: 12,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: _earthClay.withValues(alpha: 0.8),
+                      color: ThemeColors.earthClay.withValues(alpha: 0.8),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.close, color: _ivoryWhite),
+                      icon: Icon(Icons.close, color: ThemeColors.ivoryWhite),
                       onPressed: () {
                         setState(() {
                           _selectedImage = null;
@@ -688,12 +724,15 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _softerBurntOrange,
+                      color: ThemeColors.softerBurntOrange,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       'รูปใหม่',
-                      style: TextStyle(color: _ivoryWhite, fontSize: 12),
+                      style: TextStyle(
+                        color: ThemeColors.ivoryWhite,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -705,9 +744,9 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
               width: double.infinity,
               height: 200,
               decoration: BoxDecoration(
-                color: _inputFill,
+                color: ThemeColors.inputFill,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _softBorder, width: 2),
+                border: Border.all(color: ThemeColors.softBorder, width: 2),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -715,17 +754,23 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                   Icon(
                     _getVehicleIcon(_selectedVehicleType),
                     size: 64,
-                    color: _warmStone,
+                    color: ThemeColors.warmStone,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'ยังไม่มีรูปภาพ',
-                    style: TextStyle(color: _earthClay, fontSize: 16),
+                    style: TextStyle(
+                      color: ThemeColors.earthClay,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'กดปุ่มด้านล่างเพื่อเพิ่มรูป',
-                    style: TextStyle(color: _warmStone, fontSize: 14),
+                    style: TextStyle(
+                      color: ThemeColors.warmStone,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
@@ -742,15 +787,15 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
               onPressed: _pickImage,
               icon: Icon(
                 _hasImage() ? Icons.edit : Icons.add_photo_alternate,
-                color: _burntOrange,
+                color: ThemeColors.burntOrange,
               ),
               label: Text(
                 _hasImage() ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ',
-                style: TextStyle(color: _earthClay),
+                style: TextStyle(color: ThemeColors.earthClay),
               ),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: _softBorder),
-                backgroundColor: _ivoryWhite,
+                side: BorderSide(color: ThemeColors.softBorder),
+                backgroundColor: ThemeColors.ivoryWhite,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -774,7 +819,7 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: _earthClay,
+              color: ThemeColors.earthClay,
             ),
           ),
           const SizedBox(height: 16),
@@ -806,10 +851,12 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? type['color'].withValues(alpha: 0.1)
-                        : _ivoryWhite,
+                        : ThemeColors.ivoryWhite,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? type['color'] : _softBorder,
+                      color: isSelected
+                          ? type['color']
+                          : ThemeColors.softBorder,
                       width: isSelected ? 2 : 1,
                     ),
                     boxShadow: isSelected
@@ -828,14 +875,18 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                     children: [
                       Icon(
                         type['icon'],
-                        color: isSelected ? type['color'] : _warmStone,
+                        color: isSelected
+                            ? type['color']
+                            : ThemeColors.warmStone,
                         size: 24,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         type['type'],
                         style: TextStyle(
-                          color: isSelected ? type['color'] : _earthClay,
+                          color: isSelected
+                              ? type['color']
+                              : ThemeColors.earthClay,
                           fontWeight: isSelected
                               ? FontWeight.bold
                               : FontWeight.normal,
@@ -885,30 +936,36 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                     onEditingComplete: onEditingComplete,
                     decoration: InputDecoration(
                       labelText: 'ยี่ห้อ *',
-                      labelStyle: TextStyle(color: _earthClay),
+                      labelStyle: TextStyle(color: ThemeColors.earthClay),
                       hintText: 'เช่น Toyota, Honda',
-                      hintStyle: TextStyle(color: _warmStone),
+                      hintStyle: TextStyle(color: ThemeColors.warmStone),
                       prefixIcon: Icon(
                         Icons.branding_watermark,
-                        color: _burntOrange,
+                        color: ThemeColors.burntOrange,
                       ),
                       filled: true,
-                      fillColor: _inputFill,
+                      fillColor: ThemeColors.inputFill,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _softBorder),
+                        borderSide: BorderSide(color: ThemeColors.softBorder),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _focusedBrown, width: 2),
+                        borderSide: BorderSide(
+                          color: ThemeColors.focusedBrown,
+                          width: 2,
+                        ),
                       ),
                       errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _clayOrange),
+                        borderSide: BorderSide(color: ThemeColors.clayOrange),
                       ),
                       focusedErrorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _clayOrange, width: 2),
+                        borderSide: BorderSide(
+                          color: ThemeColors.clayOrange,
+                          width: 2,
+                        ),
                       ),
                     ),
                     validator: (value) {
@@ -930,9 +987,9 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                     width: MediaQuery.of(context).size.width - 32,
                     constraints: const BoxConstraints(maxHeight: 200),
                     decoration: BoxDecoration(
-                      color: _ivoryWhite,
+                      color: ThemeColors.ivoryWhite,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _softBorder),
+                      border: Border.all(color: ThemeColors.softBorder),
                     ),
                     child: ListView.builder(
                       padding: EdgeInsets.zero,
@@ -943,10 +1000,10 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                         return ListTile(
                           title: Text(
                             option,
-                            style: TextStyle(color: _earthClay),
+                            style: TextStyle(color: ThemeColors.earthClay),
                           ),
                           onTap: () => onSelected(option),
-                          hoverColor: _beige,
+                          hoverColor: ThemeColors.beige,
                         );
                       },
                     ),
@@ -963,27 +1020,33 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
             controller: _modelController,
             decoration: InputDecoration(
               labelText: 'รุ่น *',
-              labelStyle: TextStyle(color: _earthClay),
+              labelStyle: TextStyle(color: ThemeColors.earthClay),
               hintText: 'เช่น Camry, Civic',
-              hintStyle: TextStyle(color: _warmStone),
-              prefixIcon: Icon(Icons.model_training, color: _burntOrange),
+              hintStyle: TextStyle(color: ThemeColors.warmStone),
+              prefixIcon: Icon(
+                Icons.model_training,
+                color: ThemeColors.burntOrange,
+              ),
               filled: true,
-              fillColor: _inputFill,
+              fillColor: ThemeColors.inputFill,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _softBorder),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _focusedBrown, width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _clayOrange),
+                borderSide: BorderSide(color: ThemeColors.clayOrange),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _clayOrange, width: 2),
+                borderSide: BorderSide(color: ThemeColors.clayOrange, width: 2),
               ),
             ),
             validator: (value) {
@@ -1002,27 +1065,33 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
             controller: _numberController,
             decoration: InputDecoration(
               labelText: 'หมายเลขทะเบียน',
-              labelStyle: TextStyle(color: _earthClay),
+              labelStyle: TextStyle(color: ThemeColors.earthClay),
               hintText: 'เช่น กข 1234 กรุงเทพฯ',
-              hintStyle: TextStyle(color: _warmStone),
-              prefixIcon: Icon(Icons.confirmation_number, color: _burntOrange),
+              hintStyle: TextStyle(color: ThemeColors.warmStone),
+              prefixIcon: Icon(
+                Icons.confirmation_number,
+                color: ThemeColors.burntOrange,
+              ),
               filled: true,
-              fillColor: _inputFill,
+              fillColor: ThemeColors.inputFill,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _softBorder),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _focusedBrown, width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _clayOrange),
+                borderSide: BorderSide(color: ThemeColors.clayOrange),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _clayOrange, width: 2),
+                borderSide: BorderSide(color: ThemeColors.clayOrange, width: 2),
               ),
             ),
             onChanged: (value) {
@@ -1060,27 +1129,33 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
             controller: _yearController,
             decoration: InputDecoration(
               labelText: 'ปี',
-              labelStyle: TextStyle(color: _earthClay),
+              labelStyle: TextStyle(color: ThemeColors.earthClay),
               hintText: 'เช่น 2023',
-              hintStyle: TextStyle(color: _warmStone),
-              prefixIcon: Icon(Icons.calendar_today, color: _burntOrange),
+              hintStyle: TextStyle(color: ThemeColors.warmStone),
+              prefixIcon: Icon(
+                Icons.calendar_today,
+                color: ThemeColors.burntOrange,
+              ),
               filled: true,
-              fillColor: _inputFill,
+              fillColor: ThemeColors.inputFill,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _softBorder),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _focusedBrown, width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _clayOrange),
+                borderSide: BorderSide(color: ThemeColors.clayOrange),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: _clayOrange, width: 2),
+                borderSide: BorderSide(color: ThemeColors.clayOrange, width: 2),
               ),
             ),
             keyboardType: TextInputType.number,
@@ -1128,27 +1203,36 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                     onEditingComplete: onEditingComplete,
                     decoration: InputDecoration(
                       labelText: 'สี',
-                      labelStyle: TextStyle(color: _earthClay),
+                      labelStyle: TextStyle(color: ThemeColors.earthClay),
                       hintText: 'เช่น ขาว, ดำ',
-                      hintStyle: TextStyle(color: _warmStone),
-                      prefixIcon: Icon(Icons.palette, color: _burntOrange),
+                      hintStyle: TextStyle(color: ThemeColors.warmStone),
+                      prefixIcon: Icon(
+                        Icons.palette,
+                        color: ThemeColors.burntOrange,
+                      ),
                       filled: true,
-                      fillColor: _inputFill,
+                      fillColor: ThemeColors.inputFill,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _softBorder),
+                        borderSide: BorderSide(color: ThemeColors.softBorder),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _focusedBrown, width: 2),
+                        borderSide: BorderSide(
+                          color: ThemeColors.focusedBrown,
+                          width: 2,
+                        ),
                       ),
                       errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _clayOrange),
+                        borderSide: BorderSide(color: ThemeColors.clayOrange),
                       ),
                       focusedErrorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _clayOrange, width: 2),
+                        borderSide: BorderSide(
+                          color: ThemeColors.clayOrange,
+                          width: 2,
+                        ),
                       ),
                     ),
                     onChanged: (value) => _onFieldChanged(),
@@ -1164,9 +1248,9 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                     width: MediaQuery.of(context).size.width - 32,
                     constraints: const BoxConstraints(maxHeight: 200),
                     decoration: BoxDecoration(
-                      color: _ivoryWhite,
+                      color: ThemeColors.ivoryWhite,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _softBorder),
+                      border: Border.all(color: ThemeColors.softBorder),
                     ),
                     child: ListView.builder(
                       padding: EdgeInsets.zero,
@@ -1177,10 +1261,10 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                         return ListTile(
                           title: Text(
                             option,
-                            style: TextStyle(color: _earthClay),
+                            style: TextStyle(color: ThemeColors.earthClay),
                           ),
                           onTap: () => onSelected(option),
-                          hoverColor: _beige,
+                          hoverColor: ThemeColors.beige,
                         );
                       },
                     ),
@@ -1202,19 +1286,19 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
         controller: _notesController,
         decoration: InputDecoration(
           labelText: 'หมายเหตุเพิ่มเติม',
-          labelStyle: TextStyle(color: _earthClay),
+          labelStyle: TextStyle(color: ThemeColors.earthClay),
           hintText: 'ระบุรายละเอียดเพิ่มเติมเกี่ยวกับยานพาหนะ...',
-          hintStyle: TextStyle(color: _warmStone),
-          prefixIcon: Icon(Icons.edit_note, color: _burntOrange),
+          hintStyle: TextStyle(color: ThemeColors.warmStone),
+          prefixIcon: Icon(Icons.edit_note, color: ThemeColors.burntOrange),
           filled: true,
-          fillColor: _inputFill,
+          fillColor: ThemeColors.inputFill,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: _softBorder),
+            borderSide: BorderSide(color: ThemeColors.softBorder),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: _focusedBrown, width: 2),
+            borderSide: BorderSide(color: ThemeColors.focusedBrown, width: 2),
           ),
           alignLabelWithHint: true,
         ),
@@ -1234,12 +1318,12 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
           child: ElevatedButton(
             onPressed: _isSaving ? null : _saveVehicle,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _softBrown,
-              foregroundColor: _ivoryWhite,
-              disabledBackgroundColor: _disabledGrey,
-              disabledForegroundColor: _warmStone,
+              backgroundColor: ThemeColors.softBrown,
+              foregroundColor: ThemeColors.ivoryWhite,
+              disabledBackgroundColor: ThemeColors.disabledGrey,
+              disabledForegroundColor: ThemeColors.warmStone,
               elevation: 2,
-              shadowColor: _warmStone.withValues(alpha: 0.5),
+              shadowColor: ThemeColors.warmStone.withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -1254,7 +1338,7 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            _ivoryWhite,
+                            ThemeColors.ivoryWhite,
                           ),
                         ),
                       ),
@@ -1264,7 +1348,7 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: _ivoryWhite,
+                          color: ThemeColors.ivoryWhite,
                         ),
                       ),
                     ],
@@ -1306,7 +1390,7 @@ class _VehicleAddPageState extends State<VehicleAddPage> {
                     }
                   },
             style: TextButton.styleFrom(
-              foregroundColor: _earthClay,
+              foregroundColor: ThemeColors.earthClay,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

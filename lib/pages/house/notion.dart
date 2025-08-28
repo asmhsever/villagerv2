@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/domains/notion_domain.dart';
-import 'package:fullproject/extensions/context_extensions.dart';
+import 'package:fullproject/models/house_model.dart';
 import 'package:fullproject/models/notion_model.dart';
+import 'package:fullproject/pages/house/widgets/appbar.dart';
 import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseNotionsPage extends StatefulWidget {
-  final int? villageId;
+  final HouseModel? houseData;
 
-  const HouseNotionsPage({super.key, this.villageId});
+  const HouseNotionsPage({super.key, this.houseData});
 
   @override
   State<HouseNotionsPage> createState() => _HouseNotionsPageState();
@@ -24,19 +26,20 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
   late Animation<double> _fadeAnimation;
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
+  // static const Color ThemeColors.softBrown = ThemeColors.softBrown;
+  // static const Color ThemeColors.ivoryWhite = ThemeColors.ivoryWhite;
+  // static const Color ThemeColors.beige = ThemeColors.beige;
+  // static const Color ThemeColors.ThemeColors.sandyTan = ThemeColors.sandyTan;
+  // static const Color ThemeColors.earthClay = ThemeColors.earthClay;
+  // static const Color ThemeColors.warmStone = ThemeColors.warmStone;
+  // static const Color ThemeColors.oliveGreen =ThemeColors.oliveGreen;
+  // static const Color ThemeColors.burntOrange = ThemeColors.burntOrange;
+  // static const Color ThemeColors.softTerracotta = ThemeColors.softTerracotta;
+  // static const Color ThemeColors.clayOrange = ThemeColors.clayOrange;
 
   @override
   void initState() {
+    print(widget.houseData!.toJson());
     super.initState();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -67,10 +70,12 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
       Map<String, dynamic> data;
 
       if (_selectedFilter == 'ALL') {
-        data = await NotionDomain.getRecentNotions(villageId: widget.villageId);
+        data = await NotionDomain.getRecentNotions(
+          villageId: widget.houseData?.villageId,
+        );
       } else {
         data = await NotionDomain.getRecentNotionsFilter(
-          villageId: widget.villageId,
+          villageId: widget.houseData?.villageId,
           type: _selectedFilter,
         );
       }
@@ -162,17 +167,17 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
   Color _getTypeColor(String type) {
     switch (type) {
       case 'GENERAL':
-        return softBrown;
+        return ThemeColors.softBrown;
       case 'MAINTENANCE':
-        return burntOrange;
+        return ThemeColors.burntOrange;
       case 'SECURITY':
-        return clayOrange;
+        return ThemeColors.clayOrange;
       case 'FINANCE':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case 'SOCIAL':
-        return softTerracotta;
+        return ThemeColors.softTerracotta;
       default:
-        return warmStone;
+        return ThemeColors.warmStone;
     }
   }
 
@@ -213,7 +218,9 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: beige,
+      appBar: HouseAppBar(house: widget.houseData?.houseNumber),
+
+      backgroundColor: ThemeColors.beige,
       body: Column(
         children: [
           // Filter Section
@@ -246,11 +253,11 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.1),
+            color: ThemeColors.earthClay.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -263,14 +270,14 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Icon(Icons.filter_list_rounded, color: softBrown, size: 20),
+                // Icon(Icons.filter_list_rounded, color: ThemeColors.softBrown, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'หมวดหมู่ข่าวสาร',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: softBrown,
+                    color: ThemeColors.softBrown,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -280,7 +287,7 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: softBrown.withOpacity(0.1),
+                    color: ThemeColors.softBrown.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -288,7 +295,7 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: softBrown,
+                      color: ThemeColors.softBrown,
                     ),
                   ),
                 ),
@@ -298,7 +305,10 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                     onPressed: () => _changeFilter('ALL'),
                     child: Text(
                       'ล้างตัวกรอง',
-                      style: TextStyle(color: clayOrange, fontSize: 12),
+                      style: TextStyle(
+                        color: ThemeColors.clayOrange,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
               ],
@@ -312,27 +322,30 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
               value: _selectedFilter,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: sandyTan,
+                fillColor: ThemeColors.sandyTan,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: warmStone),
+                  borderSide: BorderSide(color: ThemeColors.warmStone),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: warmStone),
+                  borderSide: BorderSide(color: ThemeColors.warmStone),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: softBrown, width: 2),
+                  borderSide: BorderSide(
+                    color: ThemeColors.softBrown,
+                    width: 2,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
               ),
-              dropdownColor: ivoryWhite,
+              dropdownColor: ThemeColors.ivoryWhite,
               style: TextStyle(
-                color: softBrown,
+                color: ThemeColors.softBrown,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -344,7 +357,7 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                       Icon(
                         Icons.all_inclusive_rounded,
                         size: 18,
-                        color: softBrown,
+                        color: ThemeColors.softBrown,
                       ),
                       const SizedBox(width: 8),
                       const Text('ทั้งหมด'),
@@ -355,7 +368,11 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                   value: 'GENERAL',
                   child: Row(
                     children: [
-                      Icon(Icons.info_rounded, size: 18, color: softBrown),
+                      Icon(
+                        Icons.info_rounded,
+                        size: 18,
+                        color: ThemeColors.softBrown,
+                      ),
                       const SizedBox(width: 8),
                       const Text('ข่าวสารทั่วไป'),
                     ],
@@ -365,7 +382,11 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                   value: 'MAINTENANCE',
                   child: Row(
                     children: [
-                      Icon(Icons.build_rounded, size: 18, color: burntOrange),
+                      Icon(
+                        Icons.build_rounded,
+                        size: 18,
+                        color: ThemeColors.burntOrange,
+                      ),
                       const SizedBox(width: 8),
                       const Text('การบำรุงรักษา'),
                     ],
@@ -375,7 +396,11 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                   value: 'SECURITY',
                   child: Row(
                     children: [
-                      Icon(Icons.security_rounded, size: 18, color: clayOrange),
+                      Icon(
+                        Icons.security_rounded,
+                        size: 18,
+                        color: ThemeColors.clayOrange,
+                      ),
                       const SizedBox(width: 8),
                       const Text('ความปลอดภัย'),
                     ],
@@ -388,7 +413,7 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                       Icon(
                         Icons.account_balance_wallet_rounded,
                         size: 18,
-                        color: oliveGreen,
+                        color: ThemeColors.oliveGreen,
                       ),
                       const SizedBox(width: 8),
                       const Text('การเงิน'),
@@ -402,7 +427,7 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                       Icon(
                         Icons.groups_rounded,
                         size: 18,
-                        color: softTerracotta,
+                        color: ThemeColors.softTerracotta,
                       ),
                       const SizedBox(width: 8),
                       const Text('กิจกรรมสังคม'),
@@ -415,7 +440,10 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
                   _changeFilter(newValue);
                 }
               },
-              icon: Icon(Icons.keyboard_arrow_down_rounded, color: earthClay),
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: ThemeColors.earthClay,
+              ),
             ),
           ),
         ],
@@ -445,19 +473,19 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
   Color _getFilterColor(String filter) {
     switch (filter) {
       case 'ALL':
-        return softBrown;
+        return ThemeColors.softBrown;
       case 'GENERAL':
-        return softBrown;
+        return ThemeColors.softBrown;
       case 'MAINTENANCE':
-        return burntOrange;
+        return ThemeColors.burntOrange;
       case 'SECURITY':
-        return clayOrange;
+        return ThemeColors.clayOrange;
       case 'FINANCE':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case 'SOCIAL':
-        return softTerracotta;
+        return ThemeColors.softTerracotta;
       default:
-        return softBrown;
+        return ThemeColors.softBrown;
     }
   }
 
@@ -467,13 +495,13 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+            valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
             strokeWidth: 3,
           ),
           const SizedBox(height: 16),
           Text(
             'กำลังโหลดข่าวสาร...',
-            style: TextStyle(color: earthClay, fontSize: 16),
+            style: TextStyle(color: ThemeColors.earthClay, fontSize: 16),
           ),
         ],
       ),
@@ -486,11 +514,11 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
         margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -499,28 +527,32 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline_rounded, size: 48, color: clayOrange),
+            Icon(
+              Icons.error_outline_rounded,
+              size: 48,
+              color: ThemeColors.clayOrange,
+            ),
             const SizedBox(height: 16),
             Text(
               'เกิดข้อผิดพลาด',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: softBrown,
+                color: ThemeColors.softBrown,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               error,
-              style: TextStyle(color: earthClay, fontSize: 14),
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadNotions,
               style: ElevatedButton.styleFrom(
-                backgroundColor: burntOrange,
-                foregroundColor: ivoryWhite,
+                backgroundColor: ThemeColors.burntOrange,
+                foregroundColor: ThemeColors.ivoryWhite,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -539,11 +571,11 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
         margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.1),
+              color: ThemeColors.earthClay.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -552,14 +584,18 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.article_outlined, size: 48, color: warmStone),
+            Icon(
+              Icons.article_outlined,
+              size: 48,
+              color: ThemeColors.warmStone,
+            ),
             const SizedBox(height: 16),
             Text(
               'ไม่พบข่าวสาร',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: softBrown,
+                color: ThemeColors.softBrown,
               ),
             ),
             const SizedBox(height: 8),
@@ -567,7 +603,7 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
               _selectedFilter == 'ALL'
                   ? 'ยังไม่มีข่าวสารในระบบ'
                   : 'ไม่พบข่าวสารในหมวดหมู่ที่เลือก',
-              style: TextStyle(color: earthClay, fontSize: 14),
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
               textAlign: TextAlign.center,
             ),
           ],
@@ -580,8 +616,8 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
     return FadeTransition(
       opacity: _fadeAnimation,
       child: RefreshIndicator(
-        color: softBrown,
-        backgroundColor: ivoryWhite,
+        color: ThemeColors.softBrown,
+        backgroundColor: ThemeColors.ivoryWhite,
         onRefresh: _loadNotions,
         child: ListView.builder(
           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
@@ -666,32 +702,23 @@ class CardNotion extends StatelessWidget {
   const CardNotion({super.key, required this.notion});
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
 
   Color _getTypeColor(String? type) {
-    if (type == null) return warmStone;
+    if (type == null) return ThemeColors.warmStone;
 
     switch (type) {
       case 'GENERAL':
-        return softBrown;
+        return ThemeColors.softBrown;
       case 'MAINTENANCE':
-        return burntOrange;
+        return ThemeColors.burntOrange;
       case 'SECURITY':
-        return clayOrange;
+        return ThemeColors.clayOrange;
       case 'FINANCE':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case 'SOCIAL':
-        return softTerracotta;
+        return ThemeColors.softTerracotta;
       default:
-        return warmStone;
+        return ThemeColors.warmStone;
     }
   }
 
@@ -779,11 +806,11 @@ class CardNotion extends StatelessWidget {
       return Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: ivoryWhite,
+          color: ThemeColors.ivoryWhite,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: earthClay.withOpacity(0.08),
+              color: ThemeColors.earthClay.withOpacity(0.08),
               blurRadius: 15,
               offset: const Offset(0, 4),
             ),
@@ -837,7 +864,7 @@ class CardNotion extends StatelessWidget {
                         _formatDateFromDateTime(notion.createDate),
                         style: TextStyle(
                           fontSize: 12,
-                          color: earthClay,
+                          color: ThemeColors.earthClay,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -851,7 +878,7 @@ class CardNotion extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: softBrown,
+                      color: ThemeColors.softBrown,
                       height: 1.3,
                     ),
                   ),
@@ -871,7 +898,7 @@ class CardNotion extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: earthClay.withOpacity(0.1),
+                      color: ThemeColors.earthClay.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -896,7 +923,11 @@ class CardNotion extends StatelessWidget {
               padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
               child: Text(
                 notion.description ?? 'ไม่มีรายละเอียด',
-                style: TextStyle(fontSize: 15, height: 1.5, color: earthClay),
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.5,
+                  color: ThemeColors.earthClay,
+                ),
               ),
             ),
           ],

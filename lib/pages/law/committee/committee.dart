@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/domains/committee_domain.dart';
 import 'package:fullproject/models/committee_model.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'add_committee.dart';
 import 'edit_committee.dart';
 
@@ -16,18 +17,6 @@ class LawCommitteeListPage extends StatefulWidget {
 
 class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
-  static const Color mutedBurntSienna = Color(0xFFC8755A);
-  static const Color danger = Color(0xFFDC3545);
 
   bool _isRefreshing = false; // ป้องกันกดซ้ำตอนกำลังทำงาน
 
@@ -80,44 +69,51 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
       return;
     }
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('ยืนยันการลบ'),
-          content: Text('ต้องการลบคณะกรรมการรหัส $id ใช่หรือไม่?'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('ยกเลิก'),
-            ),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(backgroundColor: danger),
-              onPressed: () => Navigator.pop(ctx, true),
-              icon: const Icon(Icons.delete_forever),
-              label: const Text('ลบ'),
-            ),
-          ],
-        );
-      },
-    ) ??
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              title: const Text('ยืนยันการลบ'),
+              content: Text('ต้องการลบคณะกรรมการรหัส $id ใช่หรือไม่?'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('ยกเลิก'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ThemeColors.beige,
+                  ),
+                  onPressed: () => Navigator.pop(ctx, true),
+                  icon: const Icon(Icons.delete_forever),
+                  label: const Text('ลบ'),
+                ),
+              ],
+            );
+          },
+        ) ??
         false;
 
     if (!confirmed) return;
 
-    setState(() => _isRefreshing = true); // ใช้สถานะเดียวกับรีเฟรช เพื่อล็อกปุ่ม
+    setState(
+      () => _isRefreshing = true,
+    ); // ใช้สถานะเดียวกับรีเฟรช เพื่อล็อกปุ่ม
     try {
       await CommitteeDomain.delete(id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ลบคณะกรรมการสำเร็จ')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ลบคณะกรรมการสำเร็จ')));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('ลบไม่สำเร็จ: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('ลบไม่สำเร็จ: $e')));
     } finally {
       if (mounted) {
         setState(() => _isRefreshing = false);
@@ -130,7 +126,7 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ivoryWhite,
+      backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
         title: const Text(
           'รายชื่อคณะกรรมการหมู่บ้าน',
@@ -140,7 +136,7 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
             fontSize: 18,
           ),
         ),
-        backgroundColor: softBrown,
+        backgroundColor: ThemeColors.softBrown,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -164,12 +160,17 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ThemeColors.softBrown,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'กำลังโหลดข้อมูลคณะกรรมการ...',
-                    style: TextStyle(color: earthClay, fontSize: 14),
+                    style: TextStyle(
+                      color: ThemeColors.earthClay,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
@@ -181,12 +182,16 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, color: mutedBurntSienna, size: 64),
+                  Icon(
+                    Icons.error_outline,
+                    color: ThemeColors.mutedBurntSienna,
+                    size: 64,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'เกิดข้อผิดพลาด',
                     style: TextStyle(
-                      color: clayOrange,
+                      color: ThemeColors.clayOrange,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -194,7 +199,10 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                   const SizedBox(height: 8),
                   Text(
                     '${snapshot.error}',
-                    style: TextStyle(color: mutedBurntSienna, fontSize: 14),
+                    style: TextStyle(
+                      color: ThemeColors.mutedBurntSienna,
+                      fontSize: 14,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -205,8 +213,8 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                     icon: const Icon(Icons.refresh),
                     label: const Text('ลองใหม่'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: burntOrange,
-                      foregroundColor: ivoryWhite,
+                      backgroundColor: ThemeColors.burntOrange,
+                      foregroundColor: ThemeColors.ivoryWhite,
                       elevation: 2,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -226,20 +234,24 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: sandyTan.withOpacity(0.3),
+                      color: ThemeColors.sandyTan.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: warmStone.withOpacity(0.3),
+                        color: ThemeColors.warmStone.withOpacity(0.3),
                         width: 1,
                       ),
                     ),
-                    child: Icon(Icons.groups, size: 64, color: earthClay),
+                    child: Icon(
+                      Icons.groups,
+                      size: 64,
+                      color: ThemeColors.earthClay,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'ไม่มีข้อมูลคณะกรรมการ',
                     style: TextStyle(
-                      color: earthClay,
+                      color: ThemeColors.earthClay,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -247,7 +259,10 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                   const SizedBox(height: 8),
                   Text(
                     'ยังไม่มีคณะกรรมการในหมู่บ้านนี้',
-                    style: TextStyle(color: warmStone, fontSize: 14),
+                    style: TextStyle(
+                      color: ThemeColors.warmStone,
+                      fontSize: 14,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
@@ -256,10 +271,13 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                     icon: const Icon(Icons.add),
                     label: const Text('เพิ่มคณะกรรมการใหม่'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: oliveGreen,
-                      foregroundColor: ivoryWhite,
+                      backgroundColor: ThemeColors.oliveGreen,
+                      foregroundColor: ThemeColors.ivoryWhite,
                       elevation: 4,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -286,21 +304,25 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: beige.withOpacity(0.7),
+                          color: ThemeColors.beige.withOpacity(0.7),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: warmStone.withOpacity(0.3),
+                            color: ThemeColors.warmStone.withOpacity(0.3),
                             width: 1,
                           ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.groups, color: softBrown, size: 20),
+                            Icon(
+                              Icons.groups,
+                              color: ThemeColors.softBrown,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'จำนวนคณะกรรมการ: ${committees.length} คน',
                               style: TextStyle(
-                                color: earthClay,
+                                color: ThemeColors.earthClay,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -315,19 +337,24 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: oliveGreen.withOpacity(0.3),
+                            color: ThemeColors.oliveGreen.withOpacity(0.3),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: _isRefreshing ? null : _navigateToAddCommittee,
+                        onPressed: _isRefreshing
+                            ? null
+                            : _navigateToAddCommittee,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: oliveGreen,
-                          foregroundColor: ivoryWhite,
+                          backgroundColor: ThemeColors.oliveGreen,
+                          foregroundColor: ThemeColors.ivoryWhite,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -337,7 +364,13 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                           children: const [
                             Icon(Icons.add, size: 18),
                             SizedBox(width: 4),
-                            Text('เพิ่ม', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                            Text(
+                              'เพิ่ม',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -372,12 +405,12 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
 
   Widget _buildCommitteeCard(CommitteeModel committee, int index) {
     final cardColors = [
-      softBrown,
-      burntOrange,
-      oliveGreen,
-      softTerracotta,
-      clayOrange,
-      mutedBurntSienna,
+      ThemeColors.softBrown,
+      ThemeColors.burntOrange,
+      ThemeColors.oliveGreen,
+      ThemeColors.softTerracotta,
+      ThemeColors.clayOrange,
+      ThemeColors.mutedBurntSienna,
     ];
     final cardColor = cardColors[index % cardColors.length];
 
@@ -391,7 +424,7 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [ivoryWhite, cardColor.withOpacity(0.1)],
+            colors: [ThemeColors.ivoryWhite, cardColor.withOpacity(0.1)],
           ),
         ),
         child: Padding(
@@ -443,10 +476,10 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: oliveGreen.withOpacity(0.15),
+                            color: ThemeColors.oliveGreen.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: oliveGreen.withOpacity(0.3),
+                              color: ThemeColors.oliveGreen.withOpacity(0.3),
                               width: 1,
                             ),
                           ),
@@ -457,7 +490,7 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                                 width: 6,
                                 height: 6,
                                 decoration: BoxDecoration(
-                                  color: oliveGreen,
+                                  color: ThemeColors.oliveGreen,
                                   borderRadius: BorderRadius.circular(3),
                                 ),
                               ),
@@ -465,7 +498,7 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                               Text(
                                 'ดำรงตำแหน่ง',
                                 style: TextStyle(
-                                  color: oliveGreen,
+                                  color: ThemeColors.oliveGreen,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -482,23 +515,25 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: burntOrange.withOpacity(0.2),
+                          color: ThemeColors.burntOrange.withOpacity(0.2),
                           blurRadius: 3,
                           offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: Material(
-                      color: burntOrange.withOpacity(0.1),
+                      color: ThemeColors.burntOrange.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(10),
-                        onTap: _isRefreshing ? null : () => _navigateToEditCommittee(committee),
+                        onTap: _isRefreshing
+                            ? null
+                            : () => _navigateToEditCommittee(committee),
                         child: const Padding(
                           padding: EdgeInsets.all(8),
                           child: Icon(
                             Icons.edit,
-                            color: burntOrange,
+                            color: ThemeColors.burntOrange,
                             size: 20,
                           ),
                         ),
@@ -512,23 +547,25 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: danger.withOpacity(0.15),
+                          color: ThemeColors.beige.withOpacity(0.15),
                           blurRadius: 3,
                           offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: Material(
-                      color: danger.withOpacity(0.08),
+                      color: ThemeColors.beige.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(10),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(10),
-                        onTap: _isRefreshing ? null : () => _confirmDelete(committee),
+                        onTap: _isRefreshing
+                            ? null
+                            : () => _confirmDelete(committee),
                         child: const Padding(
                           padding: EdgeInsets.all(8),
                           child: Icon(
                             Icons.delete_outline,
-                            color: danger,
+                            color: ThemeColors.beige,
                             size: 20,
                           ),
                         ),
@@ -592,7 +629,7 @@ class _LawCommitteeListPageState extends State<LawCommitteeListPage> {
           Text(
             label,
             style: TextStyle(
-              color: earthClay,
+              color: ThemeColors.earthClay,
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),

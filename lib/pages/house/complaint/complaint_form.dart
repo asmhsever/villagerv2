@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:fullproject/domains/complaint_domain.dart';
 import 'package:fullproject/domains/complaint_type_domain.dart';
 import 'package:fullproject/models/complaint_model.dart';
+import 'package:fullproject/theme/Color.dart';
 
 class HouseComplaintFormPage extends StatefulWidget {
   final int houseId;
@@ -41,19 +42,6 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
   late Animation<Offset> _slideAnimation;
 
   // Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
-  static const Color inputFill = Color(0xFFFBF9F3);
-  static const Color softBorder = Color(0xFFD0C4B0);
-  static const Color focusedBrown = Color(0xFF916846);
 
   @override
   void initState() {
@@ -104,7 +92,9 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
           message,
           style: const TextStyle(fontWeight: FontWeight.w500),
         ),
-        backgroundColor: isError ? clayOrange : oliveGreen,
+        backgroundColor: isError
+            ? ThemeColors.clayOrange
+            : ThemeColors.oliveGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
@@ -120,14 +110,14 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
       builder: (BuildContext context) {
         return Container(
           decoration: BoxDecoration(
-            color: ivoryWhite,
+            color: ThemeColors.ivoryWhite,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
             ),
             boxShadow: [
               BoxShadow(
-                color: earthClay.withOpacity(0.2),
+                color: ThemeColors.earthClay.withOpacity(0.2),
                 blurRadius: 20,
                 offset: const Offset(0, -5),
               ),
@@ -143,7 +133,7 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                   height: 4,
                   margin: const EdgeInsets.only(top: 12, bottom: 24),
                   decoration: BoxDecoration(
-                    color: warmStone,
+                    color: ThemeColors.warmStone,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -156,12 +146,12 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: softBrown.withOpacity(0.1),
+                          color: ThemeColors.softBrown.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
                           Icons.image_rounded,
-                          color: softBrown,
+                          color: ThemeColors.softBrown,
                           size: 24,
                         ),
                       ),
@@ -171,7 +161,7 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: softBrown,
+                          color: ThemeColors.softBrown,
                         ),
                       ),
                     ],
@@ -233,10 +223,14 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       decoration: BoxDecoration(
-        color: isDelete ? clayOrange.withOpacity(0.05) : beige,
+        color: isDelete
+            ? ThemeColors.clayOrange.withOpacity(0.05)
+            : ThemeColors.beige,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDelete ? clayOrange.withOpacity(0.2) : softBorder,
+          color: isDelete
+              ? ThemeColors.clayOrange.withOpacity(0.2)
+              : ThemeColors.softBorder,
           width: 1,
         ),
       ),
@@ -253,13 +247,15 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isDelete
-                        ? clayOrange.withOpacity(0.15)
-                        : softBrown.withOpacity(0.1),
+                        ? ThemeColors.clayOrange.withOpacity(0.15)
+                        : ThemeColors.softBrown.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     icon,
-                    color: isDelete ? clayOrange : softBrown,
+                    color: isDelete
+                        ? ThemeColors.clayOrange
+                        : ThemeColors.softBrown,
                     size: 24,
                   ),
                 ),
@@ -271,7 +267,9 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                       Text(
                         title,
                         style: TextStyle(
-                          color: isDelete ? clayOrange : softBrown,
+                          color: isDelete
+                              ? ThemeColors.clayOrange
+                              : ThemeColors.softBrown,
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
                         ),
@@ -281,8 +279,8 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                         subtitle,
                         style: TextStyle(
                           color: isDelete
-                              ? clayOrange.withOpacity(0.7)
-                              : earthClay,
+                              ? ThemeColors.clayOrange.withOpacity(0.7)
+                              : ThemeColors.earthClay,
                           fontSize: 14,
                         ),
                       ),
@@ -292,8 +290,8 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                 Icon(
                   Icons.chevron_right_rounded,
                   color: isDelete
-                      ? clayOrange.withOpacity(0.5)
-                      : earthClay.withOpacity(0.5),
+                      ? ThemeColors.clayOrange.withOpacity(0.5)
+                      : ThemeColors.earthClay.withOpacity(0.5),
                 ),
               ],
             ),
@@ -386,10 +384,10 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: beige,
+      backgroundColor: ThemeColors.beige,
       appBar: AppBar(
-        backgroundColor: softBrown,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.softBrown,
+        foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
         title: const Text(
           'สร้างร้องเรียนใหม่',
@@ -409,7 +407,9 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ThemeColors.ivoryWhite,
+                    ),
                   ),
                 ),
               ),
@@ -434,14 +434,14 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(softBrown),
+            valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
             strokeWidth: 3,
           ),
           const SizedBox(height: 20),
           Text(
             'กำลังโหลดข้อมูล...',
             style: TextStyle(
-              color: earthClay,
+              color: ThemeColors.earthClay,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -483,14 +483,14 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            burntOrange.withOpacity(0.1),
-            softTerracotta.withOpacity(0.05),
+            ThemeColors.burntOrange.withOpacity(0.1),
+            ThemeColors.softTerracotta.withOpacity(0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.1),
+            color: ThemeColors.earthClay.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -506,12 +506,12 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: burntOrange.withOpacity(0.15),
+                    color: ThemeColors.burntOrange.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
                     Icons.feedback_rounded,
-                    color: burntOrange,
+                    color: ThemeColors.burntOrange,
                     size: 28,
                   ),
                 ),
@@ -525,7 +525,7 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: softBrown,
+                          color: ThemeColors.softBrown,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -533,7 +533,7 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                         'บ้านเลขที่ ${widget.houseId}',
                         style: TextStyle(
                           fontSize: 16,
-                          color: earthClay,
+                          color: ThemeColors.earthClay,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -552,11 +552,11 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
   Widget _buildFormCard() {
     return Container(
       decoration: BoxDecoration(
-        color: ivoryWhite,
+        color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.08),
+            color: ThemeColors.earthClay.withOpacity(0.08),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -625,10 +625,10 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: beige,
+                color: ThemeColors.beige,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: softBrown, size: 20),
+              child: Icon(icon, color: ThemeColors.softBrown, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -640,12 +640,15 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: softBrown,
+                      color: ThemeColors.softBrown,
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: earthClay),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: ThemeColors.earthClay,
+                    ),
                   ),
                 ],
               ),
@@ -661,27 +664,30 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
   Widget _buildHeaderInput() {
     return TextFormField(
       controller: _headerController,
-      style: TextStyle(color: softBrown, fontSize: 15),
+      style: TextStyle(color: ThemeColors.softBrown, fontSize: 15),
       decoration: InputDecoration(
         hintText: 'เช่น "ไฟฟ้าดับบ่อย" หรือ "เสียงดังจากเพื่อนบ้าน"',
-        hintStyle: TextStyle(color: earthClay.withOpacity(0.6), fontSize: 14),
+        hintStyle: TextStyle(
+          color: ThemeColors.earthClay.withOpacity(0.6),
+          fontSize: 14,
+        ),
         filled: true,
-        fillColor: inputFill,
+        fillColor: ThemeColors.inputFill,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: softBorder),
+          borderSide: BorderSide(color: ThemeColors.softBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: softBorder),
+          borderSide: BorderSide(color: ThemeColors.softBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: focusedBrown, width: 2),
+          borderSide: BorderSide(color: ThemeColors.focusedBrown, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: clayOrange),
+          borderSide: BorderSide(color: ThemeColors.clayOrange),
         ),
         contentPadding: const EdgeInsets.all(16),
       ),
@@ -701,29 +707,32 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
   Widget _buildDescriptionInput() {
     return TextFormField(
       controller: _descriptionController,
-      style: TextStyle(color: softBrown, fontSize: 15),
+      style: TextStyle(color: ThemeColors.softBrown, fontSize: 15),
       maxLines: 4,
       decoration: InputDecoration(
         hintText:
             'อธิบายปัญหาอย่างละเอียด เช่น เกิดเมื่อไหร่ กี่ครั้ง ส่งผลกระทบอย่างไร',
-        hintStyle: TextStyle(color: earthClay.withOpacity(0.6), fontSize: 14),
+        hintStyle: TextStyle(
+          color: ThemeColors.earthClay.withOpacity(0.6),
+          fontSize: 14,
+        ),
         filled: true,
-        fillColor: inputFill,
+        fillColor: ThemeColors.inputFill,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: softBorder),
+          borderSide: BorderSide(color: ThemeColors.softBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: softBorder),
+          borderSide: BorderSide(color: ThemeColors.softBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: focusedBrown, width: 2),
+          borderSide: BorderSide(color: ThemeColors.focusedBrown, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: clayOrange),
+          borderSide: BorderSide(color: ThemeColors.clayOrange),
         ),
         contentPadding: const EdgeInsets.all(16),
       ),
@@ -745,17 +754,17 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: warmStone.withOpacity(0.1),
+          color: ThemeColors.warmStone.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: warmStone.withOpacity(0.3)),
+          border: Border.all(color: ThemeColors.warmStone.withOpacity(0.3)),
         ),
         child: Row(
           children: [
-            Icon(Icons.warning_rounded, color: warmStone, size: 20),
+            Icon(Icons.warning_rounded, color: ThemeColors.warmStone, size: 20),
             const SizedBox(width: 12),
             Text(
               'ไม่พบข้อมูลประเภทร้องเรียน',
-              style: TextStyle(color: earthClay),
+              style: TextStyle(color: ThemeColors.earthClay),
             ),
           ],
         ),
@@ -764,23 +773,23 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
 
     return DropdownButtonFormField<int>(
       value: _selectedTypeId == 0 ? null : _selectedTypeId,
-      style: TextStyle(color: softBrown, fontSize: 15),
+      style: TextStyle(color: ThemeColors.softBrown, fontSize: 15),
       decoration: InputDecoration(
         hintText: 'กรุณาเลือกประเภทร้องเรียน',
-        hintStyle: TextStyle(color: earthClay.withOpacity(0.6)),
+        hintStyle: TextStyle(color: ThemeColors.earthClay.withOpacity(0.6)),
         filled: true,
-        fillColor: inputFill,
+        fillColor: ThemeColors.inputFill,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: softBorder),
+          borderSide: BorderSide(color: ThemeColors.softBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: softBorder),
+          borderSide: BorderSide(color: ThemeColors.softBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: focusedBrown, width: 2),
+          borderSide: BorderSide(color: ThemeColors.focusedBrown, width: 2),
         ),
         contentPadding: const EdgeInsets.all(16),
       ),
@@ -790,7 +799,7 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
 
         return DropdownMenuItem<int>(
           value: typeId,
-          child: Text(typeName, style: TextStyle(color: softBrown)),
+          child: Text(typeName, style: TextStyle(color: ThemeColors.softBrown)),
         );
       }).toList(),
       onChanged: (int? newValue) {
@@ -808,8 +817,11 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
       },
       isExpanded: true,
       menuMaxHeight: 300,
-      dropdownColor: ivoryWhite,
-      icon: Icon(Icons.keyboard_arrow_down_rounded, color: earthClay),
+      dropdownColor: ThemeColors.ivoryWhite,
+      icon: Icon(
+        Icons.keyboard_arrow_down_rounded,
+        color: ThemeColors.earthClay,
+      ),
     );
   }
 
@@ -831,7 +843,7 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: earthClay.withOpacity(0.15),
+            color: ThemeColors.earthClay.withOpacity(0.15),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -861,18 +873,22 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: oliveGreen,
+                color: ThemeColors.oliveGreen,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check_circle_rounded, color: ivoryWhite, size: 14),
+                  Icon(
+                    Icons.check_circle_rounded,
+                    color: ThemeColors.ivoryWhite,
+                    size: 14,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     'รูปที่เลือก',
                     style: TextStyle(
-                      color: ivoryWhite,
+                      color: ThemeColors.ivoryWhite,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -886,18 +902,22 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
             right: 8,
             child: Container(
               decoration: BoxDecoration(
-                color: clayOrange,
+                color: ThemeColors.clayOrange,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: clayOrange.withOpacity(0.3),
+                    color: ThemeColors.clayOrange.withOpacity(0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: IconButton(
-                icon: Icon(Icons.close_rounded, color: ivoryWhite, size: 16),
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: ThemeColors.ivoryWhite,
+                  size: 16,
+                ),
                 onPressed: () => setState(() {
                   _selectedImageFile = null;
                   _selectedImageBytes = null;
@@ -923,9 +943,12 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 32),
           decoration: BoxDecoration(
-            border: Border.all(color: softBorder, style: BorderStyle.solid),
+            border: Border.all(
+              color: ThemeColors.softBorder,
+              style: BorderStyle.solid,
+            ),
             borderRadius: BorderRadius.circular(12),
-            color: inputFill,
+            color: ThemeColors.inputFill,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -933,7 +956,7 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: softBrown.withOpacity(0.1),
+                  color: ThemeColors.softBrown.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
@@ -941,14 +964,14 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                       ? Icons.edit_rounded
                       : Icons.add_photo_alternate_rounded,
                   size: 32,
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 _hasSelectedImage() ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ',
                 style: TextStyle(
-                  color: softBrown,
+                  color: ThemeColors.softBrown,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
@@ -956,7 +979,7 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
               const SizedBox(height: 4),
               Text(
                 'แตะเพื่อเลือกรูปจากแกลเลอรี่หรือถ่ายรูปใหม่',
-                style: TextStyle(color: earthClay, fontSize: 12),
+                style: TextStyle(color: ThemeColors.earthClay, fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -975,12 +998,16 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: _isPrivate ? burntOrange.withOpacity(0.15) : beige,
+                color: _isPrivate
+                    ? ThemeColors.burntOrange.withOpacity(0.15)
+                    : ThemeColors.beige,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 _isPrivate ? Icons.lock_rounded : Icons.lock_open_rounded,
-                color: _isPrivate ? burntOrange : earthClay,
+                color: _isPrivate
+                    ? ThemeColors.burntOrange
+                    : ThemeColors.earthClay,
                 size: 20,
               ),
             ),
@@ -994,12 +1021,15 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: softBrown,
+                      color: ThemeColors.softBrown,
                     ),
                   ),
                   Text(
                     'เลือกว่าใครสามารถเห็นร้องเรียนนี้ได้บ้าง',
-                    style: TextStyle(fontSize: 12, color: earthClay),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: ThemeColors.earthClay,
+                    ),
                   ),
                 ],
               ),
@@ -1010,13 +1040,13 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
         Container(
           decoration: BoxDecoration(
             color: _isPrivate
-                ? burntOrange.withOpacity(0.05)
-                : oliveGreen.withOpacity(0.05),
+                ? ThemeColors.burntOrange.withOpacity(0.05)
+                : ThemeColors.oliveGreen.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: _isPrivate
-                  ? burntOrange.withOpacity(0.2)
-                  : oliveGreen.withOpacity(0.2),
+                  ? ThemeColors.burntOrange.withOpacity(0.2)
+                  : ThemeColors.oliveGreen.withOpacity(0.2),
             ),
           ),
           child: SwitchListTile(
@@ -1028,7 +1058,9 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
               _isPrivate ? 'ร้องเรียนแบบส่วนตัว' : 'ร้องเรียนแบบสาธารณะ',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: _isPrivate ? burntOrange : oliveGreen,
+                color: _isPrivate
+                    ? ThemeColors.burntOrange
+                    : ThemeColors.oliveGreen,
                 fontSize: 15,
               ),
             ),
@@ -1040,17 +1072,17 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                     : 'ทุกคนในหมู่บ้านสามารถเห็นได้',
                 style: TextStyle(
                   color: _isPrivate
-                      ? burntOrange.withOpacity(0.7)
-                      : oliveGreen.withOpacity(0.7),
+                      ? ThemeColors.burntOrange.withOpacity(0.7)
+                      : ThemeColors.oliveGreen.withOpacity(0.7),
                   fontSize: 12,
                 ),
               ),
             ),
             value: _isPrivate,
             onChanged: (value) => setState(() => _isPrivate = value),
-            activeColor: burntOrange,
-            inactiveThumbColor: oliveGreen,
-            inactiveTrackColor: oliveGreen.withOpacity(0.3),
+            activeColor: ThemeColors.burntOrange,
+            inactiveThumbColor: ThemeColors.oliveGreen,
+            inactiveTrackColor: ThemeColors.oliveGreen.withOpacity(0.3),
           ),
         ),
       ],
@@ -1066,15 +1098,15 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: _isSubmitting
-              ? [warmStone, warmStone]
-              : [burntOrange, softTerracotta],
+              ? [ThemeColors.warmStone, ThemeColors.warmStone]
+              : [ThemeColors.burntOrange, ThemeColors.softTerracotta],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: _isSubmitting
             ? []
             : [
                 BoxShadow(
-                  color: burntOrange.withOpacity(0.4),
+                  color: ThemeColors.burntOrange.withOpacity(0.4),
                   blurRadius: 15,
                   offset: const Offset(0, 6),
                 ),
@@ -1098,7 +1130,9 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(ivoryWhite),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        ThemeColors.ivoryWhite,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1107,7 +1141,7 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: ivoryWhite,
+                      color: ThemeColors.ivoryWhite,
                     ),
                   ),
                 ],
@@ -1115,14 +1149,18 @@ class _HouseComplaintFormPageState extends State<HouseComplaintFormPage>
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.send_rounded, color: ivoryWhite, size: 20),
+                  Icon(
+                    Icons.send_rounded,
+                    color: ThemeColors.ivoryWhite,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'ส่งข้อมูลร้องเรียน',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: ivoryWhite,
+                      color: ThemeColors.ivoryWhite,
                     ),
                   ),
                 ],

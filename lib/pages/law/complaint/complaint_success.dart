@@ -5,6 +5,7 @@ import 'package:fullproject/domains/complaint_domain.dart';
 import 'package:fullproject/models/complaint_model.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/services/auth_service.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 
@@ -32,13 +33,6 @@ class _LawSuccessComplaintFormPageState
   final ImagePicker _picker = ImagePicker();
 
   // Earthy Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
 
   @override
   void initState() {
@@ -87,7 +81,7 @@ class _LawSuccessComplaintFormPageState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e'),
-            backgroundColor: burntOrange,
+            backgroundColor: ThemeColors.burntOrange,
           ),
         );
       }
@@ -108,7 +102,7 @@ class _LawSuccessComplaintFormPageState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('กรุณาตรวจสอบข้อมูลที่กรอก'),
-          backgroundColor: burntOrange,
+          backgroundColor: ThemeColors.burntOrange,
         ),
       );
       return;
@@ -118,7 +112,7 @@ class _LawSuccessComplaintFormPageState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('ไม่พบข้อมูลผู้ใช้'),
-          backgroundColor: burntOrange,
+          backgroundColor: ThemeColors.burntOrange,
         ),
       );
       return;
@@ -146,7 +140,7 @@ class _LawSuccessComplaintFormPageState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text('บันทึกการดำเนินการเสร็จสิ้นแล้ว'),
-              backgroundColor: oliveGreen,
+              backgroundColor: ThemeColors.oliveGreen,
             ),
           );
           Navigator.pop(context, true);
@@ -160,11 +154,11 @@ class _LawSuccessComplaintFormPageState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('เกิดข้อผิดพลาด: $e'),
-            backgroundColor: burntOrange,
+            backgroundColor: ThemeColors.burntOrange,
             duration: const Duration(seconds: 4),
             action: SnackBarAction(
               label: 'ลองใหม่',
-              textColor: ivoryWhite,
+              textColor: ThemeColors.ivoryWhite,
               onPressed: () => _submit(),
             ),
           ),
@@ -184,7 +178,7 @@ class _LawSuccessComplaintFormPageState
   }) {
     return Card(
       elevation: 3,
-      color: ivoryWhite,
+      color: ThemeColors.ivoryWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
@@ -197,10 +191,10 @@ class _LawSuccessComplaintFormPageState
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: beige,
+                    color: ThemeColors.beige,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: softBrown, size: 24),
+                  child: Icon(icon, color: ThemeColors.softBrown, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -208,7 +202,7 @@ class _LawSuccessComplaintFormPageState
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: softBrown,
+                    color: ThemeColors.softBrown,
                   ),
                 ),
               ],
@@ -232,7 +226,7 @@ class _LawSuccessComplaintFormPageState
             height: 200,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: warmStone),
+              border: Border.all(color: ThemeColors.warmStone),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
@@ -242,19 +236,26 @@ class _LawSuccessComplaintFormPageState
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.image, color: earthClay, size: 16),
+              Icon(Icons.image, color: ThemeColors.earthClay, size: 16),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   _imageFileName ?? 'รูปภาพ',
-                  style: TextStyle(fontSize: 12, color: earthClay),
+                  style: TextStyle(fontSize: 12, color: ThemeColors.earthClay),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               TextButton.icon(
                 onPressed: _removeImage,
-                icon: Icon(Icons.delete, color: burntOrange, size: 16),
-                label: Text('ลบ', style: TextStyle(color: burntOrange)),
+                icon: Icon(
+                  Icons.delete,
+                  color: ThemeColors.burntOrange,
+                  size: 16,
+                ),
+                label: Text(
+                  'ลบ',
+                  style: TextStyle(color: ThemeColors.burntOrange),
+                ),
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
@@ -269,14 +270,14 @@ class _LawSuccessComplaintFormPageState
             onPressed: _pickImage,
             icon: Icon(
               _imageFile != null ? Icons.edit : Icons.add_photo_alternate,
-              color: softBrown,
+              color: ThemeColors.softBrown,
             ),
             label: Text(
               _imageFile != null ? 'เปลี่ยนรูปภาพ' : 'เลือกรูปภาพ',
-              style: TextStyle(color: softBrown),
+              style: TextStyle(color: ThemeColors.softBrown),
             ),
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: softBrown),
+              side: BorderSide(color: ThemeColors.softBrown),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -288,7 +289,7 @@ class _LawSuccessComplaintFormPageState
           'รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB\nแนะนำให้แนบรูปภาพการดำเนินการเพื่อเป็นหลักฐาน',
           style: TextStyle(
             fontSize: 12,
-            color: warmStone,
+            color: ThemeColors.warmStone,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -299,10 +300,10 @@ class _LawSuccessComplaintFormPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: beige,
+      backgroundColor: ThemeColors.beige,
       appBar: AppBar(
-        backgroundColor: oliveGreen,
-        foregroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.oliveGreen,
+        foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
         title: const Text(
           'บันทึกการดำเนินการเสร็จสิ้น',
@@ -324,9 +325,9 @@ class _LawSuccessComplaintFormPageState
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: beige,
+                      color: ThemeColors.beige,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: warmStone),
+                      border: Border.all(color: ThemeColors.warmStone),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,7 +337,7 @@ class _LawSuccessComplaintFormPageState
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: softBrown,
+                            color: ThemeColors.softBrown,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -344,7 +345,7 @@ class _LawSuccessComplaintFormPageState
                           widget.complaint.description,
                           style: TextStyle(
                             fontSize: 14,
-                            color: earthClay,
+                            color: ThemeColors.earthClay,
                             height: 1.4,
                           ),
                         ),
@@ -366,14 +367,20 @@ class _LawSuccessComplaintFormPageState
                       labelText: 'อธิบายการดำเนินการที่ทำ',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: warmStone),
+                        borderSide: BorderSide(color: ThemeColors.warmStone),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: softBrown, width: 2),
+                        borderSide: BorderSide(
+                          color: ThemeColors.softBrown,
+                          width: 2,
+                        ),
                       ),
-                      prefixIcon: Icon(Icons.description, color: earthClay),
-                      fillColor: ivoryWhite,
+                      prefixIcon: Icon(
+                        Icons.description,
+                        color: ThemeColors.earthClay,
+                      ),
+                      fillColor: ThemeColors.ivoryWhite,
                       filled: true,
                       hintText:
                           'อธิบายรายละเอียดว่าได้ดำเนินการแก้ไขปัญหาอย่างไร\nเช่น ติดตั้งไฟส่องสว่าง จัดทำป้ายเตือน ซ่อมแซมสิ่งปลูกสร้าง ฯลฯ',
@@ -403,8 +410,8 @@ class _LawSuccessComplaintFormPageState
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: oliveGreen,
-                    foregroundColor: ivoryWhite,
+                    backgroundColor: ThemeColors.oliveGreen,
+                    foregroundColor: ThemeColors.ivoryWhite,
                     padding: const EdgeInsets.all(16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -421,7 +428,7 @@ class _LawSuccessComplaintFormPageState
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  ivoryWhite,
+                                  ThemeColors.ivoryWhite,
                                 ),
                               ),
                             ),

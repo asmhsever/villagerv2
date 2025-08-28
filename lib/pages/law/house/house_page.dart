@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fullproject/domains/house_domain.dart';
 import 'package:fullproject/models/house_model.dart';
 import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/theme/Color.dart';
 
 import 'house_add.dart';
 import 'house_detail.dart';
@@ -23,27 +24,6 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
   String _selectedStatus = 'all'; // all, owned, vacant, rented
 
   final TextEditingController _searchController = TextEditingController();
-
-  // Enhanced Earthy Theme Colors
-  static const Color softBrown = Color(0xFFA47551);
-  static const Color ivoryWhite = Color(0xFFFFFDF6);
-  static const Color beige = Color(0xFFF5F0E1);
-  static const Color sandyTan = Color(0xFFD8CAB8);
-  static const Color earthClay = Color(0xFFBFA18F);
-  static const Color warmStone = Color(0xFFC7B9A5);
-  static const Color oliveGreen = Color(0xFFA3B18A);
-  static const Color burntOrange = Color(0xFFE08E45);
-
-  // New Enhanced Colors
-  static const Color softBorder = Color(0xFFD0C4B0);
-  static const Color focusedBrown = Color(0xFF916846);
-  static const Color inputFill = Color(0xFFFBF9F3);
-  static const Color clickHighlight = Color(0xFFDC7633);
-  static const Color hoverButton = Color(0xFFF3A664);
-  static const Color disabledGrey = Color(0xFFDCDCDC);
-  static const Color softTerracotta = Color(0xFFD48B5C);
-  static const Color clayOrange = Color(0xFFCC7748);
-  static const Color warmAmber = Color(0xFFDA9856);
 
   @override
   void initState() {
@@ -83,7 +63,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.error_outline, color: Colors.white, size: 18),
+                    child: const Icon(
+                      Icons.error_outline,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -95,9 +79,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                 ],
               ),
             ),
-            backgroundColor: clayOrange,
+            backgroundColor: ThemeColors.clayOrange,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             margin: const EdgeInsets.all(16),
           ),
         );
@@ -109,12 +95,18 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
     setState(() {
       _filteredHouses = _houses.where((house) {
         // Filter by search query
-        bool matchesSearch = _searchQuery.isEmpty ||
-            (house.houseNumber?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false) ||
-            (house.owner?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+        bool matchesSearch =
+            _searchQuery.isEmpty ||
+            (house.houseNumber?.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ??
+                false) ||
+            (house.owner?.toLowerCase().contains(_searchQuery.toLowerCase()) ??
+                false);
 
         // Filter by status
-        bool matchesStatus = _selectedStatus == 'all' ||
+        bool matchesStatus =
+            _selectedStatus == 'all' ||
             (house.status?.toLowerCase() == _selectedStatus);
 
         return matchesSearch && matchesStatus;
@@ -126,23 +118,27 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: ivoryWhite,
+        backgroundColor: ThemeColors.ivoryWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: clayOrange.withValues(alpha: 0.1),
+                color: ThemeColors.clayOrange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.delete_forever_rounded, color: clayOrange, size: 24),
+              child: Icon(
+                Icons.delete_forever_rounded,
+                color: ThemeColors.clayOrange,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 12),
             Text(
               'ยืนยันการลบ',
               style: TextStyle(
-                color: clayOrange,
+                color: ThemeColors.clayOrange,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -156,19 +152,25 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: clayOrange.withValues(alpha: 0.05),
+                color: ThemeColors.clayOrange.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: clayOrange.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: ThemeColors.clayOrange.withValues(alpha: 0.2),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_rounded, color: clayOrange, size: 20),
+                  Icon(
+                    Icons.warning_rounded,
+                    color: ThemeColors.clayOrange,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'การดำเนินการนี้ไม่สามารถยกเลิกได้',
                       style: TextStyle(
-                        color: clayOrange,
+                        color: ThemeColors.clayOrange,
                         fontWeight: FontWeight.w500,
                         fontSize: 13,
                       ),
@@ -180,7 +182,7 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
             const SizedBox(height: 12),
             const Text(
               'คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลบ้านนี้?',
-              style: TextStyle(color: earthClay, fontSize: 15),
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 15),
             ),
           ],
         ),
@@ -188,18 +190,23 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             style: TextButton.styleFrom(
-              foregroundColor: warmStone,
+              foregroundColor: ThemeColors.warmStone,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
-            child: const Text('ยกเลิก', style: TextStyle(fontWeight: FontWeight.w600)),
+            child: const Text(
+              'ยกเลิก',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: clayOrange,
-              foregroundColor: ivoryWhite,
+              backgroundColor: ThemeColors.clayOrange,
+              foregroundColor: ThemeColors.ivoryWhite,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -230,7 +237,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                      child: const Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     const Text(
@@ -240,9 +251,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                   ],
                 ),
               ),
-              backgroundColor: oliveGreen,
+              backgroundColor: ThemeColors.oliveGreen,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               margin: const EdgeInsets.all(16),
             ),
           );
@@ -260,7 +273,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.error_outline, color: Colors.white, size: 18),
+                      child: const Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     const Text(
@@ -270,9 +287,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                   ],
                 ),
               ),
-              backgroundColor: clayOrange,
+              backgroundColor: ThemeColors.clayOrange,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               margin: const EdgeInsets.all(16),
             ),
           );
@@ -284,27 +303,26 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
   Map<String, int> _getStatistics() {
     int total = _houses.length;
     int owned = _houses.where((h) => h.status?.toLowerCase() == 'owned').length;
-    int vacant = _houses.where((h) => h.status?.toLowerCase() == 'vacant').length;
-    int rented = _houses.where((h) => h.status?.toLowerCase() == 'rented').length;
+    int vacant = _houses
+        .where((h) => h.status?.toLowerCase() == 'vacant')
+        .length;
+    int rented = _houses
+        .where((h) => h.status?.toLowerCase() == 'rented')
+        .length;
 
-    return {
-      'total': total,
-      'owned': owned,
-      'vacant': vacant,
-      'rented': rented,
-    };
+    return {'total': total, 'owned': owned, 'vacant': vacant, 'rented': rented};
   }
 
   Color _getStatusColor(String? status) {
     switch (status?.toLowerCase()) {
       case 'owned':
-        return oliveGreen;
+        return ThemeColors.oliveGreen;
       case 'vacant':
-        return warmAmber;
+        return ThemeColors.warmAmber;
       case 'rented':
-        return softTerracotta;
+        return ThemeColors.softTerracotta;
       default:
-        return warmStone;
+        return ThemeColors.warmStone;
     }
   }
 
@@ -326,422 +344,514 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
     final stats = _getStatistics();
 
     return Scaffold(
-      backgroundColor: inputFill,
+      backgroundColor: ThemeColors.inputFill,
       body: SafeArea(
         child: _loading
             ? Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: ivoryWhite,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: softBrown.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: CircularProgressIndicator(
-                  color: softBrown,
-                  strokeWidth: 3,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'กำลังโหลดข้อมูลบ้าน...',
-                style: TextStyle(
-                  color: earthClay,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        )
-            : Column(
-          children: [
-            // Enhanced Header
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [softBrown, focusedBrown],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: softBrown.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: const Icon(
-                            Icons.arrow_back_rounded,
-                            size: 24,
-                            color: ivoryWhite,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Expanded(
-                        child: Text(
-                          'จัดการลูกบ้าน',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: ivoryWhite,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.home_work_rounded,
-                          size: 24,
-                          color: ivoryWhite,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Enhanced Statistics Card
-            Container(
-              margin: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: ivoryWhite,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: softBrown.withValues(alpha: 0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: sandyTan,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(Icons.analytics_rounded, color: softBrown, size: 20),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'สรุปข้อมูลบ้าน',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: softBrown,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(child: _buildStatItem('ทั้งหมด', stats['total']!, softBrown)),
-                      Container(width: 1, height: 60, color: softBorder),
-                      Expanded(child: _buildStatItem('มีเจ้าของ', stats['owned']!, oliveGreen)),
-                      Container(width: 1, height: 60, color: softBorder),
-                      Expanded(child: _buildStatItem('ว่าง', stats['vacant']!, warmAmber)),
-                      Container(width: 1, height: 60, color: softBorder),
-                      Expanded(child: _buildStatItem('ให้เช่า', stats['rented']!, softTerracotta)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Enhanced Search and Filter
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  // Enhanced Search TextField
-                  Expanded(
-                    flex: 2,
-                    child: Container(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
+                        color: ThemeColors.ivoryWhite,
+                        borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: softBrown.withValues(alpha: 0.1),
+                            color: ThemeColors.softBrown.withValues(alpha: 0.1),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'ค้นหาเลขที่บ้านหรือชื่อเจ้าของ...',
-                          hintStyle: TextStyle(color: earthClay, fontSize: 14),
-                          prefixIcon: Container(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(Icons.search_rounded, color: softBrown, size: 20),
-                          ),
-                          suffixIcon: _searchQuery.isNotEmpty
-                              ? IconButton(
-                            icon: Icon(Icons.clear_rounded, color: earthClay),
-                            onPressed: () {
-                              _searchController.clear();
-                              _searchQuery = '';
-                              _filterHouses();
-                            },
-                          )
-                              : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: focusedBrown, width: 2),
-                          ),
-                          filled: true,
-                          fillColor: ivoryWhite,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                        ),
-                        style: TextStyle(color: softBrown, fontWeight: FontWeight.w500),
-                        onChanged: (value) {
-                          _searchQuery = value;
-                          _filterHouses();
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-
-                  // Enhanced Status Filter
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: ivoryWhite,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: softBorder, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: softBrown.withValues(alpha: 0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedStatus,
-                        icon: Icon(Icons.tune_rounded, size: 20, color: softBrown),
-                        style: TextStyle(color: softBrown, fontWeight: FontWeight.w600),
-                        items: [
-                          DropdownMenuItem(
-                            value: 'all',
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: softBrown,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Text('ทั้งหมด'),
-                              ],
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: 'owned',
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: oliveGreen,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Text('มีเจ้าของ'),
-                              ],
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: 'vacant',
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: warmAmber,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Text('ว่าง'),
-                              ],
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: 'rented',
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: softTerracotta,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Text('ให้เช่า'),
-                              ],
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedStatus = value!;
-                          });
-                          _filterHouses();
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Results Count
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: softBrown.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: softBrown.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(
-                      'พบ ${_filteredHouses.length} รายการ',
-                      style: TextStyle(
-                        color: softBrown,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Enhanced Houses List
-            Expanded(
-              child: _filteredHouses.isEmpty
-                  ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: warmStone.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.home_outlined,
-                        size: 64,
-                        color: warmStone,
+                      child: CircularProgressIndicator(
+                        color: ThemeColors.softBrown,
+                        strokeWidth: 3,
                       ),
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      _searchQuery.isNotEmpty || _selectedStatus != 'all'
-                          ? 'ไม่พบข้อมูลที่ค้นหา'
-                          : 'ยังไม่มีข้อมูลบ้าน',
+                      'กำลังโหลดข้อมูลบ้าน...',
                       style: TextStyle(
-                        fontSize: 18,
-                        color: earthClay,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _searchQuery.isNotEmpty || _selectedStatus != 'all'
-                          ? 'ลองเปลี่ยนเงื่อนไขการค้นหา'
-                          : 'เริ่มต้นด้วยการเพิ่มข้อมูลบ้านใหม่',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: warmStone,
+                        color: ThemeColors.earthClay,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               )
-                  : RefreshIndicator(
-                color: softBrown,
-                backgroundColor: ivoryWhite,
-                onRefresh: _loadHouses,
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                  itemCount: _filteredHouses.length,
-                  itemBuilder: (context, index) {
-                    final house = _filteredHouses[index];
-                    return _buildHouseCard(house);
-                  },
-                ),
+            : Column(
+                children: [
+                  // Enhanced Header
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          ThemeColors.softBrown,
+                          ThemeColors.focusedBrown,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: ThemeColors.softBrown.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(24),
+                        bottomRight: Radius.circular(24),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: const Icon(
+                                  Icons.arrow_back_rounded,
+                                  size: 24,
+                                  color: ThemeColors.ivoryWhite,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            const Expanded(
+                              child: Text(
+                                'จัดการลูกบ้าน',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: ThemeColors.ivoryWhite,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.home_work_rounded,
+                                size: 24,
+                                color: ThemeColors.ivoryWhite,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Enhanced Statistics Card
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: ThemeColors.ivoryWhite,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: ThemeColors.softBrown.withValues(alpha: 0.15),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: ThemeColors.sandyTan,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.analytics_rounded,
+                                color: ThemeColors.softBrown,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'สรุปข้อมูลบ้าน',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: ThemeColors.softBrown,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatItem(
+                                'ทั้งหมด',
+                                stats['total']!,
+                                ThemeColors.softBrown,
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 60,
+                              color: ThemeColors.softBorder,
+                            ),
+                            Expanded(
+                              child: _buildStatItem(
+                                'มีเจ้าของ',
+                                stats['owned']!,
+                                ThemeColors.oliveGreen,
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 60,
+                              color: ThemeColors.softBorder,
+                            ),
+                            Expanded(
+                              child: _buildStatItem(
+                                'ว่าง',
+                                stats['vacant']!,
+                                ThemeColors.warmAmber,
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 60,
+                              color: ThemeColors.softBorder,
+                            ),
+                            Expanded(
+                              child: _buildStatItem(
+                                'ให้เช่า',
+                                stats['rented']!,
+                                ThemeColors.softTerracotta,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Enhanced Search and Filter
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        // Enhanced Search TextField
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: ThemeColors.softBrown.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'ค้นหาเลขที่บ้านหรือชื่อเจ้าของ...',
+                                hintStyle: TextStyle(
+                                  color: ThemeColors.earthClay,
+                                  fontSize: 14,
+                                ),
+                                prefixIcon: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Icon(
+                                    Icons.search_rounded,
+                                    color: ThemeColors.softBrown,
+                                    size: 20,
+                                  ),
+                                ),
+                                suffixIcon: _searchQuery.isNotEmpty
+                                    ? IconButton(
+                                        icon: Icon(
+                                          Icons.clear_rounded,
+                                          color: ThemeColors.earthClay,
+                                        ),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          _searchQuery = '';
+                                          _filterHouses();
+                                        },
+                                      )
+                                    : null,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide.none,
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: ThemeColors.focusedBrown,
+                                    width: 2,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: ThemeColors.ivoryWhite,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
+                              ),
+                              style: TextStyle(
+                                color: ThemeColors.softBrown,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              onChanged: (value) {
+                                _searchQuery = value;
+                                _filterHouses();
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+
+                        // Enhanced Status Filter
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: ThemeColors.ivoryWhite,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: ThemeColors.softBorder,
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: ThemeColors.softBrown.withValues(
+                                  alpha: 0.1,
+                                ),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _selectedStatus,
+                              icon: Icon(
+                                Icons.tune_rounded,
+                                size: 20,
+                                color: ThemeColors.softBrown,
+                              ),
+                              style: TextStyle(
+                                color: ThemeColors.softBrown,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              items: [
+                                DropdownMenuItem(
+                                  value: 'all',
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: ThemeColors.softBrown,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text('ทั้งหมด'),
+                                    ],
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'owned',
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: ThemeColors.oliveGreen,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text('มีเจ้าของ'),
+                                    ],
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'vacant',
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: ThemeColors.warmAmber,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text('ว่าง'),
+                                    ],
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'rented',
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: ThemeColors.softTerracotta,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text('ให้เช่า'),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedStatus = value!;
+                                });
+                                _filterHouses();
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Results Count
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: ThemeColors.softBrown.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: ThemeColors.softBrown.withValues(
+                                alpha: 0.3,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'พบ ${_filteredHouses.length} รายการ',
+                            style: TextStyle(
+                              color: ThemeColors.softBrown,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Enhanced Houses List
+                  Expanded(
+                    child: _filteredHouses.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: ThemeColors.warmStone.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.home_outlined,
+                                    size: 64,
+                                    color: ThemeColors.warmStone,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  _searchQuery.isNotEmpty ||
+                                          _selectedStatus != 'all'
+                                      ? 'ไม่พบข้อมูลที่ค้นหา'
+                                      : 'ยังไม่มีข้อมูลบ้าน',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: ThemeColors.earthClay,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _searchQuery.isNotEmpty ||
+                                          _selectedStatus != 'all'
+                                      ? 'ลองเปลี่ยนเงื่อนไขการค้นหา'
+                                      : 'เริ่มต้นด้วยการเพิ่มข้อมูลบ้านใหม่',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: ThemeColors.warmStone,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            color: ThemeColors.softBrown,
+                            backgroundColor: ThemeColors.ivoryWhite,
+                            onRefresh: _loadHouses,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                0,
+                                20,
+                                120,
+                              ),
+                              itemCount: _filteredHouses.length,
+                              itemBuilder: (context, index) {
+                                final house = _filteredHouses[index];
+                                return _buildHouseCard(house);
+                              },
+                            ),
+                          ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -753,8 +863,8 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
               heroTag: "refresh",
               mini: true,
               onPressed: _loadHouses,
-              backgroundColor: warmStone,
-              foregroundColor: ivoryWhite,
+              backgroundColor: ThemeColors.warmStone,
+              foregroundColor: ThemeColors.ivoryWhite,
               elevation: 4,
               child: const Icon(Icons.refresh_rounded),
             ),
@@ -774,10 +884,12 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
               'เพิ่มบ้าน',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            backgroundColor: oliveGreen,
-            foregroundColor: ivoryWhite,
+            backgroundColor: ThemeColors.oliveGreen,
+            foregroundColor: ThemeColors.ivoryWhite,
             elevation: 6,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         ],
       ),
@@ -808,7 +920,7 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
           label,
           style: TextStyle(
             fontSize: 13,
-            color: earthClay,
+            color: ThemeColors.earthClay,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -820,12 +932,10 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 4,
-        color: ivoryWhite,
-        shadowColor: softBrown.withValues(alpha: 0.2),
+        color: ThemeColors.ivoryWhite,
+        shadowColor: ThemeColors.softBrown.withValues(alpha: 0.2),
         child: InkWell(
           onTap: () async {
             final updated = await Navigator.push(
@@ -837,7 +947,7 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
             if (updated == true && mounted) _loadHouses();
           },
           borderRadius: BorderRadius.circular(16),
-          splashColor: clickHighlight.withValues(alpha: 0.1),
+          splashColor: ThemeColors.clickHighlight.withValues(alpha: 0.1),
           child: Container(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -859,7 +969,9 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: _getStatusColor(house.status).withValues(alpha: 0.3),
+                        color: _getStatusColor(
+                          house.status,
+                        ).withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -867,7 +979,7 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                   ),
                   child: Icon(
                     Icons.home_rounded,
-                    color: ivoryWhite,
+                    color: ThemeColors.ivoryWhite,
                     size: 32,
                   ),
                 ),
@@ -887,7 +999,7 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: softBrown,
+                                color: ThemeColors.softBrown,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -902,13 +1014,17 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                               gradient: LinearGradient(
                                 colors: [
                                   _getStatusColor(house.status),
-                                  _getStatusColor(house.status).withValues(alpha: 0.8),
+                                  _getStatusColor(
+                                    house.status,
+                                  ).withValues(alpha: 0.8),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _getStatusColor(house.status).withValues(alpha: 0.3),
+                                  color: _getStatusColor(
+                                    house.status,
+                                  ).withValues(alpha: 0.3),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -917,7 +1033,7 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                             child: Text(
                               _getStatusText(house.status),
                               style: const TextStyle(
-                                color: ivoryWhite,
+                                color: ThemeColors.ivoryWhite,
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -933,19 +1049,23 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                           padding: const EdgeInsets.all(8),
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
-                            color: inputFill,
+                            color: ThemeColors.inputFill,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: softBorder),
+                            border: Border.all(color: ThemeColors.softBorder),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.person_rounded, size: 16, color: earthClay),
+                              Icon(
+                                Icons.person_rounded,
+                                size: 16,
+                                color: ThemeColors.earthClay,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   house.owner!,
                                   style: TextStyle(
-                                    color: softBrown,
+                                    color: ThemeColors.softBrown,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -961,19 +1081,23 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                           padding: const EdgeInsets.all(8),
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
-                            color: inputFill,
+                            color: ThemeColors.inputFill,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: softBorder),
+                            border: Border.all(color: ThemeColors.softBorder),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.phone_rounded, size: 16, color: earthClay),
+                              Icon(
+                                Icons.phone_rounded,
+                                size: 16,
+                                color: ThemeColors.earthClay,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   house.phone!,
                                   style: TextStyle(
-                                    color: softBrown,
+                                    color: ThemeColors.softBrown,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -984,23 +1108,28 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                           ),
                         ),
 
-                      if (house.houseType != null && house.houseType!.isNotEmpty)
+                      if (house.houseType != null &&
+                          house.houseType!.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: inputFill,
+                            color: ThemeColors.inputFill,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: softBorder),
+                            border: Border.all(color: ThemeColors.softBorder),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.home_work_rounded, size: 16, color: earthClay),
+                              Icon(
+                                Icons.home_work_rounded,
+                                size: 16,
+                                color: ThemeColors.earthClay,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   house.houseType!,
                                   style: TextStyle(
-                                    color: softBrown,
+                                    color: ThemeColors.softBrown,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -1025,7 +1154,7 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                       Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: Material(
-                          color: oliveGreen,
+                          color: ThemeColors.oliveGreen,
                           borderRadius: BorderRadius.circular(12),
                           child: InkWell(
                             onTap: () {
@@ -1033,28 +1162,41 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Container(
-                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 4,
+                                      ),
                                       child: Row(
                                         children: [
                                           Container(
                                             padding: const EdgeInsets.all(6),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withValues(alpha: 0.2),
-                                              borderRadius: BorderRadius.circular(8),
+                                              color: Colors.white.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
-                                            child: const Icon(Icons.phone_rounded, color: Colors.white, size: 16),
+                                            child: const Icon(
+                                              Icons.phone_rounded,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
                                           ),
                                           const SizedBox(width: 12),
                                           Text(
                                             'โทร: ${house.phone}',
-                                            style: const TextStyle(fontWeight: FontWeight.w500),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    backgroundColor: oliveGreen,
+                                    backgroundColor: ThemeColors.oliveGreen,
                                     behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
                                 );
                               }
@@ -1064,7 +1206,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                               width: 44,
                               height: 44,
                               padding: const EdgeInsets.all(8),
-                              child: const Icon(Icons.phone_rounded, color: ivoryWhite, size: 20),
+                              child: const Icon(
+                                Icons.phone_rounded,
+                                color: ThemeColors.ivoryWhite,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
@@ -1072,7 +1218,7 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
 
                     // Delete Button
                     Material(
-                      color: clayOrange,
+                      color: ThemeColors.clayOrange,
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
                         onTap: () => _deleteHouse(house.houseId),
@@ -1081,7 +1227,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                           width: 44,
                           height: 44,
                           padding: const EdgeInsets.all(8),
-                          child: const Icon(Icons.delete_rounded, color: ivoryWhite, size: 20),
+                          child: const Icon(
+                            Icons.delete_rounded,
+                            color: ThemeColors.ivoryWhite,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),

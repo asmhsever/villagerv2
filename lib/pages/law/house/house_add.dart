@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fullproject/models/house_model.dart';
 import 'package:fullproject/services/auth_service.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../domains/house_domain.dart';
 import 'dart:io';
@@ -35,30 +36,21 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
   bool _isSubmitting = false;
 
   // Options for dropdowns
-  final List<String> _statusOptions = [
-    'owned',
-    'vacant',
-    'rented',
-    'sold'
-  ];
+  final List<String> _statusOptions = ['owned', 'vacant', 'rented', 'sold'];
 
-  final List<String> _ownershipTypeOptions = [
-    'owned',
-    'rented',
-    'company'
-  ];
+  final List<String> _ownershipTypeOptions = ['owned', 'rented', 'company'];
 
   final List<String> _houseTypeOptions = [
     'detached',
     'townhouse',
     'apartment',
-    'condo'
+    'condo',
   ];
 
   final List<String> _usageStatusOptions = [
     'active',
     'inactive',
-    'maintenance'
+    'maintenance',
   ];
 
   final ImagePicker _picker = ImagePicker();
@@ -103,20 +95,31 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: const Color(0xFFE08E45), size: 28),
+            Icon(
+              Icons.warning_amber_rounded,
+              color: ThemeColors.burntOrange,
+              size: 28,
+            ),
             const SizedBox(width: 12),
             const Text('ยืนยันการออก'),
           ],
         ),
-        content: const Text('คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?'),
+        content: const Text(
+          'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('ยกเลิก', style: TextStyle(color: const Color(0xFFA47551))),
+            child: Text(
+              'ยกเลิก',
+              style: TextStyle(color: ThemeColors.softBrown),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFFE08E45)),
+            style: TextButton.styleFrom(
+              foregroundColor: ThemeColors.burntOrange,
+            ),
             child: const Text('ออก'),
           ),
         ],
@@ -133,7 +136,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
       builder: (BuildContext context) {
         return Container(
           decoration: const BoxDecoration(
-            color: Color(0xFFFFFDF6),
+            color: ThemeColors.ivoryWhite,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SafeArea(
@@ -146,7 +149,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   height: 4,
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD8CAB8),
+                    color: ThemeColors.sandyTan,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -156,7 +159,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFFA47551),
+                    color: ThemeColors.softBrown,
                   ),
                 ),
 
@@ -166,13 +169,22 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD8CAB8).withValues(alpha: 0.3),
+                      color: ThemeColors.sandyTan.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(Icons.photo_camera, color: const Color(0xFFA47551)),
+                    child: Icon(
+                      Icons.photo_camera,
+                      color: ThemeColors.softBrown,
+                    ),
                   ),
-                  title: Text('ถ่ายรูป', style: TextStyle(color: const Color(0xFFA47551))),
-                  subtitle: Text('ใช้กล้องถ่ายรูปใหม่', style: TextStyle(color: const Color(0xFFBFA18F))),
+                  title: Text(
+                    'ถ่ายรูป',
+                    style: TextStyle(color: ThemeColors.softBrown),
+                  ),
+                  subtitle: Text(
+                    'ใช้กล้องถ่ายรูปใหม่',
+                    style: TextStyle(color: ThemeColors.earthClay),
+                  ),
                   onTap: () => Navigator.pop(context, 'camera'),
                 ),
 
@@ -180,13 +192,22 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFA3B18A).withValues(alpha: 0.3),
+                      color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(Icons.photo_library, color: const Color(0xFFA3B18A)),
+                    child: Icon(
+                      Icons.photo_library,
+                      color: ThemeColors.oliveGreen,
+                    ),
                   ),
-                  title: Text('เลือกจากแกลเลอรี่', style: TextStyle(color: const Color(0xFFA47551))),
-                  subtitle: Text('เลือกรูปจากคลังภาพ', style: TextStyle(color: const Color(0xFFBFA18F))),
+                  title: Text(
+                    'เลือกจากแกลเลอรี่',
+                    style: TextStyle(color: ThemeColors.softBrown),
+                  ),
+                  subtitle: Text(
+                    'เลือกรูปจากคลังภาพ',
+                    style: TextStyle(color: ThemeColors.earthClay),
+                  ),
                   onTap: () => Navigator.pop(context, 'gallery'),
                 ),
 
@@ -195,13 +216,19 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE08E45).withValues(alpha: 0.3),
+                        color: ThemeColors.burntOrange.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(Icons.delete, color: const Color(0xFFE08E45)),
+                      child: Icon(Icons.delete, color: ThemeColors.burntOrange),
                     ),
-                    title: Text('ลบรูปภาพ', style: TextStyle(color: const Color(0xFFE08E45))),
-                    subtitle: Text('ลบรูปภาพปัจจุบัน', style: TextStyle(color: const Color(0xFFBFA18F))),
+                    title: Text(
+                      'ลบรูปภาพ',
+                      style: TextStyle(color: ThemeColors.burntOrange),
+                    ),
+                    subtitle: Text(
+                      'ลบรูปภาพปัจจุบัน',
+                      style: TextStyle(color: ThemeColors.earthClay),
+                    ),
                     onTap: () => Navigator.pop(context, 'delete'),
                   ),
 
@@ -255,7 +282,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
               Expanded(child: Text('เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e')),
             ],
           ),
-          backgroundColor: const Color(0xFFE08E45),
+          backgroundColor: ThemeColors.burntOrange,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -286,39 +313,57 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
 
   String _getStatusText(String? status) {
     switch (status) {
-      case 'owned': return 'มีเจ้าของ';
-      case 'vacant': return 'ว่าง';
-      case 'rented': return 'ให้เช่า';
-      case 'sold': return 'ขายแล้ว';
-      default: return status ?? '';
+      case 'owned':
+        return 'มีเจ้าของ';
+      case 'vacant':
+        return 'ว่าง';
+      case 'rented':
+        return 'ให้เช่า';
+      case 'sold':
+        return 'ขายแล้ว';
+      default:
+        return status ?? '';
     }
   }
 
   String _getOwnershipTypeText(String? type) {
     switch (type) {
-      case 'owned': return 'เป็นเจ้าของ';
-      case 'rented': return 'เช่า';
-      case 'company': return 'นิติบุคคล';
-      default: return type ?? '';
+      case 'owned':
+        return 'เป็นเจ้าของ';
+      case 'rented':
+        return 'เช่า';
+      case 'company':
+        return 'นิติบุคคล';
+      default:
+        return type ?? '';
     }
   }
 
   String _getHouseTypeText(String? type) {
     switch (type) {
-      case 'detached': return 'บ้านเดี่ยว';
-      case 'townhouse': return 'ทาวน์เฮาส์';
-      case 'apartment': return 'อพาร์ทเมนต์';
-      case 'condo': return 'คอนโดมิเนียม';
-      default: return type ?? '';
+      case 'detached':
+        return 'บ้านเดี่ยว';
+      case 'townhouse':
+        return 'ทาวน์เฮาส์';
+      case 'apartment':
+        return 'อพาร์ทเมนต์';
+      case 'condo':
+        return 'คอนโดมิเนียม';
+      default:
+        return type ?? '';
     }
   }
 
   String _getUsageStatusText(String? status) {
     switch (status) {
-      case 'active': return 'ใช้งาน';
-      case 'inactive': return 'ไม่ใช้งาน';
-      case 'maintenance': return 'ปรับปรุง';
-      default: return status ?? '';
+      case 'active':
+        return 'ใช้งาน';
+      case 'inactive':
+        return 'ไม่ใช้งาน';
+      case 'maintenance':
+        return 'ปรับปรุง';
+      default:
+        return status ?? '';
     }
   }
 
@@ -358,7 +403,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                 const Text('ไม่พบ village id'),
               ],
             ),
-            backgroundColor: const Color(0xFFE08E45),
+            backgroundColor: ThemeColors.burntOrange,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -373,7 +418,8 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
         phone: _phoneController.text.trim(),
         owner: _ownerController.text.trim(),
         status: _status!,
-        userId: user.userId ?? 0, // ใช้ userId จาก AuthService
+        userId: user.userId ?? 0,
+        // ใช้ userId จาก AuthService
         ownershipType: _ownershipType!,
         houseType: _houseType!,
         floors: int.tryParse(_floorsController.text.trim()) ?? 1,
@@ -395,7 +441,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                 const Text('เพิ่มบ้านสำเร็จ'),
               ],
             ),
-            backgroundColor: const Color(0xFFA3B18A),
+            backgroundColor: ThemeColors.oliveGreen,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -410,7 +456,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                 const Text('เกิดข้อผิดพลาดในการเพิ่มบ้าน'),
               ],
             ),
-            backgroundColor: const Color(0xFFE08E45),
+            backgroundColor: ThemeColors.burntOrange,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -427,7 +473,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
               Expanded(child: Text('เกิดข้อผิดพลาด: $e')),
             ],
           ),
-          backgroundColor: const Color(0xFFE08E45),
+          backgroundColor: ThemeColors.burntOrange,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -451,17 +497,23 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFFFFDF6),
+        backgroundColor: ThemeColors.ivoryWhite,
         appBar: AppBar(
-          title: Text('เพิ่มลูกบ้าน', style: TextStyle(color: const Color(0xFFA47551))),
-          backgroundColor: const Color(0xFFFFFDF6),
-          foregroundColor: const Color(0xFFA47551),
+          title: Text(
+            'เพิ่มลูกบ้าน',
+            style: TextStyle(color: ThemeColors.softBrown),
+          ),
+          backgroundColor: ThemeColors.ivoryWhite,
+          foregroundColor: ThemeColors.softBrown,
           elevation: 1,
           actions: [
             if (_hasUnsavedChanges)
               TextButton(
                 onPressed: _resetForm,
-                child: Text('รีเซ็ต', style: TextStyle(color: const Color(0xFFE08E45))),
+                child: Text(
+                  'รีเซ็ต',
+                  style: TextStyle(color: ThemeColors.burntOrange),
+                ),
               ),
           ],
         ),
@@ -522,7 +574,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   right: 12,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFA47551).withValues(alpha: 0.8),
+                      color: ThemeColors.softBrown.withValues(alpha: 0.8),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -540,9 +592,12 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   top: 12,
                   left: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFA3B18A),
+                      color: ThemeColors.oliveGreen,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -559,23 +614,19 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
               width: double.infinity,
               height: 200,
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F0E1),
+                color: ThemeColors.beige,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFD8CAB8), width: 2),
+                border: Border.all(color: ThemeColors.sandyTan, width: 2),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.home,
-                    size: 64,
-                    color: const Color(0xFFBFA18F),
-                  ),
+                  Icon(Icons.home, size: 64, color: ThemeColors.earthClay),
                   const SizedBox(height: 12),
                   Text(
                     'ยังไม่มีรูปภาพ',
                     style: TextStyle(
-                      color: const Color(0xFFA47551),
+                      color: ThemeColors.softBrown,
                       fontSize: 16,
                     ),
                   ),
@@ -583,7 +634,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   Text(
                     'กดปุ่มด้านล่างเพื่อเพิ่มรูป',
                     style: TextStyle(
-                      color: const Color(0xFFBFA18F),
+                      color: ThemeColors.earthClay,
                       fontSize: 14,
                     ),
                   ),
@@ -600,11 +651,15 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             height: 50,
             child: OutlinedButton.icon(
               onPressed: _pickImage,
-              icon: Icon(_selectedImage != null ? Icons.edit : Icons.add_photo_alternate),
-              label: Text(_selectedImage != null ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ'),
+              icon: Icon(
+                _selectedImage != null ? Icons.edit : Icons.add_photo_alternate,
+              ),
+              label: Text(
+                _selectedImage != null ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ',
+              ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFA47551),
-                side: BorderSide(color: const Color(0xFFD8CAB8)),
+                foregroundColor: ThemeColors.softBrown,
+                side: BorderSide(color: ThemeColors.sandyTan),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -627,27 +682,33 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             controller: _houseNumberController,
             decoration: InputDecoration(
               labelText: 'บ้านเลขที่ *',
-              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              labelStyle: TextStyle(color: ThemeColors.softBrown),
               hintText: 'ระบุเลขที่บ้าน',
-              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
-              prefixIcon: Icon(Icons.home_outlined, color: const Color(0xFFA47551)),
+              hintStyle: TextStyle(color: ThemeColors.earthClay),
+              prefixIcon: Icon(
+                Icons.home_outlined,
+                color: ThemeColors.softBrown,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               filled: true,
-              fillColor: const Color(0xFFFBF9F3),
+              fillColor: ThemeColors.inputFill,
             ),
             validator: (value) =>
-            value?.trim().isEmpty == true ? 'กรุณาระบุบ้านเลขที่' : null,
+                value?.trim().isEmpty == true ? 'กรุณาระบุบ้านเลขที่' : null,
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
@@ -657,27 +718,30 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             controller: _ownerController,
             decoration: InputDecoration(
               labelText: 'เจ้าของบ้าน *',
-              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              labelStyle: TextStyle(color: ThemeColors.softBrown),
               hintText: 'ระบุชื่อเจ้าของ',
-              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
-              prefixIcon: Icon(Icons.person, color: const Color(0xFFA47551)),
+              hintStyle: TextStyle(color: ThemeColors.earthClay),
+              prefixIcon: Icon(Icons.person, color: ThemeColors.softBrown),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               filled: true,
-              fillColor: const Color(0xFFFBF9F3),
+              fillColor: ThemeColors.inputFill,
             ),
             validator: (value) =>
-            value?.trim().isEmpty == true ? 'กรุณาระบุชื่อเจ้าของ' : null,
+                value?.trim().isEmpty == true ? 'กรุณาระบุชื่อเจ้าของ' : null,
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
@@ -687,24 +751,27 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             controller: _phoneController,
             decoration: InputDecoration(
               labelText: 'เบอร์โทร',
-              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              labelStyle: TextStyle(color: ThemeColors.softBrown),
               hintText: 'XXX-XXX-XXXX',
-              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
-              prefixIcon: Icon(Icons.phone, color: const Color(0xFFA47551)),
+              hintStyle: TextStyle(color: ThemeColors.earthClay),
+              prefixIcon: Icon(Icons.phone, color: ThemeColors.softBrown),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               filled: true,
-              fillColor: const Color(0xFFFBF9F3),
+              fillColor: ThemeColors.inputFill,
             ),
             keyboardType: TextInputType.phone,
             inputFormatters: [
@@ -747,27 +814,33 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             value: _houseType,
             decoration: InputDecoration(
               labelText: 'ประเภทบ้าน *',
-              labelStyle: TextStyle(color: const Color(0xFFA47551)),
-              prefixIcon: Icon(Icons.apartment, color: const Color(0xFFA47551)),
+              labelStyle: TextStyle(color: ThemeColors.softBrown),
+              prefixIcon: Icon(Icons.apartment, color: ThemeColors.softBrown),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               filled: true,
-              fillColor: const Color(0xFFFBF9F3),
+              fillColor: ThemeColors.inputFill,
             ),
             items: _houseTypeOptions.map((type) {
               return DropdownMenuItem(
                 value: type,
-                child: Text(_getHouseTypeText(type), style: TextStyle(color: const Color(0xFFA47551))),
+                child: Text(
+                  _getHouseTypeText(type),
+                  style: TextStyle(color: ThemeColors.softBrown),
+                ),
               );
             }).toList(),
             onChanged: (value) {
@@ -788,24 +861,30 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   controller: _floorsController,
                   decoration: InputDecoration(
                     labelText: 'จำนวนชั้น',
-                    labelStyle: TextStyle(color: const Color(0xFFA47551)),
+                    labelStyle: TextStyle(color: ThemeColors.softBrown),
                     hintText: 'เช่น 1, 2',
-                    hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
-                    prefixIcon: Icon(Icons.layers, color: const Color(0xFFA47551)),
+                    hintStyle: TextStyle(color: ThemeColors.earthClay),
+                    prefixIcon: Icon(
+                      Icons.layers,
+                      color: ThemeColors.softBrown,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                      borderSide: BorderSide(color: ThemeColors.softBorder),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                      borderSide: BorderSide(color: ThemeColors.softBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                      borderSide: BorderSide(
+                        color: ThemeColors.focusedBrown,
+                        width: 2,
+                      ),
                     ),
                     filled: true,
-                    fillColor: const Color(0xFFFBF9F3),
+                    fillColor: ThemeColors.inputFill,
                   ),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -820,24 +899,30 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   controller: _sizeController,
                   decoration: InputDecoration(
                     labelText: 'ขนาด',
-                    labelStyle: TextStyle(color: const Color(0xFFA47551)),
+                    labelStyle: TextStyle(color: ThemeColors.softBrown),
                     hintText: 'เช่น 100 ตร.ม.',
-                    hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
-                    prefixIcon: Icon(Icons.square_foot, color: const Color(0xFFA47551)),
+                    hintStyle: TextStyle(color: ThemeColors.earthClay),
+                    prefixIcon: Icon(
+                      Icons.square_foot,
+                      color: ThemeColors.softBrown,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                      borderSide: BorderSide(color: ThemeColors.softBorder),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                      borderSide: BorderSide(color: ThemeColors.softBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                      borderSide: BorderSide(
+                        color: ThemeColors.focusedBrown,
+                        width: 2,
+                      ),
                     ),
                     filled: true,
-                    fillColor: const Color(0xFFFBF9F3),
+                    fillColor: ThemeColors.inputFill,
                   ),
                   textInputAction: TextInputAction.next,
                 ),
@@ -851,24 +936,27 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             controller: _usableAreaController,
             decoration: InputDecoration(
               labelText: 'พื้นที่ใช้สอย',
-              labelStyle: TextStyle(color: const Color(0xFFA47551)),
+              labelStyle: TextStyle(color: ThemeColors.softBrown),
               hintText: 'เช่น 80 ตร.ม.',
-              hintStyle: TextStyle(color: const Color(0xFFBFA18F)),
-              prefixIcon: Icon(Icons.area_chart, color: const Color(0xFFA47551)),
+              hintStyle: TextStyle(color: ThemeColors.earthClay),
+              prefixIcon: Icon(Icons.area_chart, color: ThemeColors.softBrown),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               filled: true,
-              fillColor: const Color(0xFFFBF9F3),
+              fillColor: ThemeColors.inputFill,
             ),
             textInputAction: TextInputAction.done,
           ),
@@ -888,27 +976,33 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             value: _status,
             decoration: InputDecoration(
               labelText: 'สถานะบ้าน *',
-              labelStyle: TextStyle(color: const Color(0xFFA47551)),
-              prefixIcon: Icon(Icons.home_filled, color: const Color(0xFFA47551)),
+              labelStyle: TextStyle(color: ThemeColors.softBrown),
+              prefixIcon: Icon(Icons.home_filled, color: ThemeColors.softBrown),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               filled: true,
-              fillColor: const Color(0xFFFBF9F3),
+              fillColor: ThemeColors.inputFill,
             ),
             items: _statusOptions.map((status) {
               return DropdownMenuItem(
                 value: status,
-                child: Text(_getStatusText(status), style: TextStyle(color: const Color(0xFFA47551))),
+                child: Text(
+                  _getStatusText(status),
+                  style: TextStyle(color: ThemeColors.softBrown),
+                ),
               );
             }).toList(),
             onChanged: (value) {
@@ -926,27 +1020,36 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             value: _ownershipType,
             decoration: InputDecoration(
               labelText: 'ประเภทความเป็นเจ้าของ *',
-              labelStyle: TextStyle(color: const Color(0xFFA47551)),
-              prefixIcon: Icon(Icons.account_balance, color: const Color(0xFFA47551)),
+              labelStyle: TextStyle(color: ThemeColors.softBrown),
+              prefixIcon: Icon(
+                Icons.account_balance,
+                color: ThemeColors.softBrown,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               filled: true,
-              fillColor: const Color(0xFFFBF9F3),
+              fillColor: ThemeColors.inputFill,
             ),
             items: _ownershipTypeOptions.map((type) {
               return DropdownMenuItem(
                 value: type,
-                child: Text(_getOwnershipTypeText(type), style: TextStyle(color: const Color(0xFFA47551))),
+                child: Text(
+                  _getOwnershipTypeText(type),
+                  style: TextStyle(color: ThemeColors.softBrown),
+                ),
               );
             }).toList(),
             onChanged: (value) {
@@ -955,7 +1058,8 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                 _hasUnsavedChanges = true;
               });
             },
-            validator: (value) => value == null ? 'กรุณาเลือกประเภทความเป็นเจ้าของ' : null,
+            validator: (value) =>
+                value == null ? 'กรุณาเลือกประเภทความเป็นเจ้าของ' : null,
           ),
           const SizedBox(height: 16),
 
@@ -964,27 +1068,33 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             value: _usageStatus,
             decoration: InputDecoration(
               labelText: 'สถานะการใช้งาน *',
-              labelStyle: TextStyle(color: const Color(0xFFA47551)),
-              prefixIcon: Icon(Icons.toggle_on, color: const Color(0xFFA47551)),
+              labelStyle: TextStyle(color: ThemeColors.softBrown),
+              prefixIcon: Icon(Icons.toggle_on, color: ThemeColors.softBrown),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFFD0C4B0)),
+                borderSide: BorderSide(color: ThemeColors.softBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF916846), width: 2),
+                borderSide: BorderSide(
+                  color: ThemeColors.focusedBrown,
+                  width: 2,
+                ),
               ),
               filled: true,
-              fillColor: const Color(0xFFFBF9F3),
+              fillColor: ThemeColors.inputFill,
             ),
             items: _usageStatusOptions.map((status) {
               return DropdownMenuItem(
                 value: status,
-                child: Text(_getUsageStatusText(status), style: TextStyle(color: const Color(0xFFA47551))),
+                child: Text(
+                  _getUsageStatusText(status),
+                  style: TextStyle(color: ThemeColors.softBrown),
+                ),
               );
             }).toList(),
             onChanged: (value) {
@@ -993,7 +1103,8 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                 _hasUnsavedChanges = true;
               });
             },
-            validator: (value) => value == null ? 'กรุณาเลือกสถานะการใช้งาน' : null,
+            validator: (value) =>
+                value == null ? 'กรุณาเลือกสถานะการใช้งาน' : null,
           ),
         ],
       ),
@@ -1010,7 +1121,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
           child: ElevatedButton(
             onPressed: _isSubmitting ? null : _submitForm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE08E45),
+              backgroundColor: ThemeColors.burntOrange,
               foregroundColor: Colors.white,
               disabledBackgroundColor: const Color(0xFFDCDCDC),
               shape: RoundedRectangleBorder(
@@ -1020,27 +1131,24 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             ),
             child: _isSubmitting
                 ? const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Text('กำลังบันทึก...'),
-              ],
-            )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text('กำลังบันทึก...'),
+                    ],
+                  )
                 : const Text(
-              'เพิ่มบ้าน',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                    'เพิ่มบ้าน',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
           ),
         ),
         const SizedBox(height: 12),
@@ -1053,18 +1161,18 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
             onPressed: _isSubmitting
                 ? null
                 : () async {
-              if (_hasUnsavedChanges) {
-                final shouldPop = await _onWillPop();
-                if (shouldPop && mounted) {
-                  Navigator.pop(context);
-                }
-              } else {
-                Navigator.pop(context);
-              }
-            },
+                    if (_hasUnsavedChanges) {
+                      final shouldPop = await _onWillPop();
+                      if (shouldPop && mounted) {
+                        Navigator.pop(context);
+                      }
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFA47551),
-              side: BorderSide(color: const Color(0xFFD8CAB8)),
+              foregroundColor: ThemeColors.softBrown,
+              side: BorderSide(color: ThemeColors.sandyTan),
               disabledForegroundColor: const Color(0xFFDCDCDC),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -1084,11 +1192,11 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
   }) {
     return Card(
       elevation: 2,
-      color: const Color(0xFFFFFDF6),
-      shadowColor: const Color(0xFFBFA18F).withValues(alpha: 0.3),
+      color: ThemeColors.ivoryWhite,
+      shadowColor: ThemeColors.earthClay.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: const Color(0xFFD8CAB8).withValues(alpha: 0.3)),
+        side: BorderSide(color: ThemeColors.sandyTan.withValues(alpha: 0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -1100,10 +1208,10 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE08E45).withValues(alpha: 0.1),
+                    color: ThemeColors.burntOrange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: const Color(0xFFE08E45), size: 20),
+                  child: Icon(icon, color: ThemeColors.burntOrange, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -1111,7 +1219,7 @@ class _HouseCreatePageState extends State<HouseCreatePage> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFA47551),
+                    color: ThemeColors.softBrown,
                   ),
                 ),
               ],
