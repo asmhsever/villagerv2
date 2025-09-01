@@ -1,3 +1,6 @@
+// lib/pages/law/notion/notion_page.dart
+// Future loading ถูกต้อง: ให้ FutureBuilder แสดงสถานะรอจริง, reload หลัง add/edit/delete + loading overlay
+
 import 'package:flutter/material.dart';
 import 'package:fullproject/pages/law/notion/notion_edit_page.dart';
 import 'package:intl/intl.dart';
@@ -16,25 +19,51 @@ class LawNotionPage extends StatefulWidget {
 }
 
 class _LawNotionPageState extends State<LawNotionPage> {
-  Future<List<NotionModel>>? _notions;
+  Future<List<NotionModel>>? _notions; // ชี้ไปยัง future ปัจจุบันเสมอ
   LawModel? law;
+  bool _isRefreshing = false; // สถานะ loading สำหรับ
 
   @override
   void initState() {
     super.initState();
-    _loadNotions();
+    // สำคัญ: ผูก future ตั้งแต่เริ่ม เพื่อให้ FutureBuilder ได้ state = waiting
+    _notions = _fetchNotions();
   }
 
-  Future<void> _loadNotions() async {
+  /// แยกเป็นฟังก์ชันคืน Future เพื่อให้ FutureBuilder จัดการ state ได้เอง
+  Future<List<NotionModel>> _fetchNotions() async {
     final user = await AuthService.getCurrentUser();
     if (user is LawModel) {
-      setState(() => law = user);
-      final results = await NotionDomain.getByVillage(user.villageId);
-      setState(() {
-        _notions = Future.value(results);
-      });
-    } else {
-      _notions = Future.value([]);
+      if (mounted) setState(() => law = user);
+      return NotionDomain.getByVillage(user.villageId);
+    }
+    return [];
+  }
+
+  /// ใช้รีโหลด: เซ็ต _notions = _fetchNotions() ใหม่เสมอ ให้ FutureBuilder เข้าสถานะ waiting
+  Future<void> _loadNotions() async {
+    setState(() {
+      _notions = _fetchNotions();
+    });
+    await _notions;
+  }
+
+  /// รีโหลดพร้อม loading overlay สำหรับเมื่อกลับจากหน้า add/edit
+  Future<void> _refreshWithOverlay() async {
+    if (_isRefreshing) return; // ป้องกัน multiple calls
+
+    setState(() {
+      _isRefreshing = true;
+    });
+
+    try {
+      await _loadNotions();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRefreshing = false;
+        });
+      }
     }
   }
 
@@ -48,7 +77,9 @@ class _LawNotionPageState extends State<LawNotionPage> {
       context,
       MaterialPageRoute(builder: (_) => const LawNotionAddPage()),
     );
-    if (result == true) _loadNotions();
+    if (result == true) {
+      await _refreshWithOverlay(); // ใช้ loading overlay
+    }
   }
 
   Future<void> _navigateToEdit(NotionModel notion) async {
@@ -56,7 +87,9 @@ class _LawNotionPageState extends State<LawNotionPage> {
       context,
       MaterialPageRoute(builder: (_) => LawNotionEditPage(notion: notion)),
     );
-    if (result == true) _loadNotions();
+    if (result == true) {
+      await _refreshWithOverlay(); // ใช้ loading overlay
+    }
   }
 
   Future<void> _confirmDelete(NotionModel notion) async {
@@ -98,18 +131,31 @@ class _LawNotionPageState extends State<LawNotionPage> {
     );
 
     if (confirm == true) {
-      await NotionDomain.delete(notion.notionId);
-      _loadNotions();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('ลบข่าวสารเรียบร้อยแล้ว'),
-            backgroundColor: ThemeColors.oliveGreen,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+      // แสดง loading ระหว่างลบ
+      setState(() {
+        _isRefreshing = true;
+      });
+
+      try {
+        await NotionDomain.delete(notion.notionId);
+        await _loadNotions();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('ลบข่าวสารเรียบร้อยแล้ว'),
+              backgroundColor: ThemeColors.oliveGreen,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-          ),
-        );
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isRefreshing = false;
+          });
+        }
       }
     }
   }
@@ -137,11 +183,11 @@ class _LawNotionPageState extends State<LawNotionPage> {
       height: 80,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0x33BFA18F), // Using direct hex with alpha
+            color: Color(0x33BFA18F),
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -156,9 +202,7 @@ class _LawNotionPageState extends State<LawNotionPage> {
               color: ThemeColors.beige,
               child: const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    ThemeColors.softBrown,
-                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
                   strokeWidth: 2,
                 ),
               ),
@@ -188,22 +232,22 @@ class _LawNotionPageState extends State<LawNotionPage> {
 
     switch (type.toUpperCase()) {
       case 'SECURITY':
-        chipColor = ThemeColors.clayOrange; // Clay Orange - เร่งด่วน
+        chipColor = ThemeColors.clayOrange;
         textColor = Colors.white;
         displayText = 'ความปลอดภัย';
         break;
       case 'MAINTENANCE':
-        chipColor = ThemeColors.oliveGreen; // Olive Green - ดูแลรักษา
+        chipColor = ThemeColors.oliveGreen;
         textColor = Colors.white;
         displayText = 'ซ่อมบำรุง';
         break;
       case 'GENERAL':
-        chipColor = ThemeColors.warmStone; // Warm Stone - ทั่วไป
+        chipColor = ThemeColors.warmStone;
         textColor = Colors.white;
         displayText = 'ข้อมูลทั่วไป';
         break;
       case 'SOCIAL':
-        chipColor = ThemeColors.softTerracotta; // Soft Terracotta - สังคม
+        chipColor = ThemeColors.softTerracotta;
         textColor = Colors.white;
         displayText = 'กิจกรรม';
         break;
@@ -218,11 +262,11 @@ class _LawNotionPageState extends State<LawNotionPage> {
       decoration: BoxDecoration(
         color: chipColor,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0x26000000),
+            color: Color(0x26000000),
             blurRadius: 3,
-            offset: const Offset(0, 1),
+            offset: Offset(0, 1),
           ),
         ],
       ),
@@ -237,11 +281,41 @@ class _LawNotionPageState extends State<LawNotionPage> {
     );
   }
 
+  Widget _buildLoadingOverlay() {
+    return Container(
+      color: Colors.black54,
+      child: const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'กำลังอัพเดทข้อมูล...',
+                  style: TextStyle(
+                    color: ThemeColors.softBrown,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData(
-        primarySwatch: MaterialColor(0xFFA47551, const {
+        primarySwatch: const MaterialColor(0xFFA47551, {
           50: Color(0xFFF5F2EF),
           100: Color(0xFFE5DDD6),
           200: Color(0xFFD4C5BB),
@@ -268,11 +342,11 @@ class _LawNotionPageState extends State<LawNotionPage> {
         cardTheme: const CardThemeData(
           color: ThemeColors.ivoryWhite,
           elevation: 3,
-          shadowColor: Color(0x4DBFA18F), // Using direct hex with alpha
+          shadowColor: Color(0x4DBFA18F),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
             side: BorderSide(
-              color: Color(0x4DD8CAB8), // Using direct hex with alpha
+              color: Color(0x4DD8CAB8),
               width: 1,
             ),
           ),
@@ -286,211 +360,167 @@ class _LawNotionPageState extends State<LawNotionPage> {
           ),
           centerTitle: true,
         ),
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [ThemeColors.ivoryWhite, ThemeColors.beige],
-            ),
-          ),
-          child: FutureBuilder<List<NotionModel>>(
-            future: _notions,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      ThemeColors.softBrown,
-                    ),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: ThemeColors.burntOrange,
+        body: Stack(
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [ThemeColors.ivoryWhite, ThemeColors.beige],
+                ),
+              ),
+              child: FutureBuilder<List<NotionModel>>(
+                future: _notions,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting || _notions == null) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'เกิดข้อผิดพลาด',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: ThemeColors.softBrown,
-                        ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline, size: 64, color: ThemeColors.burntOrange),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'เกิดข้อผิดพลาด',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ThemeColors.softBrown),
+                          ),
+                          const SizedBox(height: 8),
+                          Text('${snapshot.error}', style: const TextStyle(color: ThemeColors.earthClay), textAlign: TextAlign.center),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${snapshot.error}',
-                        style: TextStyle(color: ThemeColors.earthClay),
-                        textAlign: TextAlign.center,
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.article_outlined, size: 64, color: ThemeColors.earthClay),
+                          SizedBox(height: 16),
+                          Text(
+                            'ไม่มีข่าวสารในขณะนี้',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: ThemeColors.softBrown),
+                          ),
+                          SizedBox(height: 8),
+                          Text('แตะปุ่ม + เพื่อเพิ่มข่าวสารใหม่', style: TextStyle(color: ThemeColors.earthClay)),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.article_outlined,
-                        size: 64,
-                        color: ThemeColors.earthClay,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'ไม่มีข่าวสารในขณะนี้',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: ThemeColors.softBrown,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'แตะปุ่ม + เพื่อเพิ่มข่าวสารใหม่',
-                        style: TextStyle(color: ThemeColors.earthClay),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                    );
+                  }
 
-              final notions = snapshot.data!;
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: notions.length,
-                itemBuilder: (context, index) {
-                  final notion = notions[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // รูปภาพ
-                            _buildNotionImage(notion.img),
-                            const SizedBox(width: 16),
-
-                            // เนื้อหา
-                            Expanded(
-                              child: Column(
+                  final notions = snapshot.data!;
+                  return RefreshIndicator(
+                    color: ThemeColors.softBrown,
+                    backgroundColor: ThemeColors.ivoryWhite,
+                    onRefresh: () async {
+                      await _loadNotions();
+                    },
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: notions.length,
+                      itemBuilder: (context, index) {
+                        final notion = notions[index];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // หัวข้อและประเภท
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          notion.header ?? 'ไม่มีหัวข้อ',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                            color: ThemeColors.softBrown,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
+                                  _buildNotionImage(notion.img),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                notion.header ?? 'ไม่มีหัวข้อ',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                  color: ThemeColors.softBrown,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            _buildTypeChip(notion.type),
+                                          ],
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      _buildTypeChip(notion.type),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-
-                                  // รายละเอียด
-                                  if (notion.description != null &&
-                                      notion.description!.isNotEmpty)
-                                    Text(
-                                      notion.description!,
-                                      style: const TextStyle(
-                                        color: ThemeColors.earthClay,
-                                        fontSize: 14,
-                                        height: 1.3,
-                                      ),
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
+                                        const SizedBox(height: 8),
+                                        if (notion.description != null && notion.description!.isNotEmpty)
+                                          Text(
+                                            notion.description!,
+                                            style: const TextStyle(
+                                              color: ThemeColors.earthClay,
+                                              fontSize: 14,
+                                              height: 1.3,
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        const SizedBox(height: 12),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.schedule, size: 14, color: ThemeColors.earthClay),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                _formatDate(notion.createDate),
+                                                style: const TextStyle(fontSize: 12, color: ThemeColors.earthClay),
+                                              ),
+                                            ),
+                                            Material(
+                                              color: Colors.transparent,
+                                              child: InkWell(
+                                                borderRadius: BorderRadius.circular(20),
+                                                onTap: () => _navigateToEdit(notion),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  child: const Icon(Icons.edit_outlined, color: ThemeColors.burntOrange, size: 20),
+                                                ),
+                                              ),
+                                            ),
+                                            Material(
+                                              color: Colors.transparent,
+                                              child: InkWell(
+                                                borderRadius: BorderRadius.circular(20),
+                                                onTap: () => _confirmDelete(notion),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  child: const Icon(Icons.delete_outline, color: ThemeColors.softTerracotta, size: 20),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                  const SizedBox(height: 12),
-
-                                  // วันที่และปุ่มจัดการ
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.schedule,
-                                        size: 14,
-                                        color: ThemeColors.earthClay,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          _formatDate(notion.createDate),
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: ThemeColors.earthClay,
-                                          ),
-                                        ),
-                                      ),
-
-                                      // ปุ่มแก้ไข
-                                      Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                          onTap: () => _navigateToEdit(notion),
-                                          child: Container(
-                                            padding: const EdgeInsets.all(8),
-                                            child: const Icon(
-                                              Icons.edit_outlined,
-                                              color: ThemeColors.burntOrange,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-
-                                      // ปุ่มลบ
-                                      Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                          onTap: () => _confirmDelete(notion),
-                                          child: Container(
-                                            padding: const EdgeInsets.all(8),
-                                            child: const Icon(
-                                              Icons.delete_outline,
-                                              color: ThemeColors.softTerracotta,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
-              );
-            },
-          ),
+              ),
+            ),
+            // Loading overlay
+            if (_isRefreshing) _buildLoadingOverlay(),
+          ],
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _navigateToAdd,

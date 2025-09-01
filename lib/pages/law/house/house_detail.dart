@@ -6,12 +6,12 @@ import 'package:fullproject/domains/house_domain.dart';
 import 'package:fullproject/domains/animal_domain.dart';
 import 'package:fullproject/domains/vehicle_domain.dart';
 import 'package:fullproject/services/image_service.dart';
+import 'package:fullproject/theme/Color.dart';
 import 'house_edit.dart';
 import 'animal_edit.dart';
 import 'animal_add.dart';
 import 'vehicle_edit.dart';
 import 'vehicle_add.dart';
-
 
 class HouseDetailPage extends StatefulWidget {
   final int houseId;
@@ -144,7 +144,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     }
   }
 
-  // Navigation methods for Single Edit Pages (แก้ไข/เพิ่มทีละรายการ)
+  // Navigation methods for Single Edit Pages
   Future<void> _navigateToAnimalEdit({AnimalModel? animal}) async {
     final result = await Navigator.push(
       context,
@@ -167,13 +167,15 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       context,
       MaterialPageRoute(
         builder: (context) => VehicleEditPage(
-          vehicle: vehicle, // ส่งเฉพาะ vehicle เท่านั้น
+          vehicle: vehicle,
         ),
       ),
     );
 
-
-
+    // Refresh vehicles data when returning
+    if (result == true && mounted) {
+      loadVehicles();
+    }
   }
 
   // Quick delete methods
@@ -182,34 +184,48 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: ThemeColors.ivoryWhite,
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange[600], size: 28),
+            Icon(Icons.warning_amber_rounded, color: ThemeColors.warningAmber, size: 28),
             const SizedBox(width: 12),
-            const Text('ยืนยันการลบ'),
+            Text(
+              'ยืนยันการลบ',
+              style: TextStyle(color: ThemeColors.darkChocolate),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('คุณแน่ใจหรือไม่ว่าต้องการลบ'),
+            Text(
+              'คุณแน่ใจหรือไม่ว่าต้องการลบ',
+              style: TextStyle(color: ThemeColors.darkChocolate),
+            ),
             Text(
               animal.name ?? 'สัตว์เลี้ยง',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: ThemeColors.softBrown,
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: ThemeColors.softBrown,
+            ),
             child: const Text('ยกเลิก'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: ThemeColors.errorRust,
+              foregroundColor: ThemeColors.ivoryWhite,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('ลบ'),
           ),
@@ -224,8 +240,9 @@ class _HouseDetailPageState extends State<HouseDetailPage>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('ลบ ${animal.name ?? 'สัตว์เลี้ยง'} สำเร็จ'),
-              backgroundColor: Colors.green,
+              backgroundColor: ThemeColors.successGreen,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           );
           loadAnimals();
@@ -233,10 +250,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('เกิดข้อผิดพลาดในการลบ'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('เกิดข้อผิดพลาดในการลบ'),
+              backgroundColor: ThemeColors.errorRust,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           );
         }
@@ -249,34 +267,48 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: ThemeColors.ivoryWhite,
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange[600], size: 28),
+            Icon(Icons.warning_amber_rounded, color: ThemeColors.warningAmber, size: 28),
             const SizedBox(width: 12),
-            const Text('ยืนยันการลบ'),
+            Text(
+              'ยืนยันการลบ',
+              style: TextStyle(color: ThemeColors.darkChocolate),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('คุณแน่ใจหรือไม่ว่าต้องการลบ'),
+            Text(
+              'คุณแน่ใจหรือไม่ว่าต้องการลบ',
+              style: TextStyle(color: ThemeColors.darkChocolate),
+            ),
             Text(
               '${vehicle.brand ?? ''} ${vehicle.model ?? ''}'.trim(),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: ThemeColors.softBrown,
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: ThemeColors.softBrown,
+            ),
             child: const Text('ยกเลิก'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: ThemeColors.errorRust,
+              foregroundColor: ThemeColors.ivoryWhite,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('ลบ'),
           ),
@@ -291,8 +323,9 @@ class _HouseDetailPageState extends State<HouseDetailPage>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('ลบ ${vehicle.brand ?? ''} ${vehicle.model ?? ''} สำเร็จ'),
-              backgroundColor: Colors.green,
+              backgroundColor: ThemeColors.successGreen,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           );
           loadVehicles();
@@ -300,10 +333,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('เกิดข้อผิดพลาดในการลบ'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('เกิดข้อผิดพลาดในการลบ'),
+              backgroundColor: ThemeColors.errorRust,
               behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           );
         }
@@ -311,19 +345,23 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: ThemeColors.creamWhite,
       appBar: AppBar(
-        title: Text('บ้านเลขที่ ${house?.houseNumber ?? widget.houseId}'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 1,
+        title: Text(
+          'บ้านเลขที่ ${house?.houseNumber ?? widget.houseId}',
+          style: TextStyle(
+            color: ThemeColors.darkChocolate,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: ThemeColors.ivoryWhite,
+        foregroundColor: ThemeColors.darkChocolate,
+        elevation: 2,
+        shadowColor: ThemeColors.sandyTan.withValues(alpha: 0.3),
         actions: [
-          // เปลี่ยนปุ่ม edit house ให้ง่ายขึ้น
           if (house != null)
             Container(
               margin: const EdgeInsets.only(right: 8),
@@ -332,22 +370,28 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => EditHousePage(house: house!),
+                      builder: (_) => EditHousePage(
+                        villageId: house!.villageId,
+                        house: house,
+                      ),
                     ),
                   );
 
-                  if (result is HouseModel && mounted) {
+                  if (!mounted) return;
+                  if (result is HouseModel) {
                     setState(() => house = result);
+                  } else if (result == true) {
+                    await loadHouseData();
                   }
                 },
-                icon: const Icon(Icons.edit, size: 18),
-                label: const Text('แก้ไข'),
+                icon: Icon(Icons.edit, size: 18, color: ThemeColors.softBrown),
+                label: Text(
+                  'แก้ไข',
+                  style: TextStyle(color: ThemeColors.softBrown),
+                ),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.blue,
-                  backgroundColor: Colors.blue.withValues(alpha: 0.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  backgroundColor: ThemeColors.lightTaupe,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 ),
               ),
@@ -357,6 +401,10 @@ class _HouseDetailPageState extends State<HouseDetailPage>
             ? null
             : TabBar(
           controller: _tabController,
+          labelColor: ThemeColors.softBrown,
+          unselectedLabelColor: ThemeColors.dustyBrown,
+          indicatorColor: ThemeColors.softBrown,
+          indicatorWeight: 3,
           tabs: [
             const Tab(
               icon: Icon(Icons.home),
@@ -374,9 +422,18 @@ class _HouseDetailPageState extends State<HouseDetailPage>
         ),
       ),
       body: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+        child: CircularProgressIndicator(
+          color: ThemeColors.softBrown,
+        ),
+      )
           : house == null
-          ? const Center(child: Text('ไม่พบข้อมูล'))
+          ? Center(
+        child: Text(
+          'ไม่พบข้อมูล',
+          style: TextStyle(color: ThemeColors.dustyBrown),
+        ),
+      )
           : TabBarView(
         controller: _tabController,
         children: [
@@ -388,13 +445,13 @@ class _HouseDetailPageState extends State<HouseDetailPage>
           _buildVehiclesTab(),
         ],
       ),
-      // ลบ FloatingActionButton ออก
-      // floatingActionButton: loading ? null : _buildFloatingActionButton(),
     );
   }
 
   Widget _buildHouseInfoTab() {
     return RefreshIndicator(
+      color: ThemeColors.softBrown,
+      backgroundColor: ThemeColors.ivoryWhite,
       onRefresh: loadHouseData,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -405,8 +462,19 @@ class _HouseDetailPageState extends State<HouseDetailPage>
             if (house!.img != null && house!.img!.isNotEmpty)
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: ThemeColors.sandyTan.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   child: BuildImage(
                     imagePath: house!.img!,
                     tablePath: 'house',
@@ -416,11 +484,29 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                     errorWidget: Container(
                       height: 200,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(12),
+                        gradient: LinearGradient(
+                          colors: [ThemeColors.beige, ThemeColors.lightTaupe],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Center(
-                        child: Text('ไม่สามารถโหลดรูปภาพได้'),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.home_outlined,
+                              size: 48,
+                              color: ThemeColors.dustyBrown,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'ไม่สามารถโหลดรูปภาพได้',
+                              style: TextStyle(color: ThemeColors.dustyBrown),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -428,7 +514,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
               ),
 
             // House Details
-            _buildDetailCard('ข้อมูลพื้นฐาน', [
+            _buildDetailCard('ข้อมูลพื้นฐาน', Icons.info_outline, [
               _buildDetailRow('บ้านเลขที่', house!.houseNumber),
               _buildDetailRow('เจ้าของ', house!.owner),
               _buildDetailRow('เบอร์โทร', house!.phone),
@@ -437,7 +523,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
 
             const SizedBox(height: 16),
 
-            _buildDetailCard('รายละเอียดบ้าน', [
+            _buildDetailCard('รายละเอียดบ้าน', Icons.home_work, [
               _buildDetailRow('ประเภทบ้าน', house!.houseType),
               _buildDetailRow('จำนวนชั้น', house!.floors?.toString()),
               _buildDetailRow('ขนาด', house!.size),
@@ -456,30 +542,31 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => EditHousePage(house: house!),
+                      builder: (_) => EditHousePage(
+                        villageId: house!.villageId,
+                        house: house,
+                      ),
                     ),
                   );
 
-                  if (result is HouseModel && mounted) {
+                  if (!mounted) return;
+                  if (result is HouseModel) {
                     setState(() => house = result);
+                  } else if (result == true) {
+                    await loadHouseData();
                   }
                 },
                 icon: const Icon(Icons.edit, size: 20),
                 label: const Text(
                   'แก้ไขข้อมูลบ้าน',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  elevation: 2,
-                  shadowColor: Colors.blue.withValues(alpha: 0.3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  backgroundColor: ThemeColors.softBrown,
+                  foregroundColor: ThemeColors.ivoryWhite,
+                  elevation: 4,
+                  shadowColor: ThemeColors.softBrown.withValues(alpha: 0.3),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),
@@ -495,7 +582,16 @@ class _HouseDetailPageState extends State<HouseDetailPage>
         // Header with statistics and add button
         Container(
           padding: const EdgeInsets.all(16),
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: ThemeColors.ivoryWhite,
+            boxShadow: [
+              BoxShadow(
+                color: ThemeColors.sandyTan.withValues(alpha: 0.2),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Row(
             children: [
               Expanded(
@@ -507,29 +603,29 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: ThemeColors.darkChocolate,
                       ),
                     ),
                     Text(
                       '${animals.length} รายการ',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: ThemeColors.dustyBrown,
                       ),
                     ),
                   ],
                 ),
               ),
-              // เปลี่ยนเป็นปุ่มเพิ่มข้อมูล
               ElevatedButton.icon(
                 onPressed: _navigateToAnimalAdd,
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('เพิ่มข้อมูล'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
+                  backgroundColor: ThemeColors.sageGreen,
+                  foregroundColor: ThemeColors.ivoryWhite,
+                  elevation: 2,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
@@ -540,10 +636,16 @@ class _HouseDetailPageState extends State<HouseDetailPage>
         // Animals content
         Expanded(
           child: animalsLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+            child: CircularProgressIndicator(
+              color: ThemeColors.softBrown,
+            ),
+          )
               : animals.isEmpty
               ? _buildEmptyAnimalsState()
               : RefreshIndicator(
+            color: ThemeColors.softBrown,
+            backgroundColor: ThemeColors.ivoryWhite,
             onRefresh: loadAnimals,
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -565,7 +667,16 @@ class _HouseDetailPageState extends State<HouseDetailPage>
         // Header with statistics and add button
         Container(
           padding: const EdgeInsets.all(16),
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: ThemeColors.ivoryWhite,
+            boxShadow: [
+              BoxShadow(
+                color: ThemeColors.sandyTan.withValues(alpha: 0.2),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Row(
             children: [
               Expanded(
@@ -577,29 +688,29 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: ThemeColors.darkChocolate,
                       ),
                     ),
                     Text(
                       '${vehicles.length} คัน',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: ThemeColors.dustyBrown,
                       ),
                     ),
                   ],
                 ),
               ),
-              // เปลี่ยนเป็นปุ่มเพิ่มข้อมูล
               ElevatedButton.icon(
                 onPressed: _navigateToVehicleAdd,
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('เพิ่มข้อมูล'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
+                  backgroundColor: ThemeColors.infoBlue,
+                  foregroundColor: ThemeColors.ivoryWhite,
+                  elevation: 2,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
@@ -610,10 +721,16 @@ class _HouseDetailPageState extends State<HouseDetailPage>
         // Vehicles content
         Expanded(
           child: vehiclesLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+            child: CircularProgressIndicator(
+              color: ThemeColors.softBrown,
+            ),
+          )
               : vehicles.isEmpty
               ? _buildEmptyVehiclesState()
               : RefreshIndicator(
+            color: ThemeColors.softBrown,
+            backgroundColor: ThemeColors.ivoryWhite,
             onRefresh: loadVehicles,
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -634,14 +751,32 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.pets_outlined, size: 80, color: Colors.grey[400]),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: ThemeColors.lightTaupe,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: ThemeColors.sandyTan.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.pets_outlined,
+              size: 64,
+              color: ThemeColors.dustyBrown,
+            ),
+          ),
           const SizedBox(height: 24),
           Text(
             'ไม่มีสัตว์เลี้ยงในบ้านนี้',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
+              color: ThemeColors.darkChocolate,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
@@ -649,7 +784,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
             'กดปุ่ม "เพิ่มข้อมูล" เพื่อเพิ่มสัตว์เลี้ยง',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: ThemeColors.dustyBrown,
             ),
           ),
           const SizedBox(height: 32),
@@ -658,9 +793,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
             icon: const Icon(Icons.add),
             label: const Text('เพิ่มสัตว์เลี้ยง'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
+              backgroundColor: ThemeColors.sageGreen,
+              foregroundColor: ThemeColors.ivoryWhite,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              elevation: 4,
+              shadowColor: ThemeColors.sageGreen.withValues(alpha: 0.3),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -676,14 +813,32 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.directions_car_outlined, size: 80, color: Colors.grey[400]),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: ThemeColors.lightTaupe,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: ThemeColors.sandyTan.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.directions_car_outlined,
+              size: 64,
+              color: ThemeColors.dustyBrown,
+            ),
+          ),
           const SizedBox(height: 24),
           Text(
             'ไม่มียานพาหนะในบ้านนี้',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
+              color: ThemeColors.darkChocolate,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
@@ -691,7 +846,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
             'กดปุ่ม "เพิ่มข้อมูล" เพื่อเพิ่มยานพาหนะ',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: ThemeColors.dustyBrown,
             ),
           ),
           const SizedBox(height: 32),
@@ -700,9 +855,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
             icon: const Icon(Icons.add),
             label: const Text('เพิ่มยานพาหนะ'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
+              backgroundColor: ThemeColors.infoBlue,
+              foregroundColor: ThemeColors.ivoryWhite,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              elevation: 4,
+              shadowColor: ThemeColors.infoBlue.withValues(alpha: 0.3),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -713,24 +870,39 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     );
   }
 
-  Widget _buildDetailCard(String title, List<Widget> children) {
+  Widget _buildDetailCard(String title, IconData icon, List<Widget> children) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      shadowColor: ThemeColors.sandyTan.withValues(alpha: 0.3),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: ThemeColors.ivoryWhite,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: ThemeColors.lightTaupe,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: ThemeColors.softBrown, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: ThemeColors.softBrown,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             ...children,
           ],
         ),
@@ -740,7 +912,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
 
   Widget _buildDetailRow(String label, String? value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -750,14 +922,18 @@ class _HouseDetailPageState extends State<HouseDetailPage>
               '$label:',
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
+                color: ThemeColors.dustyBrown,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value ?? '-',
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(
+                fontSize: 16,
+                color: ThemeColors.darkChocolate,
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ),
         ],
@@ -768,13 +944,15 @@ class _HouseDetailPageState extends State<HouseDetailPage>
   Widget _buildAnimalCard(AnimalModel animal) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 3,
+      elevation: 4,
+      shadowColor: ThemeColors.sandyTan.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: ThemeColors.ivoryWhite,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Animal Image/Icon - ขนาดใหญ่ขึ้น
+            // Animal Image/Icon
             Container(
               width: 80,
               height: 80,
@@ -785,6 +963,13 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                   color: _getAnimalTypeColor(animal.type).withValues(alpha: 0.3),
                   width: 2,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: _getAnimalTypeColor(animal.type).withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
@@ -812,7 +997,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                     child: Icon(
                       _getAnimalIcon(animal.type),
                       size: 36,
-                      color: Colors.white,
+                      color: ThemeColors.ivoryWhite,
                     ),
                   ),
                 )
@@ -833,7 +1018,7 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                   child: Icon(
                     _getAnimalIcon(animal.type),
                     size: 36,
-                    color: Colors.white,
+                    color: ThemeColors.ivoryWhite,
                   ),
                 ),
               ),
@@ -848,14 +1033,15 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                 children: [
                   Text(
                     animal.name ?? 'ไม่มีชื่อ',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: ThemeColors.darkChocolate,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: _getAnimalTypeColor(animal.type).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -883,11 +1069,11 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                       ],
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     'ID: ${animal.animalId}',
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: ThemeColors.dustyBrown,
                       fontSize: 12,
                     ),
                   ),
@@ -901,11 +1087,12 @@ class _HouseDetailPageState extends State<HouseDetailPage>
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: ThemeColors.lightTaupe,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: ThemeColors.softBrown.withValues(alpha: 0.3)),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.blue, size: 22),
+                    icon: Icon(Icons.edit, color: ThemeColors.softBrown, size: 22),
                     onPressed: () => _navigateToAnimalEdit(animal: animal),
                     tooltip: 'แก้ไข',
                   ),
@@ -913,11 +1100,12 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                 const SizedBox(width: 8),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: ThemeColors.errorRust.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: ThemeColors.errorRust.withValues(alpha: 0.3)),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 22),
+                    icon: Icon(Icons.delete_outline, color: ThemeColors.errorRust, size: 22),
                     onPressed: () => _deleteAnimal(animal),
                     tooltip: 'ลบ',
                   ),
@@ -933,23 +1121,32 @@ class _HouseDetailPageState extends State<HouseDetailPage>
   Widget _buildVehicleCard(VehicleModel vehicle) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 3,
+      elevation: 4,
+      shadowColor: ThemeColors.sandyTan.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: ThemeColors.ivoryWhite,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Vehicle Image/Icon - ขนาดใหญ่ขึ้น
+            // Vehicle Image/Icon
             Container(
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
+                color: ThemeColors.infoBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.blue.withValues(alpha: 0.3),
+                  color: ThemeColors.infoBlue.withValues(alpha: 0.3),
                   width: 2,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: ThemeColors.infoBlue.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
@@ -964,20 +1161,20 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Color(0xFF1976D2),
-                          Color(0xFF1565C0),
+                          ThemeColors.infoBlue.withValues(alpha: 0.7),
+                          ThemeColors.infoBlue.withValues(alpha: 0.9),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.directions_car,
                       size: 36,
-                      color: Colors.white,
+                      color: ThemeColors.ivoryWhite,
                     ),
                   ),
                 )
@@ -985,20 +1182,20 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xFF1976D2),
-                        Color(0xFF1565C0),
+                        ThemeColors.infoBlue.withValues(alpha: 0.7),
+                        ThemeColors.infoBlue.withValues(alpha: 0.9),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.directions_car,
                     size: 36,
-                    color: Colors.white,
+                    color: ThemeColors.ivoryWhite,
                   ),
                 ),
               ),
@@ -1015,9 +1212,10 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                     '${vehicle.brand ?? ''} ${vehicle.model ?? ''}'.trim().isEmpty
                         ? 'ไม่มีข้อมูลรถ'
                         : '${vehicle.brand ?? ''} ${vehicle.model ?? ''}'.trim(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: ThemeColors.darkChocolate,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1027,15 +1225,15 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.amber[100]!,
-                            Colors.amber[50]!,
+                            ThemeColors.goldenHoney.withValues(alpha: 0.2),
+                            ThemeColors.wheatGold.withValues(alpha: 0.1),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.amber[300]!),
+                        border: Border.all(color: ThemeColors.goldenHoney.withValues(alpha: 0.4)),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.amber.withValues(alpha: 0.2),
+                            color: ThemeColors.goldenHoney.withValues(alpha: 0.2),
                             spreadRadius: 1,
                             blurRadius: 3,
                             offset: const Offset(0, 1),
@@ -1048,13 +1246,13 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                           Icon(
                             Icons.confirmation_number,
                             size: 16,
-                            color: Colors.amber[700],
+                            color: ThemeColors.goldenHoney,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             vehicle.number!,
                             style: TextStyle(
-                              color: Colors.amber[800],
+                              color: ThemeColors.darkChocolate,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1066,9 +1264,9 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
+                        color: ThemeColors.lightTaupe,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey[300]!),
+                        border: Border.all(color: ThemeColors.dustyBrown.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1076,24 +1274,24 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                           Icon(
                             Icons.help_outline,
                             size: 16,
-                            color: Colors.grey[600],
+                            color: ThemeColors.dustyBrown,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'ไม่มีทะเบียน',
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: ThemeColors.dustyBrown,
                               fontSize: 14,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     'ID: ${vehicle.vehicleId}',
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: ThemeColors.dustyBrown,
                       fontSize: 12,
                     ),
                   ),
@@ -1107,11 +1305,12 @@ class _HouseDetailPageState extends State<HouseDetailPage>
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: ThemeColors.lightTaupe,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: ThemeColors.softBrown.withValues(alpha: 0.3)),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.blue, size: 22),
+                    icon: Icon(Icons.edit, color: ThemeColors.softBrown, size: 22),
                     onPressed: () => _navigateToVehicleEdit(vehicle: vehicle),
                     tooltip: 'แก้ไข',
                   ),
@@ -1119,11 +1318,12 @@ class _HouseDetailPageState extends State<HouseDetailPage>
                 const SizedBox(width: 8),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: ThemeColors.errorRust.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: ThemeColors.errorRust.withValues(alpha: 0.3)),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 22),
+                    icon: Icon(Icons.delete_outline, color: ThemeColors.errorRust, size: 22),
                     onPressed: () => _deleteVehicle(vehicle),
                     tooltip: 'ลบ',
                   ),
@@ -1153,6 +1353,8 @@ class _HouseDetailPageState extends State<HouseDetailPage>
       case 'rabbit':
       case 'กระต่าย':
         return Icons.cruelty_free;
+      case 'หนู':
+        return Icons.mouse;
       default:
         return Icons.pets;
     }
@@ -1162,21 +1364,25 @@ class _HouseDetailPageState extends State<HouseDetailPage>
     switch (type?.toLowerCase()) {
       case 'dog':
       case 'สุนัข':
-        return Colors.brown;
+        return ThemeColors.softBrown;
       case 'cat':
       case 'แมว':
-        return Colors.purple;
+        return ThemeColors.burntOrange;
       case 'bird':
       case 'นก':
-        return Colors.blue;
+        return ThemeColors.infoBlue;
       case 'fish':
       case 'ปลา':
-        return Colors.cyan;
+        return ThemeColors.sageGreen;
       case 'rabbit':
       case 'กระต่าย':
-        return Colors.pink;
+        return ThemeColors.apricot;
+      case 'หนู':
+        return ThemeColors.dustyBrown;
+      case 'อื่นๆ':
+        return ThemeColors.rustOrange;
       default:
-        return Colors.grey;
+        return ThemeColors.mushroom;
     }
   }
 }

@@ -212,26 +212,31 @@ class _BillPageState extends State<BillPage> {
     }
   }
 
+  // แก้ไข _filterBills method ใน bill_page.dart
   List<BillModel> _filterBills(List<BillModel> bills) {
     List<BillModel> filtered = bills;
 
-    // กรองตามสถานะ
+    // กรองตามสถานะ 5 แบบ
     if (filterStatus != null && filterStatus!.isNotEmpty) {
-      if (filterStatus == 'unpaid') {
-        filtered = filtered.where((b) => b.paidStatus == 0).toList();
-      } else if (filterStatus == 'paid') {
-        filtered = filtered.where((b) => b.paidStatus == 1).toList();
+      final target = filterStatus!.toUpperCase();
+
+      if (target == 'RECEIPT_SENT') {
+        // ชำระเสร็จสิ้น: สถานะ RECEIPT_SENT หรือ paid_status = 1
+        filtered = filtered.where((b) =>
+        b.status.toUpperCase() == 'RECEIPT_SENT' || b.paidStatus == 1
+        ).toList();
       } else {
-        // กรองตาม BillModel.status
-        filtered = filtered.where((b) => b.status == filterStatus).toList();
+        // ที่เหลือกรองตรงตาม status
+        filtered = filtered.where((b) =>
+        b.status.toUpperCase() == target
+        ).toList();
       }
     }
 
     // กรองตามคำค้นหา
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((bill) {
-        final houseNumber =
-            houseMap[bill.houseId]?.toLowerCase() ?? '${bill.houseId}';
+        final houseNumber = houseMap[bill.houseId]?.toLowerCase() ?? '${bill.houseId}';
         final serviceName = _getServiceNameTh(bill.service).toLowerCase();
         final amount = bill.amount.toString();
         final status = _getStatusText(bill).toLowerCase();
@@ -247,28 +252,37 @@ class _BillPageState extends State<BillPage> {
     return filtered;
   }
 
+  // เกินกำหนด = วันนี้เลยกำหนดชำระไปแล้ว และยังไม่ชำระ
   bool _isOverdue(BillModel bill) {
     if (bill.paidStatus == 1) return false;
-    return DateTime.now().isAfter(bill.dueDate);
+    final now = DateTime.now();
+    final due = bill.dueDate;
+    return now.isAfter(DateTime(due.year, due.month, due.day, 23, 59, 59));
   }
 
+
+
+  // แก้ไข _getStatusColor method
   Color _getStatusColor(BillModel bill) {
-    switch (bill.status.toUpperCase()) {
-      case 'RECEIPT_SENT':
-        return ThemeColors.oliveGreen;
-      case 'PENDING':
-        return ThemeColors.softTerracotta;
-      case 'UNDER_REVIEW':
-        return ThemeColors.softBrown;
-      case 'REJECTED':
-        return ThemeColors.clayOrange;
-      case 'OVERDUE':
-        return ThemeColors.clayOrange;
-      default:
-        if (bill.paidStatus == 1) return ThemeColors.oliveGreen;
-        if (_isOverdue(bill)) return ThemeColors.clayOrange;
-        return ThemeColors.softTerracotta;
+    // ตรวจสอบสถานะหลักก่อน
+    if (bill.paidStatus == 1 || bill.status.toUpperCase() == 'RECEIPT_SENT') {
+      return ThemeColors.oliveGreen; // ชำระเสร็จสิ้น
     }
+
+    if (bill.status.toUpperCase() == 'UNDER_REVIEW') {
+      return ThemeColors.softBrown; // กำลังตรวจสอบ
+    }
+
+    // ยังไม่ชำระ - ใช้สีต่างๆ ตามสถานะย่อย
+    if (_isOverdue(bill) || bill.status.toUpperCase() == 'OVERDUE') {
+      return ThemeColors.clayOrange; // เกินกำหนด
+    }
+
+    if (bill.status.toUpperCase() == 'REJECTED') {
+      return ThemeColors.clayOrange; // ถูกปฏิเสธ
+    }
+
+    return ThemeColors.softTerracotta; // ยังไม่ชำระทั่วไป
   }
 
   IconData _getStatusIcon(BillModel bill) {
@@ -291,39 +305,52 @@ class _BillPageState extends State<BillPage> {
   }
 
   String _getStatusText(BillModel bill) {
+    // ตรวจสอบสถานะหลักก่อน
+    if (bill.paidStatus == 1 || bill.status.toUpperCase() == 'RECEIPT_SENT') {
+      return 'ชำระเสร็จสิ้น';
+    }
+
+    if (bill.status.toUpperCase() == 'UNDER_REVIEW') {
+      return 'กำลังตรวจสอบ';
+    }
+
+    // สถานะอื่นๆ = ยังไม่ชำระ
     switch (bill.status.toUpperCase()) {
       case 'DRAFT':
-        return 'แบบร่าง';
+        return 'ยังไม่ชำระ (แบบร่าง)';
       case 'PENDING':
-        return 'รอชำระ';
-      case 'UNDER_REVIEW':
-        return 'กำลังตรวจสอบ';
-      case 'RECEIPT_SENT':
-        return 'ส่งใบเสร็จแล้ว';
+        return 'ยังไม่ชำระ (รอชำระ)';
       case 'REJECTED':
-        return 'ถูกปฏิเสธ';
+        return 'ยังไม่ชำระ (ถูกปฏิเสธ)';
       case 'OVERDUE':
-        return 'เกินกำหนด';
+        return 'ยังไม่ชำระ (เกินกำหนด)';
       default:
-        if (bill.paidStatus == 1) return 'ชำระแล้ว';
-        if (_isOverdue(bill)) return 'เกินกำหนด';
+        if (_isOverdue(bill)) return 'ยังไม่ชำระ (เกินกำหนด)';
         return 'ยังไม่ชำระ';
     }
   }
 
   // คำนวณสถิติแบบ real-time
   Map<String, int> _calculateStats() {
+    int pending = 0;
+    int inProgress = 0;
+    int resolved = 0;
+
+    for (var bill in _bills) {
+      if (bill.paidStatus == 1 || bill.status.toUpperCase() == 'RECEIPT_SENT') {
+        resolved++;
+      } else if (bill.status.toUpperCase() == 'UNDER_REVIEW') {
+        inProgress++;
+      } else {
+        pending++;
+      }
+    }
+
     return {
       'total': _bills.length,
-      'unpaid': _bills.where((b) => b.paidStatus == 0).length,
-      'paid': _bills.where((b) => b.paidStatus == 1).length,
-      'pending': _bills
-          .where((b) => b.status.toUpperCase() == 'PENDING')
-          .length,
-      'under_review': _bills
-          .where((b) => b.status.toUpperCase() == 'UNDER_REVIEW')
-          .length,
-      'overdue': _bills.where((b) => _isOverdue(b)).length,
+      'pending': pending,
+      'in_progress': inProgress,
+      'resolved': resolved,
     };
   }
 
@@ -559,8 +586,8 @@ class _BillPageState extends State<BillPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildStatCard(
-                            'ยังไม่จ่าย',
-                            '${stats['unpaid']}',
+                            'ยังไม่ชำระ',
+                            '${stats['pending']}',
                             Icons.schedule_rounded,
                             ThemeColors.softTerracotta,
                           ),
@@ -568,8 +595,17 @@ class _BillPageState extends State<BillPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildStatCard(
-                            'จ่ายแล้ว',
-                            '${stats['paid']}',
+                            'กำลังตรวจสอบ',
+                            '${stats['in_progress']}',
+                            Icons.visibility_rounded,
+                            ThemeColors.softBrown,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildStatCard(
+                            'ชำระเสร็จสิ้น',
+                            '${stats['resolved']}',
                             Icons.check_circle_rounded,
                             ThemeColors.oliveGreen,
                           ),
@@ -661,49 +697,45 @@ class _BillPageState extends State<BillPage> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
                                   decoration: BoxDecoration(
                                     color: ThemeColors.inputFill,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: ThemeColors.softBorder,
-                                    ),
+                                    border: Border.all(color: ThemeColors.softBorder),
                                   ),
                                   child: DropdownButton<String?>(
                                     value: filterStatus,
                                     isExpanded: true,
                                     underline: const SizedBox(),
-                                    items: const [
-                                      DropdownMenuItem(
+                                    items: <DropdownMenuItem<String?>>[
+                                      const DropdownMenuItem<String?>(
                                         value: null,
                                         child: Text('ทั้งหมด'),
                                       ),
-                                      DropdownMenuItem(
-                                        value: 'unpaid',
+                                      const DropdownMenuItem<String?>(
+                                        value: 'PENDING',
                                         child: Text('ยังไม่ชำระ'),
                                       ),
-                                      DropdownMenuItem(
-                                        value: 'paid',
-                                        child: Text('ชำระแล้ว'),
-                                      ),
-                                      DropdownMenuItem(
+                                      const DropdownMenuItem<String?>(
                                         value: 'UNDER_REVIEW',
-                                        child: Text('กำลังตรวจสอบ'),
+                                        child: Text('รอตรวจสอบ'),
                                       ),
-                                      DropdownMenuItem(
-                                        value: 'RECEIPT_SENT',
-                                        child: Text('ส่งใบเสร็จแล้ว'),
-                                      ),
-                                      DropdownMenuItem(
+                                      const DropdownMenuItem<String?>(
                                         value: 'REJECTED',
-                                        child: Text('ถูกปฏิเสธ'),
+                                        child: Text('สลิปไม่ถูกต้อง'),
+                                      ),
+                                      const DropdownMenuItem<String?>(
+                                        value: 'OVERDUE',
+                                        child: Text('เกินกำหนด'),
+                                      ),
+                                      const DropdownMenuItem<String?>(
+                                        value: 'RECEIPT_SENT',
+                                        child: Text('ชำระเสร็จสิ้น'),
                                       ),
                                     ],
-                                    onChanged: (value) =>
-                                        setState(() => filterStatus = value),
+                                    onChanged: (value) => setState(() => filterStatus = value),
                                   ),
+
                                 ),
                               ),
                               const SizedBox(width: 16),
