@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/pages/admin/dashboard.dart';
-import 'package:fullproject/pages/house/complaint/complaint_form.dart';
 import 'package:fullproject/pages/house/main.dart';
 import 'package:fullproject/pages/law/committee/committee.dart';
 import 'package:fullproject/pages/law/complaint/complant_page.dart';
@@ -40,8 +39,10 @@ class RouteGenerator {
       //   final args = settings.arguments as Map<String, dynamic>;
       //   final houseId = args['houseId'] as int;
       //   return _createRoute(HouseComplaintFormPage(houseId: houseId));
+
       case AppRoutes.lawNotion:
         return _createRoute(const LawNotionPage());
+
       case AppRoutes.lawVillage:
         final args = settings.arguments as Map<String, dynamic>;
         final villageId = args['villageId'] as int;

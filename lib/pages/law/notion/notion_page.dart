@@ -1,6 +1,4 @@
 // lib/pages/law/notion/notion_page.dart
-// Future loading ถูกต้อง: ให้ FutureBuilder แสดงสถานะรอจริง, reload หลัง add/edit/delete + loading overlay
-
 import 'package:flutter/material.dart';
 import 'package:fullproject/pages/law/notion/notion_edit_page.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +7,7 @@ import 'package:fullproject/domains/notion_domain.dart';
 import 'package:fullproject/services/auth_service.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/pages/law/notion/notion_add_page.dart';
+import 'package:fullproject/services/image_service.dart';
 import 'package:fullproject/theme/Color.dart';
 
 class LawNotionPage extends StatefulWidget {
@@ -18,29 +17,84 @@ class LawNotionPage extends StatefulWidget {
   State<LawNotionPage> createState() => _LawNotionPageState();
 }
 
-class _LawNotionPageState extends State<LawNotionPage> {
-  Future<List<NotionModel>>? _notions; // ชี้ไปยัง future ปัจจุบันเสมอ
+class _LawNotionPageState extends State<LawNotionPage>
+    with TickerProviderStateMixin {
+  Future<List<NotionModel>>? _notions;
   LawModel? law;
-  bool _isRefreshing = false; // สถานะ loading สำหรับ
+  bool _isRefreshing = false;
+
+  // Filter states
+  List<NotionModel> _allNotions = [];
+  List<NotionModel> _filteredNotions = [];
+  String _selectedFilter = 'ALL';
+
+  // Animation
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    // สำคัญ: ผูก future ตั้งแต่เริ่ม เพื่อให้ FutureBuilder ได้ state = waiting
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
     _notions = _fetchNotions();
   }
 
-  /// แยกเป็นฟังก์ชันคืน Future เพื่อให้ FutureBuilder จัดการ state ได้เอง
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   Future<List<NotionModel>> _fetchNotions() async {
     final user = await AuthService.getCurrentUser();
     if (user is LawModel) {
       if (mounted) setState(() => law = user);
-      return NotionDomain.getByVillage(user.villageId);
+      final notions = await NotionDomain.getByVillage(user.villageId);
+
+      // Apply filter
+      setState(() {
+        _allNotions = notions;
+        _applyFilter();
+        _animationController.forward();
+      });
+
+      return notions;
     }
     return [];
   }
 
-  /// ใช้รีโหลด: เซ็ต _notions = _fetchNotions() ใหม่เสมอ ให้ FutureBuilder เข้าสถานะ waiting
+  void _applyFilter() {
+    if (_selectedFilter == 'ALL') {
+      _filteredNotions = _allNotions;
+    } else {
+      _filteredNotions = _allNotions.where((notion) {
+        return notion.type?.toUpperCase() == _selectedFilter;
+      }).toList();
+    }
+
+    // Sort by creation date (newest first)
+    _filteredNotions.sort((a, b) {
+      if (a.createDate == null && b.createDate == null) return 0;
+      if (a.createDate == null) return 1;
+      if (b.createDate == null) return -1;
+      return b.createDate!.compareTo(a.createDate!);
+    });
+  }
+
+  void _changeFilter(String filter) {
+    setState(() {
+      _selectedFilter = filter;
+      _applyFilter();
+    });
+  }
+
   Future<void> _loadNotions() async {
     setState(() {
       _notions = _fetchNotions();
@@ -48,9 +102,8 @@ class _LawNotionPageState extends State<LawNotionPage> {
     await _notions;
   }
 
-  /// รีโหลดพร้อม loading overlay สำหรับเมื่อกลับจากหน้า add/edit
   Future<void> _refreshWithOverlay() async {
-    if (_isRefreshing) return; // ป้องกัน multiple calls
+    if (_isRefreshing) return;
 
     setState(() {
       _isRefreshing = true;
@@ -78,7 +131,7 @@ class _LawNotionPageState extends State<LawNotionPage> {
       MaterialPageRoute(builder: (_) => const LawNotionAddPage()),
     );
     if (result == true) {
-      await _refreshWithOverlay(); // ใช้ loading overlay
+      await _refreshWithOverlay();
     }
   }
 
@@ -88,7 +141,7 @@ class _LawNotionPageState extends State<LawNotionPage> {
       MaterialPageRoute(builder: (_) => LawNotionEditPage(notion: notion)),
     );
     if (result == true) {
-      await _refreshWithOverlay(); // ใช้ loading overlay
+      await _refreshWithOverlay();
     }
   }
 
@@ -131,7 +184,6 @@ class _LawNotionPageState extends State<LawNotionPage> {
     );
 
     if (confirm == true) {
-      // แสดง loading ระหว่างลบ
       setState(() {
         _isRefreshing = true;
       });
@@ -160,8 +212,266 @@ class _LawNotionPageState extends State<LawNotionPage> {
     }
   }
 
-  Widget _buildNotionImage(String? imageUrl) {
-    if (imageUrl == null || imageUrl.isEmpty) {
+  Color _getTypeColor(String? type) {
+    if (type == null) return ThemeColors.warmStone;
+
+    switch (type.toUpperCase()) {
+      case 'GENERAL':
+        return ThemeColors.softBrown;
+      case 'MAINTENANCE':
+        return ThemeColors.burntOrange;
+      case 'SECURITY':
+        return ThemeColors.clayOrange;
+      case 'FINANCE':
+        return ThemeColors.oliveGreen;
+      case 'SOCIAL':
+        return ThemeColors.softTerracotta;
+      default:
+        return ThemeColors.warmStone;
+    }
+  }
+
+  String _getTypeText(String? type) {
+    if (type == null) return 'อื่นๆ';
+
+    switch (type.toUpperCase()) {
+      case 'GENERAL':
+        return 'ข่าวสารทั่วไป';
+      case 'MAINTENANCE':
+        return 'การบำรุงรักษา';
+      case 'SECURITY':
+        return 'ความปลอดภัย';
+      case 'FINANCE':
+        return 'การเงิน';
+      case 'SOCIAL':
+        return 'กิจกรรมสังคม';
+      default:
+        return 'อื่นๆ';
+    }
+  }
+
+  IconData _getTypeIcon(String? type) {
+    if (type == null) return Icons.article_rounded;
+
+    switch (type.toUpperCase()) {
+      case 'GENERAL':
+        return Icons.info_rounded;
+      case 'MAINTENANCE':
+        return Icons.build_rounded;
+      case 'SECURITY':
+        return Icons.security_rounded;
+      case 'FINANCE':
+        return Icons.account_balance_wallet_rounded;
+      case 'SOCIAL':
+        return Icons.groups_rounded;
+      default:
+        return Icons.article_rounded;
+    }
+  }
+
+  Widget _buildFilterSection() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: ThemeColors.ivoryWhite,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: ThemeColors.earthClay.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const SizedBox(width: 8),
+                Text(
+                  'หมวดหมู่ข่าวสาร',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: ThemeColors.softBrown,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: ThemeColors.softBrown.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${_filteredNotions.length}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: ThemeColors.softBrown,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                if (_selectedFilter != 'ALL')
+                  TextButton(
+                    onPressed: () => _changeFilter('ALL'),
+                    child: Text(
+                      'ล้างตัวกรอง',
+                      style: TextStyle(
+                        color: ThemeColors.clayOrange,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // Filter Dropdown
+          Container(
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            child: DropdownButtonFormField<String>(
+              value: _selectedFilter,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: ThemeColors.sandyTan,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: ThemeColors.warmStone),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: ThemeColors.warmStone),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: ThemeColors.softBrown,
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              dropdownColor: ThemeColors.ivoryWhite,
+              style: TextStyle(
+                color: ThemeColors.softBrown,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'ALL',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.all_inclusive_rounded,
+                        size: 18,
+                        color: ThemeColors.softBrown,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('ทั้งหมด'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'GENERAL',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_rounded,
+                        size: 18,
+                        color: ThemeColors.softBrown,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('ข่าวสารทั่วไป'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'MAINTENANCE',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.build_rounded,
+                        size: 18,
+                        color: ThemeColors.burntOrange,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('การบำรุงรักษา'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'SECURITY',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.security_rounded,
+                        size: 18,
+                        color: ThemeColors.clayOrange,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('ความปลอดภัย'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'FINANCE',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 18,
+                        color: ThemeColors.oliveGreen,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('การเงิน'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'SOCIAL',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.groups_rounded,
+                        size: 18,
+                        color: ThemeColors.softTerracotta,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('กิจกรรมสังคม'),
+                    ],
+                  ),
+                ),
+              ],
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  _changeFilter(newValue);
+                }
+              },
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: ThemeColors.earthClay,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotionImage(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) {
       return Container(
         width: 80,
         height: 80,
@@ -193,31 +503,29 @@ class _LawNotionPageState extends State<LawNotionPage> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          imageUrl,
+        child: BuildImage(
+          imagePath: imagePath,
+          tablePath: 'notion',
           fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Container(
-              color: ThemeColors.beige,
-              child: const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
-                  strokeWidth: 2,
-                ),
+          width: 80,
+          height: 80,
+          placeholder: Container(
+            color: ThemeColors.beige,
+            child: const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
+                strokeWidth: 2,
               ),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: ThemeColors.beige,
-              child: const Icon(
-                Icons.broken_image_outlined,
-                color: ThemeColors.earthClay,
-                size: 32,
-              ),
-            );
-          },
+            ),
+          ),
+          errorWidget: Container(
+            color: ThemeColors.beige,
+            child: const Icon(
+              Icons.broken_image_outlined,
+              color: ThemeColors.earthClay,
+              size: 32,
+            ),
+          ),
         ),
       ),
     );
@@ -226,41 +534,13 @@ class _LawNotionPageState extends State<LawNotionPage> {
   Widget _buildTypeChip(String? type) {
     if (type == null || type.isEmpty) return const SizedBox.shrink();
 
-    Color chipColor;
-    Color textColor;
-    String displayText;
-
-    switch (type.toUpperCase()) {
-      case 'SECURITY':
-        chipColor = ThemeColors.clayOrange;
-        textColor = Colors.white;
-        displayText = 'ความปลอดภัย';
-        break;
-      case 'MAINTENANCE':
-        chipColor = ThemeColors.oliveGreen;
-        textColor = Colors.white;
-        displayText = 'ซ่อมบำรุง';
-        break;
-      case 'GENERAL':
-        chipColor = ThemeColors.warmStone;
-        textColor = Colors.white;
-        displayText = 'ข้อมูลทั่วไป';
-        break;
-      case 'SOCIAL':
-        chipColor = ThemeColors.softTerracotta;
-        textColor = Colors.white;
-        displayText = 'กิจกรรม';
-        break;
-      default:
-        chipColor = ThemeColors.earthClay;
-        textColor = Colors.white;
-        displayText = type;
-    }
+    final typeColor = _getTypeColor(type);
+    final displayText = _getTypeText(type);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: chipColor,
+        color: typeColor,
         borderRadius: BorderRadius.circular(15),
         boxShadow: const [
           BoxShadow(
@@ -272,8 +552,8 @@ class _LawNotionPageState extends State<LawNotionPage> {
       ),
       child: Text(
         displayText,
-        style: TextStyle(
-          color: textColor,
+        style: const TextStyle(
+          color: Colors.white,
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
@@ -370,152 +650,214 @@ class _LawNotionPageState extends State<LawNotionPage> {
                   colors: [ThemeColors.ivoryWhite, ThemeColors.beige],
                 ),
               ),
-              child: FutureBuilder<List<NotionModel>>(
-                future: _notions,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting || _notions == null) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
-                      ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.error_outline, size: 64, color: ThemeColors.burntOrange),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'เกิดข้อผิดพลาด',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ThemeColors.softBrown),
-                          ),
-                          const SizedBox(height: 8),
-                          Text('${snapshot.error}', style: const TextStyle(color: ThemeColors.earthClay), textAlign: TextAlign.center),
-                        ],
-                      ),
-                    );
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.article_outlined, size: 64, color: ThemeColors.earthClay),
-                          SizedBox(height: 16),
-                          Text(
-                            'ไม่มีข่าวสารในขณะนี้',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: ThemeColors.softBrown),
-                          ),
-                          SizedBox(height: 8),
-                          Text('แตะปุ่ม + เพื่อเพิ่มข่าวสารใหม่', style: TextStyle(color: ThemeColors.earthClay)),
-                        ],
-                      ),
-                    );
-                  }
+              child: Column(
+                children: [
+                  // Filter Section
+                  _buildFilterSection(),
 
-                  final notions = snapshot.data!;
-                  return RefreshIndicator(
-                    color: ThemeColors.softBrown,
-                    backgroundColor: ThemeColors.ivoryWhite,
-                    onRefresh: () async {
-                      await _loadNotions();
-                    },
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: notions.length,
-                      itemBuilder: (context, index) {
-                        final notion = notions[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          child: Card(
-                            child: Padding(
+                  // Content
+                  Expanded(
+                    child: FutureBuilder<List<NotionModel>>(
+                      future: _notions,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting || _notions == null) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.error_outline, size: 64, color: ThemeColors.burntOrange),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'เกิดข้อผิดพลาด',
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ThemeColors.softBrown),
+                                ),
+                                const SizedBox(height: 8),
+                                Text('${snapshot.error}', style: const TextStyle(color: ThemeColors.earthClay), textAlign: TextAlign.center),
+                              ],
+                            ),
+                          );
+                        } else if (_filteredNotions.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.article_outlined, size: 64, color: ThemeColors.earthClay),
+                                const SizedBox(height: 16),
+                                Text(
+                                  _selectedFilter == 'ALL' ? 'ไม่มีข่าวสารในขณะนี้' : 'ไม่พบข่าวสารในหมวดหมู่ที่เลือก',
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: ThemeColors.softBrown),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text('แตะปุ่ม + เพื่อเพิ่มข่าวสารใหม่', style: TextStyle(color: ThemeColors.earthClay)),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: RefreshIndicator(
+                            color: ThemeColors.softBrown,
+                            backgroundColor: ThemeColors.ivoryWhite,
+                            onRefresh: () async {
+                              await _loadNotions();
+                            },
+                            child: ListView.builder(
                               padding: const EdgeInsets.all(16),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildNotionImage(notion.img),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                notion.header ?? 'ไม่มีหัวข้อ',
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
-                                                  color: ThemeColors.softBrown,
+                              itemCount: _filteredNotions.length,
+                              itemBuilder: (context, index) {
+                                final notion = _filteredNotions[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  child: Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildNotionImage(notion.img),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        notion.header ?? 'ไม่มีหัวข้อ',
+                                                        style: const TextStyle(
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 16,
+                                                          color: ThemeColors.softBrown,
+                                                        ),
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    _buildTypeChip(notion.type),
+                                                  ],
                                                 ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
+                                                const SizedBox(height: 8),
+                                                if (notion.description != null && notion.description!.isNotEmpty)
+                                                  Text(
+                                                    notion.description!,
+                                                    style: const TextStyle(
+                                                      color: ThemeColors.earthClay,
+                                                      fontSize: 14,
+                                                      height: 1.3,
+                                                    ),
+                                                    maxLines: 3,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+
+                                                // Large image display
+                                                if (notion.img != null && notion.img!.isNotEmpty) ...[
+                                                  const SizedBox(height: 12),
+                                                  Container(
+                                                    width: double.infinity,
+                                                    constraints: const BoxConstraints(
+                                                      minHeight: 200,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: ThemeColors.earthClay.withOpacity(0.1),
+                                                          blurRadius: 8,
+                                                          offset: const Offset(0, 2),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: ClipRRect(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      child: AspectRatio(
+                                                        aspectRatio: 16 / 9,
+                                                        child: BuildImage(
+                                                          imagePath: notion.img!,
+                                                          tablePath: 'notion',
+                                                          fit: BoxFit.cover,
+                                                          placeholder: Container(
+                                                            color: ThemeColors.beige,
+                                                            child: const Center(
+                                                              child: CircularProgressIndicator(
+                                                                valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
+                                                                strokeWidth: 2,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          errorWidget: Container(
+                                                            color: ThemeColors.beige,
+                                                            child: const Icon(
+                                                              Icons.broken_image_outlined,
+                                                              color: ThemeColors.earthClay,
+                                                              size: 48,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+
+                                                const SizedBox(height: 12),
+                                                Row(
+                                                  children: [
+                                                    const Icon(Icons.schedule, size: 14, color: ThemeColors.earthClay),
+                                                    const SizedBox(width: 4),
+                                                    Expanded(
+                                                      child: Text(
+                                                        _formatDate(notion.createDate),
+                                                        style: const TextStyle(fontSize: 12, color: ThemeColors.earthClay),
+                                                      ),
+                                                    ),
+                                                    Material(
+                                                      color: Colors.transparent,
+                                                      child: InkWell(
+                                                        borderRadius: BorderRadius.circular(20),
+                                                        onTap: () => _navigateToEdit(notion),
+                                                        child: Container(
+                                                          padding: const EdgeInsets.all(8),
+                                                          child: const Icon(Icons.edit_outlined, color: ThemeColors.burntOrange, size: 20),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Material(
+                                                      color: Colors.transparent,
+                                                      child: InkWell(
+                                                        borderRadius: BorderRadius.circular(20),
+                                                        onTap: () => _confirmDelete(notion),
+                                                        child: Container(
+                                                          padding: const EdgeInsets.all(8),
+                                                          child: const Icon(Icons.delete_outline, color: ThemeColors.softTerracotta, size: 20),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
                                             ),
-                                            const SizedBox(width: 8),
-                                            _buildTypeChip(notion.type),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        if (notion.description != null && notion.description!.isNotEmpty)
-                                          Text(
-                                            notion.description!,
-                                            style: const TextStyle(
-                                              color: ThemeColors.earthClay,
-                                              fontSize: 14,
-                                              height: 1.3,
-                                            ),
-                                            maxLines: 3,
-                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                        const SizedBox(height: 12),
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.schedule, size: 14, color: ThemeColors.earthClay),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Text(
-                                                _formatDate(notion.createDate),
-                                                style: const TextStyle(fontSize: 12, color: ThemeColors.earthClay),
-                                              ),
-                                            ),
-                                            Material(
-                                              color: Colors.transparent,
-                                              child: InkWell(
-                                                borderRadius: BorderRadius.circular(20),
-                                                onTap: () => _navigateToEdit(notion),
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(8),
-                                                  child: const Icon(Icons.edit_outlined, color: ThemeColors.burntOrange, size: 20),
-                                                ),
-                                              ),
-                                            ),
-                                            Material(
-                                              color: Colors.transparent,
-                                              child: InkWell(
-                                                borderRadius: BorderRadius.circular(20),
-                                                onTap: () => _confirmDelete(notion),
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(8),
-                                                  child: const Icon(Icons.delete_outline, color: ThemeColors.softTerracotta, size: 20),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ],
-                              ),
+                                );
+                              },
                             ),
                           ),
                         );
                       },
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
             ),
             // Loading overlay
