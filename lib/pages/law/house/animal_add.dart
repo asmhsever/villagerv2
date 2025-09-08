@@ -250,7 +250,7 @@ class _AnimalAddPageState extends State<AnimalAddPage> {
     }
   }
 
-  Future<void> _getImage(ImageSource source) async {
+    Future<void> _getImage(ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
         source: source,

@@ -513,7 +513,9 @@ class _LawNotionPageState extends State<LawNotionPage>
             color: ThemeColors.beige,
             child: const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  ThemeColors.softBrown,
+                ),
                 strokeWidth: 2,
               ),
             ),
@@ -572,7 +574,9 @@ class _LawNotionPageState extends State<LawNotionPage>
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ThemeColors.softBrown,
+                  ),
                 ),
                 SizedBox(height: 16),
                 Text(
@@ -625,10 +629,7 @@ class _LawNotionPageState extends State<LawNotionPage>
           shadowColor: Color(0x4DBFA18F),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
-            side: BorderSide(
-              color: Color(0x4DD8CAB8),
-              width: 1,
-            ),
+            side: BorderSide(color: Color(0x4DD8CAB8), width: 1),
           ),
         ),
       ),
@@ -660,10 +661,14 @@ class _LawNotionPageState extends State<LawNotionPage>
                     child: FutureBuilder<List<NotionModel>>(
                       future: _notions,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting || _notions == null) {
+                        if (snapshot.connectionState ==
+                                ConnectionState.waiting ||
+                            _notions == null) {
                           return const Center(
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                ThemeColors.softBrown,
+                              ),
                             ),
                           );
                         } else if (snapshot.hasError) {
@@ -671,14 +676,28 @@ class _LawNotionPageState extends State<LawNotionPage>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.error_outline, size: 64, color: ThemeColors.burntOrange),
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 64,
+                                  color: ThemeColors.burntOrange,
+                                ),
                                 const SizedBox(height: 16),
                                 const Text(
                                   'เกิดข้อผิดพลาด',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ThemeColors.softBrown),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: ThemeColors.softBrown,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
-                                Text('${snapshot.error}', style: const TextStyle(color: ThemeColors.earthClay), textAlign: TextAlign.center),
+                                Text(
+                                  '${snapshot.error}',
+                                  style: const TextStyle(
+                                    color: ThemeColors.earthClay,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ],
                             ),
                           );
@@ -687,14 +706,29 @@ class _LawNotionPageState extends State<LawNotionPage>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.article_outlined, size: 64, color: ThemeColors.earthClay),
+                                const Icon(
+                                  Icons.article_outlined,
+                                  size: 64,
+                                  color: ThemeColors.earthClay,
+                                ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  _selectedFilter == 'ALL' ? 'ไม่มีข่าวสารในขณะนี้' : 'ไม่พบข่าวสารในหมวดหมู่ที่เลือก',
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: ThemeColors.softBrown),
+                                  _selectedFilter == 'ALL'
+                                      ? 'ไม่มีข่าวสารในขณะนี้'
+                                      : 'ไม่พบข่าวสารในหมวดหมู่ที่เลือก',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: ThemeColors.softBrown,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
-                                const Text('แตะปุ่ม + เพื่อเพิ่มข่าวสารใหม่', style: TextStyle(color: ThemeColors.earthClay)),
+                                const Text(
+                                  'แตะปุ่ม + เพื่อเพิ่มข่าวสารใหม่',
+                                  style: TextStyle(
+                                    color: ThemeColors.earthClay,
+                                  ),
+                                ),
                               ],
                             ),
                           );
@@ -719,26 +753,32 @@ class _LawNotionPageState extends State<LawNotionPage>
                                     child: Padding(
                                       padding: const EdgeInsets.all(16),
                                       child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           _buildNotionImage(notion.img),
                                           const SizedBox(width: 16),
                                           Expanded(
                                             child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Row(
                                                   children: [
                                                     Expanded(
                                                       child: Text(
-                                                        notion.header ?? 'ไม่มีหัวข้อ',
+                                                        notion.header ??
+                                                            'ไม่มีหัวข้อ',
                                                         style: const TextStyle(
-                                                          fontWeight: FontWeight.bold,
+                                                          fontWeight:
+                                                              FontWeight.bold,
                                                           fontSize: 16,
-                                                          color: ThemeColors.softBrown,
+                                                          color: ThemeColors
+                                                              .softBrown,
                                                         ),
                                                         maxLines: 2,
-                                                        overflow: TextOverflow.ellipsis,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
                                                       ),
                                                     ),
                                                     const SizedBox(width: 8),
@@ -746,58 +786,88 @@ class _LawNotionPageState extends State<LawNotionPage>
                                                   ],
                                                 ),
                                                 const SizedBox(height: 8),
-                                                if (notion.description != null && notion.description!.isNotEmpty)
+                                                if (notion.description !=
+                                                        null &&
+                                                    notion
+                                                        .description!
+                                                        .isNotEmpty)
                                                   Text(
                                                     notion.description!,
                                                     style: const TextStyle(
-                                                      color: ThemeColors.earthClay,
+                                                      color:
+                                                          ThemeColors.earthClay,
                                                       fontSize: 14,
                                                       height: 1.3,
                                                     ),
                                                     maxLines: 3,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
 
                                                 // Large image display
-                                                if (notion.img != null && notion.img!.isNotEmpty) ...[
+                                                if (notion.img != null &&
+                                                    notion.img!.isNotEmpty) ...[
                                                   const SizedBox(height: 12),
                                                   Container(
                                                     width: double.infinity,
-                                                    constraints: const BoxConstraints(
-                                                      minHeight: 200,
-                                                    ),
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          minHeight: 200,
+                                                        ),
                                                     decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(12),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
                                                       boxShadow: [
                                                         BoxShadow(
-                                                          color: ThemeColors.earthClay.withOpacity(0.1),
+                                                          color: ThemeColors
+                                                              .earthClay
+                                                              .withOpacity(0.1),
                                                           blurRadius: 8,
-                                                          offset: const Offset(0, 2),
+                                                          offset: const Offset(
+                                                            0,
+                                                            2,
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
                                                     child: ClipRRect(
-                                                      borderRadius: BorderRadius.circular(12),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
                                                       child: AspectRatio(
                                                         aspectRatio: 16 / 9,
                                                         child: BuildImage(
-                                                          imagePath: notion.img!,
+                                                          imagePath:
+                                                              notion.img!,
                                                           tablePath: 'notion',
                                                           fit: BoxFit.cover,
                                                           placeholder: Container(
-                                                            color: ThemeColors.beige,
+                                                            color: ThemeColors
+                                                                .beige,
                                                             child: const Center(
                                                               child: CircularProgressIndicator(
-                                                                valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
+                                                                valueColor:
+                                                                    AlwaysStoppedAnimation<
+                                                                      Color
+                                                                    >(
+                                                                      ThemeColors
+                                                                          .softBrown,
+                                                                    ),
                                                                 strokeWidth: 2,
                                                               ),
                                                             ),
                                                           ),
                                                           errorWidget: Container(
-                                                            color: ThemeColors.beige,
+                                                            color: ThemeColors
+                                                                .beige,
                                                             child: const Icon(
-                                                              Icons.broken_image_outlined,
-                                                              color: ThemeColors.earthClay,
+                                                              Icons
+                                                                  .broken_image_outlined,
+                                                              color: ThemeColors
+                                                                  .earthClay,
                                                               size: 48,
                                                             ),
                                                           ),
@@ -810,33 +880,73 @@ class _LawNotionPageState extends State<LawNotionPage>
                                                 const SizedBox(height: 12),
                                                 Row(
                                                   children: [
-                                                    const Icon(Icons.schedule, size: 14, color: ThemeColors.earthClay),
+                                                    const Icon(
+                                                      Icons.schedule,
+                                                      size: 14,
+                                                      color:
+                                                          ThemeColors.earthClay,
+                                                    ),
                                                     const SizedBox(width: 4),
                                                     Expanded(
                                                       child: Text(
-                                                        _formatDate(notion.createDate),
-                                                        style: const TextStyle(fontSize: 12, color: ThemeColors.earthClay),
-                                                      ),
-                                                    ),
-                                                    Material(
-                                                      color: Colors.transparent,
-                                                      child: InkWell(
-                                                        borderRadius: BorderRadius.circular(20),
-                                                        onTap: () => _navigateToEdit(notion),
-                                                        child: Container(
-                                                          padding: const EdgeInsets.all(8),
-                                                          child: const Icon(Icons.edit_outlined, color: ThemeColors.burntOrange, size: 20),
+                                                        _formatDate(
+                                                          notion.createDate,
+                                                        ),
+                                                        style: const TextStyle(
+                                                          fontSize: 12,
+                                                          color: ThemeColors
+                                                              .earthClay,
                                                         ),
                                                       ),
                                                     ),
                                                     Material(
                                                       color: Colors.transparent,
                                                       child: InkWell(
-                                                        borderRadius: BorderRadius.circular(20),
-                                                        onTap: () => _confirmDelete(notion),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+                                                        onTap: () =>
+                                                            _navigateToEdit(
+                                                              notion,
+                                                            ),
                                                         child: Container(
-                                                          padding: const EdgeInsets.all(8),
-                                                          child: const Icon(Icons.delete_outline, color: ThemeColors.softTerracotta, size: 20),
+                                                          padding:
+                                                              const EdgeInsets.all(
+                                                                8,
+                                                              ),
+                                                          child: const Icon(
+                                                            Icons.edit_outlined,
+                                                            color: ThemeColors
+                                                                .burntOrange,
+                                                            size: 20,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Material(
+                                                      color: Colors.transparent,
+                                                      child: InkWell(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+                                                        onTap: () =>
+                                                            _confirmDelete(
+                                                              notion,
+                                                            ),
+                                                        child: Container(
+                                                          padding:
+                                                              const EdgeInsets.all(
+                                                                8,
+                                                              ),
+                                                          child: const Icon(
+                                                            Icons
+                                                                .delete_outline,
+                                                            color: ThemeColors
+                                                                .softTerracotta,
+                                                            size: 20,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),

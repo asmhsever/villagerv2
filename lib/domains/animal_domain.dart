@@ -6,25 +6,6 @@ class AnimalDomain {
   static final _client = SupabaseConfig.client;
   static const String _table = 'animal';
 
-  static Future<List<AnimalModel>> getAll() async {
-    final res = await _client.from(_table).select().order('animal_id');
-    return res.map<AnimalModel>((json) => AnimalModel.fromJson(json)).toList();
-  }
-
-  static Future<List<AnimalModel>> getByHouse({required int houseId}) async {
-    try {
-      final res = await _client.from(_table).select().eq('house_id', houseId);
-
-      return res
-          .map<AnimalModel>((json) => AnimalModel.fromJson(json))
-          .toList();
-    } catch (e) {
-      print('Error fetching animals for house $houseId: $e');
-
-      return [];
-    }
-  }
-
   // Create new animal
   static Future<AnimalModel?> create({
     required int houseId,
@@ -89,17 +70,22 @@ class AnimalDomain {
     required int animalId,
     required String type,
     required String name,
-    dynamic imageFile, // รองรับทั้ง File และ Uint8List
-    bool removeImage = false, // flag สำหรับลบรูป
+    required String status,
+    dynamic imageFile,
+    bool removeImage = false,
   }) async {
+    // Validation
+    if (animalId <= 0) throw ArgumentError('Animal ID must be positive');
+    if (type.trim().isEmpty) throw ArgumentError('Type cannot be empty');
+    if (name.trim().isEmpty) throw ArgumentError('Name cannot be empty');
+
     try {
       String? finalImageUrl;
 
       if (removeImage) {
-        // ลบรูปภาพ
+        // อาจเพิ่มการลบรูปเก่าจาก storage ด้วย
         finalImageUrl = null;
       } else if (imageFile != null) {
-        // อัปโหลดรูปใหม่
         finalImageUrl = await SupabaseImage().uploadImage(
           imageFile: imageFile,
           tableName: "animal",
@@ -110,36 +96,27 @@ class AnimalDomain {
           imgName: "animal",
         );
       }
-      // ถ้า imageFile เป็น null และ removeImage เป็น false = ไม่แก้ไขรูป
 
-      // อัปเดตข้อมูล
-      final Map<String, dynamic> updateData = {'type': type, 'name': name};
+      final Map<String, dynamic> updateData = {
+        'type': type.trim(), // trim whitespace
+        'name': name.trim(),
+        'status': status,
+      };
 
-      // เพิ่ม img field เฉพาะเมื่อต้องการเปลี่ยนรูป
       if (removeImage || imageFile != null) {
         updateData['img'] = finalImageUrl;
       }
 
-      await _client.from(_table).update(updateData).eq('animal_id', animalId);
+      final response = await _client
+          .from(_table)
+          .update(updateData)
+          .eq('animal_id', animalId);
+
+      // Optional: ตรวจสอบผลลัพธ์
+      // if (response.error != null) throw response.error!;
     } catch (e) {
       print('Error updating animal: $e');
       throw Exception('Failed to update animal: $e');
-    }
-  }
-
-  // Get animal by ID
-  static Future<AnimalModel?> getById({required int animalId}) async {
-    try {
-      final res = await _client
-          .from(_table)
-          .select()
-          .eq('animal_id', animalId)
-          .single();
-
-      return AnimalModel.fromJson(res);
-    } catch (e) {
-      print('Error fetching animal with ID $animalId: $e');
-      return null;
     }
   }
 
@@ -167,6 +144,41 @@ class AnimalDomain {
     } catch (e) {
       print('Error deleting vehicle: $e');
       throw Exception('Failed to delete vehicle: $e');
+    }
+  }
+
+  // Get animal by ID
+  static Future<AnimalModel?> getById({required int animalId}) async {
+    try {
+      final res = await _client
+          .from(_table)
+          .select()
+          .eq('animal_id', animalId)
+          .single();
+
+      return AnimalModel.fromJson(res);
+    } catch (e) {
+      print('Error fetching animal with ID $animalId: $e');
+      return null;
+    }
+  }
+
+  static Future<List<AnimalModel>> getAll() async {
+    final res = await _client.from(_table).select().order('animal_id');
+    return res.map<AnimalModel>((json) => AnimalModel.fromJson(json)).toList();
+  }
+
+  static Future<List<AnimalModel>> getByHouse({required int houseId}) async {
+    try {
+      final res = await _client.from(_table).select().eq('house_id', houseId);
+
+      return res
+          .map<AnimalModel>((json) => AnimalModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      print('Error fetching animals for house $houseId: $e');
+
+      return [];
     }
   }
 }

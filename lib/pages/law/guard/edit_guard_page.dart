@@ -5,7 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fullproject/domains/guard_domain.dart';
 import 'package:fullproject/models/guard_model.dart';
+import 'package:fullproject/services/image_service.dart';
 import 'package:fullproject/config/supabase_config.dart';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 class EditGuardPage extends StatefulWidget {
   final GuardModel guard;
@@ -18,18 +21,19 @@ class EditGuardPage extends StatefulWidget {
 
 class _EditGuardPageState extends State<EditGuardPage>
     with TickerProviderStateMixin {
-  // Theme Colors
-  static const Color primaryBrown = Color(0xFF8B4513);
-  static const Color lightBrown = Color(0xFFA0522D);
-  static const Color accentGold = Color(0xFFDAA520);
-  static const Color backgroundCream = Color(0xFFFAF6F0);
-  static const Color cardWhite = Color(0xFFFFFFFE);
-  static const Color textDark = Color(0xFF2C1810);
-  static const Color textMedium = Color(0xFF5D4E37);
-  static const Color textLight = Color(0xFF8B7355);
-  static const Color successGreen = Color(0xFF28A745);
-  static const Color warningOrange = Color(0xFFFF8C00);
-  static const Color errorRed = Color(0xFFDC3545);
+  // Theme Colors - เหมือน Guard List และ Detail Pages
+  static const Color softBrown = Color(0xFFA47551);
+  static const Color ivoryWhite = Color(0xFFFFFDF6);
+  static const Color beige = Color(0xFFF5F0E1);
+  static const Color sandyTan = Color(0xFFD8CAB8);
+  static const Color earthClay = Color(0xFFBFA18F);
+  static const Color warmStone = Color(0xFFC7B9A5);
+  static const Color oliveGreen = Color(0xFFA3B18A);
+  static const Color burntOrange = Color(0xFFE08E45);
+  static const Color softTerracotta = Color(0xFFD48B5C);
+  static const Color clayOrange = Color(0xFFCC7748);
+  static const Color mutedBurntSienna = Color(0xFFC8755A);
+  static const Color danger = Color(0xFFDC3545);
 
   // Form Controllers
   final _formKey = GlobalKey<FormState>();
@@ -39,8 +43,10 @@ class _EditGuardPageState extends State<EditGuardPage>
   late final TextEditingController _phoneController;
 
   // Image Picker
+  // Image Picker - รองรับทั้ง Web และ Mobile
   final ImagePicker _picker = ImagePicker();
-  XFile? _selectedImage;
+  File? _selectedImage; // สำหรับ Mobile
+  Uint8List? _webImage; // สำหรับ Web  <-- เพิ่มบรรทัดนี้
   String? _currentImageUrl;
   bool _removeCurrentImage = false;
 
@@ -114,7 +120,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             _nicknameController.text != (widget.guard.nickname ?? '') ||
             _phoneController.text != _formatPhoneNumber(widget.guard.phone ?? '');
 
-    final hasImageChanges = _selectedImage != null || _removeCurrentImage;
+    final hasImageChanges = _selectedImage != null || _webImage != null || _removeCurrentImage;
 
     setState(() {
       _hasChanges = hasTextChanges || hasImageChanges;
@@ -144,13 +150,13 @@ class _EditGuardPageState extends State<EditGuardPage>
         }
       },
       child: Scaffold(
-        backgroundColor: backgroundCream,
+        backgroundColor: ivoryWhite,
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [backgroundCream, Color(0xFFF5F1EA)],
+              colors: [ivoryWhite, beige],
             ),
           ),
           child: CustomScrollView(
@@ -179,7 +185,7 @@ class _EditGuardPageState extends State<EditGuardPage>
       expandedHeight: 120,
       pinned: true,
       elevation: 0,
-      backgroundColor: warningOrange,
+      backgroundColor: burntOrange,
       foregroundColor: Colors.white,
       leading: IconButton(
         icon: const Icon(Icons.close_rounded, size: 28),
@@ -207,7 +213,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [warningOrange, Color(0xFFE67E00)],
+              colors: [burntOrange, softTerracotta],
             ),
           ),
           child: Stack(
@@ -298,22 +304,22 @@ class _EditGuardPageState extends State<EditGuardPage>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [primaryBrown.withOpacity(0.1), accentGold.withOpacity(0.1)],
+          colors: [softBrown.withOpacity(0.1), clayOrange.withOpacity(0.1)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: primaryBrown.withOpacity(0.2)),
+        border: Border.all(color: softBrown.withOpacity(0.2)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: primaryBrown.withOpacity(0.1),
+              color: softBrown.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(Icons.security_rounded, color: primaryBrown, size: 32),
+            child: Icon(Icons.security_rounded, color: softBrown, size: 32),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -323,7 +329,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                 Text(
                   'เจ้าหน้าที่ #${widget.guard.guardId}',
                   style: TextStyle(
-                    color: primaryBrown,
+                    color: softBrown,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -334,16 +340,16 @@ class _EditGuardPageState extends State<EditGuardPage>
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: textDark,
+                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: successGreen.withOpacity(0.15),
+                    color: burntOrange.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: successGreen.withOpacity(0.3)),
+                    border: Border.all(color: burntOrange.withOpacity(0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -352,7 +358,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                         width: 6,
                         height: 6,
                         decoration: BoxDecoration(
-                          color: successGreen,
+                          color: burntOrange,
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -360,7 +366,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                       Text(
                         'กำลังแก้ไขข้อมูล',
                         style: TextStyle(
-                          color: successGreen,
+                          color: burntOrange,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
@@ -380,7 +386,7 @@ class _EditGuardPageState extends State<EditGuardPage>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: cardWhite,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -397,7 +403,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: textDark,
+              color: earthClay,
             ),
           ),
           const SizedBox(height: 16),
@@ -411,7 +417,7 @@ class _EditGuardPageState extends State<EditGuardPage>
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 gradient: LinearGradient(
-                  colors: [warningOrange.withOpacity(0.1), accentGold.withOpacity(0.1)],
+                  colors: [burntOrange.withOpacity(0.1), clayOrange.withOpacity(0.1)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -432,88 +438,75 @@ class _EditGuardPageState extends State<EditGuardPage>
   }
 
   Widget _buildImagePreview() {
-    if (_removeCurrentImage && _selectedImage == null) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.person_rounded,
-            size: 40,
-            color: textLight,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'ไม่มีรูปภาพ',
-            style: TextStyle(
-              color: textMedium,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (_selectedImage != null) {
+    // แสดงรูปใหม่ที่เลือก
+    if (_selectedImage != null || _webImage != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(18),
-        child: Image.file(
-          File(_selectedImage!.path),
-          fit: BoxFit.cover,
+        child: kIsWeb && _webImage != null
+            ? Image.memory(_webImage!, fit: BoxFit.cover, width: 120, height: 120)
+            : !kIsWeb && _selectedImage != null
+            ? Image.file(_selectedImage!, fit: BoxFit.cover, width: 120, height: 120)
+            : Container(
+          width: 120,
+          height: 120,
+          color: Colors.grey.shade300,
+          child: const Icon(Icons.error),
         ),
       );
     }
 
-    if (_currentImageUrl != null && _currentImageUrl!.isNotEmpty) {
+    // แสดงรูปใหม่ที่เลือก (Web หรือ Mobile)
+    if (_selectedImage != null || _webImage != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(18),
-        child: Image.network(
-          _resolveImageUrl(_currentImageUrl!),
+        child: kIsWeb && _webImage != null
+            ? Image.memory(_webImage!, fit: BoxFit.cover, width: 120, height: 120)
+            : !kIsWeb && _selectedImage != null
+            ? Image.file(_selectedImage!, fit: BoxFit.cover, width: 120, height: 120)
+            : Container(
+          width: 120,
+          height: 120,
+          color: Colors.grey.shade300,
+          child: Icon(Icons.error, color: Colors.red),
+        ),
+      );
+    }
+
+    // แสดงรูปเดิมจาก server (ใช้ BuildImage)
+    if (_currentImageUrl != null && _currentImageUrl!.isNotEmpty && !_removeCurrentImage) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: BuildImage(
+          imagePath: _currentImageUrl!,
+          tablePath: 'guard',
           fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                    : null,
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(warningOrange),
-              ),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) => Column(
+          width: 120,
+          height: 120,
+          placeholder: Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(burntOrange),
+            ),
+          ),
+          errorWidget: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.broken_image_rounded, size: 40, color: textLight),
+              Icon(Icons.broken_image_rounded, size: 40, color: warmStone),
               const SizedBox(height: 8),
-              Text(
-                'ไม่สามารถโหลดรูปได้',
-                style: TextStyle(color: textMedium, fontSize: 12),
-              ),
+              Text('ไม่สามารถโหลดรูปได้', style: TextStyle(color: earthClay, fontSize: 12)),
             ],
           ),
         ),
       );
     }
 
+    // Placeholder เมื่อไม่มีรูป
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          Icons.add_photo_alternate_rounded,
-          size: 40,
-          color: warningOrange.withOpacity(0.7),
-        ),
+        Icon(Icons.add_photo_alternate_rounded, size: 40, color: burntOrange.withOpacity(0.7)),
         const SizedBox(height: 8),
-        Text(
-          'เพิ่มรูปภาพ',
-          style: TextStyle(
-            color: textMedium,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text('เพิ่มรูปภาพ', style: TextStyle(color: earthClay, fontSize: 14, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -534,7 +527,7 @@ class _EditGuardPageState extends State<EditGuardPage>
           label: Text(_selectedImage != null || (_currentImageUrl?.isNotEmpty ?? false)
               ? 'เปลี่ยนรูป'
               : 'เพิ่มรูป'),
-          style: TextButton.styleFrom(foregroundColor: warningOrange),
+          style: TextButton.styleFrom(foregroundColor: burntOrange),
         ),
 
         if (_selectedImage != null) ...[
@@ -547,7 +540,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             },
             icon: const Icon(Icons.undo_rounded, size: 16),
             label: const Text('เลิกเปลี่ยน'),
-            style: TextButton.styleFrom(foregroundColor: primaryBrown),
+            style: TextButton.styleFrom(foregroundColor: softBrown),
           ),
         ],
 
@@ -562,7 +555,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             },
             icon: const Icon(Icons.delete_rounded, size: 16),
             label: const Text('ลบรูป'),
-            style: TextButton.styleFrom(foregroundColor: errorRed),
+            style: TextButton.styleFrom(foregroundColor: danger),
           ),
         ],
 
@@ -576,7 +569,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             },
             icon: const Icon(Icons.restore_rounded, size: 16),
             label: const Text('เลิกลบ'),
-            style: TextButton.styleFrom(foregroundColor: successGreen),
+            style: TextButton.styleFrom(foregroundColor: oliveGreen),
           ),
         ],
       ],
@@ -584,17 +577,17 @@ class _EditGuardPageState extends State<EditGuardPage>
   }
 
   Color _getImageBorderColor() {
-    if (_selectedImage != null) return successGreen;
-    if (_removeCurrentImage) return errorRed;
-    if (_currentImageUrl?.isNotEmpty ?? false) return warningOrange;
-    return primaryBrown.withOpacity(0.3);
+    if (_selectedImage != null) return oliveGreen;
+    if (_removeCurrentImage) return danger;
+    if (_currentImageUrl?.isNotEmpty ?? false) return burntOrange;
+    return softBrown.withOpacity(0.3);
   }
 
   Widget _buildPersonalInfoCard() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: cardWhite,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -612,10 +605,10 @@ class _EditGuardPageState extends State<EditGuardPage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryBrown.withOpacity(0.1),
+                  color: softBrown.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.person_rounded, color: primaryBrown, size: 20),
+                child: Icon(Icons.person_rounded, color: softBrown, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
@@ -623,7 +616,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: textDark,
+                  color: earthClay,
                 ),
               ),
             ],
@@ -686,7 +679,7 @@ class _EditGuardPageState extends State<EditGuardPage>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: cardWhite,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -704,10 +697,10 @@ class _EditGuardPageState extends State<EditGuardPage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: successGreen.withOpacity(0.1),
+                  color: oliveGreen.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.contact_phone_rounded, color: successGreen, size: 20),
+                child: Icon(Icons.contact_phone_rounded, color: oliveGreen, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
@@ -715,7 +708,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: textDark,
+                  color: earthClay,
                 ),
               ),
             ],
@@ -754,7 +747,7 @@ class _EditGuardPageState extends State<EditGuardPage>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: cardWhite,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -772,10 +765,10 @@ class _EditGuardPageState extends State<EditGuardPage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: accentGold.withOpacity(0.1),
+                  color: clayOrange.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.info_rounded, color: accentGold, size: 20),
+                child: Icon(Icons.info_rounded, color: clayOrange, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
@@ -783,7 +776,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: textDark,
+                  color: earthClay,
                 ),
               ),
             ],
@@ -798,7 +791,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                   label: 'รหัสเจ้าหน้าที่',
                   value: '#${widget.guard.guardId}',
                   icon: Icons.badge_rounded,
-                  color: primaryBrown,
+                  color: softBrown,
                 ),
               ),
               const SizedBox(width: 16),
@@ -808,7 +801,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                   label: 'รหัสหมู่บ้าน',
                   value: widget.guard.villageId.toString(),
                   icon: Icons.location_city_rounded,
-                  color: accentGold,
+                  color: clayOrange,
                 ),
               ),
             ],
@@ -842,7 +835,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: textMedium,
+                    color: earthClay,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -854,7 +847,7 @@ class _EditGuardPageState extends State<EditGuardPage>
           Text(
             value,
             style: TextStyle(
-              color: textDark,
+              color: Colors.black87,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -880,38 +873,38 @@ class _EditGuardPageState extends State<EditGuardPage>
       validator: validator,
       style: TextStyle(
         fontSize: 16,
-        color: textDark,
+        color: Colors.black87,
         fontWeight: FontWeight.w500,
       ),
       decoration: InputDecoration(
         labelText: isRequired ? '$label *' : label,
         labelStyle: TextStyle(
-          color: textMedium,
+          color: earthClay,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        prefixIcon: Icon(icon, color: textMedium, size: 20),
+        prefixIcon: Icon(icon, color: earthClay, size: 20),
         filled: true,
-        fillColor: backgroundCream.withOpacity(0.3),
+        fillColor: beige.withOpacity(0.3),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: textLight.withOpacity(0.3)),
+          borderSide: BorderSide(color: warmStone.withOpacity(0.3)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: textLight.withOpacity(0.3)),
+          borderSide: BorderSide(color: warmStone.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: warningOrange, width: 2),
+          borderSide: BorderSide(color: burntOrange, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: errorRed, width: 2),
+          borderSide: BorderSide(color: danger, width: 2),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: errorRed, width: 2),
+          borderSide: BorderSide(color: danger, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
@@ -928,7 +921,7 @@ class _EditGuardPageState extends State<EditGuardPage>
           Expanded(
             child: FloatingActionButton.extended(
               onPressed: _isLoading ? null : _resetForm,
-              backgroundColor: Colors.grey.shade600,
+              backgroundColor: warmStone,
               foregroundColor: Colors.white,
               elevation: 4,
               heroTag: "reset",
@@ -943,7 +936,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             flex: 2,
             child: FloatingActionButton.extended(
               onPressed: _isLoading || !_hasChanges ? null : _updateGuard,
-              backgroundColor: _hasChanges ? warningOrange : Colors.grey.shade400,
+              backgroundColor: _hasChanges ? burntOrange : Colors.grey.shade400,
               foregroundColor: Colors.white,
               elevation: _hasChanges ? 8 : 2,
               heroTag: "save",
@@ -982,7 +975,7 @@ class _EditGuardPageState extends State<EditGuardPage>
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: const BoxDecoration(
-          color: cardWhite,
+          color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.all(20),
@@ -993,7 +986,7 @@ class _EditGuardPageState extends State<EditGuardPage>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: textLight.withOpacity(0.3),
+                color: warmStone.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1003,7 +996,7 @@ class _EditGuardPageState extends State<EditGuardPage>
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: textDark,
+                color: earthClay,
               ),
             ),
             const SizedBox(height: 20),
@@ -1013,7 +1006,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                   child: _buildImageOptionButton(
                     icon: Icons.camera_alt_rounded,
                     label: 'ถ่ายรูปใหม่',
-                    color: warningOrange,
+                    color: burntOrange,
                     onTap: () => _pickImage(ImageSource.camera),
                   ),
                 ),
@@ -1022,7 +1015,7 @@ class _EditGuardPageState extends State<EditGuardPage>
                   child: _buildImageOptionButton(
                     icon: Icons.photo_library_rounded,
                     label: 'เลือกจากแกลเลอรี่',
-                    color: accentGold,
+                    color: clayOrange,
                     onTap: () => _pickImage(ImageSource.gallery),
                   ),
                 ),
@@ -1060,7 +1053,7 @@ class _EditGuardPageState extends State<EditGuardPage>
               Text(
                 label,
                 style: TextStyle(
-                  color: textDark,
+                  color: earthClay,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1084,11 +1077,23 @@ class _EditGuardPageState extends State<EditGuardPage>
         imageQuality: 85,
       );
 
-      if (pickedFile != null) {
-        setState(() {
-          _selectedImage = pickedFile;
-          _removeCurrentImage = false;
-        });
+      if (pickedFile != null && mounted) {
+        if (kIsWeb) {
+          // Web: แปลงเป็น bytes
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _webImage = bytes;
+            _selectedImage = null;
+            _removeCurrentImage = false;
+          });
+        } else {
+          // Mobile: ใช้ File
+          setState(() {
+            _selectedImage = File(pickedFile.path);  // ใช้ pickedFile.path
+            _webImage = null;
+            _removeCurrentImage = false;
+          });
+        }
         _onFormChanged();
         HapticFeedback.lightImpact();
       }
@@ -1156,12 +1161,19 @@ class _EditGuardPageState extends State<EditGuardPage>
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('รีเซ็ตข้อมูล'),
-        content: const Text('คุณต้องการรีเซ็ตข้อมูลกลับเป็นค่าเดิมหรือไม่?'),
+        backgroundColor: ivoryWhite,
+        title: Text(
+          'รีเซ็ตข้อมูล',
+          style: TextStyle(color: earthClay, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'คุณต้องการรีเซ็ตข้อมูลกลับเป็นค่าเดิมหรือไม่?',
+          style: TextStyle(color: warmStone),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('ยกเลิก'),
+            child: Text('ยกเลิก', style: TextStyle(color: warmStone)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -1179,7 +1191,10 @@ class _EditGuardPageState extends State<EditGuardPage>
 
               _showSuccessSnackBar('รีเซ็ตข้อมูลเรียบร้อย');
             },
-            style: ElevatedButton.styleFrom(backgroundColor: warningOrange),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: burntOrange,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('รีเซ็ต'),
           ),
         ],
@@ -1200,26 +1215,36 @@ class _EditGuardPageState extends State<EditGuardPage>
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก'),
-        content: const Text('คุณต้องการออกจากหน้านี้โดยไม่บันทึกการเปลี่ยนแปลงหรือไม่?'),
+        backgroundColor: ivoryWhite,
+        title: Text(
+          'มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก',
+          style: TextStyle(color: earthClay, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'คุณต้องการออกจากหน้านี้โดยไม่บันทึกการเปลี่ยนแปลงหรือไม่?',
+          style: TextStyle(color: warmStone),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('ยกเลิก'),
+            child: Text('ยกเลิก', style: TextStyle(color: warmStone)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
               _updateGuard(); // Try to save first
             },
-            child: const Text('บันทึกและออก'),
+            child: Text('บันทึกและออก', style: TextStyle(color: oliveGreen)),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
               Navigator.pop(context); // Close page
             },
-            style: ElevatedButton.styleFrom(backgroundColor: errorRed),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: danger,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('ออกโดยไม่บันทึก'),
           ),
         ],
@@ -1237,14 +1262,6 @@ class _EditGuardPageState extends State<EditGuardPage>
     return 'เจ้าหน้าที่ #${widget.guard.guardId}';
   }
 
-  String _resolveImageUrl(String? pathOrUrl) {
-    if (pathOrUrl == null || pathOrUrl.isEmpty) return '';
-    final s = pathOrUrl.trim();
-    if (s.startsWith('http://') || s.startsWith('https://')) return s;
-    final client = SupabaseConfig.client;
-    return client.storage.from('guard').getPublicUrl(s);
-  }
-
   void _showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1255,7 +1272,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: successGreen,
+        backgroundColor: oliveGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
@@ -1273,7 +1290,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: errorRed,
+        backgroundColor: danger,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
@@ -1292,7 +1309,7 @@ class _EditGuardPageState extends State<EditGuardPage>
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: primaryBrown,
+        backgroundColor: softBrown,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
@@ -1301,7 +1318,7 @@ class _EditGuardPageState extends State<EditGuardPage>
   }
 }
 
-// Custom formatter for phone number (same as AddGuardPage)
+// Custom formatter for phone number
 class _PhoneNumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(

@@ -178,96 +178,175 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
 
   Widget _buildFilterSection() {
     return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ThemeColors.ivoryWhite,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: ThemeColors.earthClay.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
         children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.filter_list_rounded,
-                  color: ThemeColors.softBrown,
-                  size: 20,
+          // Status Filter
+          Expanded(
+            child: Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: ThemeColors.sandyTan,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: ThemeColors.warmStone.withOpacity(0.3),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'ตัวกรอง',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: ThemeColors.softBrown,
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _statusFilter,
+                  isExpanded: true,
+                  style: TextStyle(color: Colors.black, fontSize: 13),
+                  dropdownColor: ThemeColors.ivoryWhite,
+                  icon: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: ThemeColors.earthClay,
+                    size: 18,
                   ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: ThemeColors.softBrown.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${_filteredComplaints.length}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: ThemeColors.softBrown,
+                  items: const [
+                    DropdownMenuItem(value: 'all', child: Text('ทั้งหมด')),
+                    DropdownMenuItem(
+                      value: 'pending',
+                      child: Text('รอดำเนินการ'),
                     ),
-                  ),
-                ),
-                const Spacer(),
-                if (_statusFilter != 'all' ||
-                    _levelFilter != 'all' ||
-                    _typeFilter != 'all')
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _statusFilter = 'all';
-                        _levelFilter = 'all';
-                        _typeFilter = 'all';
-                        _applyFilters();
-                      });
-                    },
-                    child: Text(
-                      'ล้างทั้งหมด',
-                      style: TextStyle(
-                        color: ThemeColors.clayOrange,
-                        fontSize: 12,
-                      ),
+                    DropdownMenuItem(
+                      value: 'in_progress',
+                      child: Text('กำลังดำเนินการ'),
                     ),
+                    DropdownMenuItem(
+                      value: 'resolved',
+                      child: Text('เสร็จสิ้น'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _statusFilter = value!;
+                      _applyFilters();
+                    });
+                  },
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Level Filter
+          Expanded(
+            child: Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: ThemeColors.sandyTan,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: ThemeColors.warmStone.withOpacity(0.3),
+                ),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _levelFilter,
+                  isExpanded: true,
+                  style: TextStyle(color: Colors.black, fontSize: 13),
+                  dropdownColor: ThemeColors.ivoryWhite,
+                  icon: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: ThemeColors.earthClay,
+                    size: 18,
                   ),
-              ],
+                  items: const [
+                    DropdownMenuItem(value: 'all', child: Text('ทุกระดับ')),
+                    DropdownMenuItem(value: '1', child: Text('ต่ำ')),
+                    DropdownMenuItem(value: '2', child: Text('ปกติ')),
+                    DropdownMenuItem(value: '3', child: Text('สูง')),
+                    DropdownMenuItem(value: '4-5', child: Text('เร่งด่วน')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _levelFilter = value!;
+                      _applyFilters();
+                    });
+                  },
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Type Filter
+          Expanded(
+            child: Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: ThemeColors.sandyTan,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: ThemeColors.warmStone.withOpacity(0.3),
+                ),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _typeFilter,
+                  isExpanded: true,
+                  style: TextStyle(color: Colors.black, fontSize: 13),
+                  dropdownColor: ThemeColors.ivoryWhite,
+                  icon: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: ThemeColors.earthClay,
+                    size: 18,
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'all', child: Text('ทุกประเภท')),
+                    DropdownMenuItem(value: '1', child: Text('สาธารณูปโภค')),
+                    DropdownMenuItem(value: '2', child: Text('ความปลอดภัย')),
+                    DropdownMenuItem(value: '3', child: Text('สิ่งแวดล้อม')),
+                    DropdownMenuItem(value: '4', child: Text('การบริการ')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _typeFilter = value!;
+                      _applyFilters();
+                    });
+                  },
+                ),
+              ),
             ),
           ),
 
-          // Dropdown Filters
-          Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-            child: Column(
-              children: [
-                _buildDropdownRow('สถานะ', _buildStatusDropdown()),
-                const SizedBox(height: 12),
-                _buildDropdownRow('ระดับ', _buildLevelDropdown()),
-                const SizedBox(height: 12),
-                _buildDropdownRow('ประเภท', _buildTypeDropdown()),
-              ],
+          // Clear/Reset Button
+          if (_statusFilter != 'all' ||
+              _levelFilter != 'all' ||
+              _typeFilter != 'all')
+            Container(
+              margin: const EdgeInsets.only(left: 8),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _statusFilter = 'all';
+                    _levelFilter = 'all';
+                    _typeFilter = 'all';
+                    _applyFilters();
+                  });
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: ThemeColors.clayOrange.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: ThemeColors.clayOrange.withOpacity(0.5),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.refresh_rounded,
+                    color: ThemeColors.clayOrange,
+                    size: 20,
+                  ),
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -290,170 +369,6 @@ class _HouseComplaintPageState extends State<HouseComplaintPage>
         const SizedBox(width: 8),
         Expanded(child: dropdown),
       ],
-    );
-  }
-
-  Widget _buildStatusDropdown() {
-    final Map<String, String> statusOptions = {
-      'all': 'ทั้งหมด',
-      'pending': 'รอดำเนินการ',
-      'in_progress': 'กำลังดำเนินการ',
-      'resolved': 'เสร็จสิ้น',
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      height: 40,
-      decoration: BoxDecoration(
-        color: ThemeColors.sandyTan,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ThemeColors.warmStone, width: 1),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _statusFilter,
-          isExpanded: true,
-          style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
-          dropdownColor: ThemeColors.ivoryWhite,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: ThemeColors.earthClay,
-            size: 20,
-          ),
-          items: statusOptions.entries.map((entry) {
-            return DropdownMenuItem<String>(
-              value: entry.key,
-              child: Text(
-                entry.value,
-                style: TextStyle(
-                  color: ThemeColors.earthClay,
-                  fontWeight: _statusFilter == entry.key
-                      ? FontWeight.w600
-                      : FontWeight.w400,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _statusFilter = newValue;
-                _applyFilters();
-              });
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLevelDropdown() {
-    final Map<String, String> levelOptions = {
-      'all': 'ทั้งหมด',
-      '1': 'ต่ำ',
-      '2': 'ปกติ',
-      '3': 'สูง',
-      '4-5': 'เร่งด่วน',
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      height: 40,
-      decoration: BoxDecoration(
-        color: ThemeColors.sandyTan,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ThemeColors.warmStone, width: 1),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _levelFilter,
-          isExpanded: true,
-          style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
-          dropdownColor: ThemeColors.ivoryWhite,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: ThemeColors.earthClay,
-            size: 20,
-          ),
-          items: levelOptions.entries.map((entry) {
-            return DropdownMenuItem<String>(
-              value: entry.key,
-              child: Text(
-                entry.value,
-                style: TextStyle(
-                  color: ThemeColors.earthClay,
-                  fontWeight: _levelFilter == entry.key
-                      ? FontWeight.w600
-                      : FontWeight.w400,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _levelFilter = newValue;
-                _applyFilters();
-              });
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypeDropdown() {
-    final Map<String, String> typeOptions = {
-      'all': 'ทั้งหมด',
-      '1': 'สาธารณูปโภค',
-      '2': 'ความปลอดภัย',
-      '3': 'สิ่งแวดล้อม',
-      '4': 'การบริการ',
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      height: 40,
-      decoration: BoxDecoration(
-        color: ThemeColors.sandyTan,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ThemeColors.warmStone, width: 1),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _typeFilter,
-          isExpanded: true,
-          style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
-          dropdownColor: ThemeColors.ivoryWhite,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: ThemeColors.earthClay,
-            size: 20,
-          ),
-          items: typeOptions.entries.map((entry) {
-            return DropdownMenuItem<String>(
-              value: entry.key,
-              child: Text(
-                entry.value,
-                style: TextStyle(
-                  color: ThemeColors.earthClay,
-                  fontWeight: _typeFilter == entry.key
-                      ? FontWeight.w600
-                      : FontWeight.w400,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _typeFilter = newValue;
-                _applyFilters();
-              });
-            }
-          },
-        ),
-      ),
     );
   }
 

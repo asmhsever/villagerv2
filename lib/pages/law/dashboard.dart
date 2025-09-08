@@ -72,7 +72,8 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
 
       if (user is LawModel) {
         // Get full user data from database
-        final fullUserData = await LawDomain.getById(user.lawId);
+        print(user.toJson());
+        final fullUserData = await LawDomain.getById(user.lawId!);
         setState(() {
           lawModel = fullUserData;
         });
@@ -99,7 +100,9 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
     try {
       // Load village statistics
       final villageStats = await LawDomain.getVillageStats(lawModel!.villageId);
-      final totalPeople = await LawDomain.countPeopleInVillage(lawModel!.villageId);
+      final totalPeople = await LawDomain.countPeopleInVillage(
+        lawModel!.villageId,
+      );
       final genderCount = await LawDomain.getCountByGender(lawModel!.villageId);
 
       setState(() {
@@ -239,11 +242,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red[400],
-              ),
+              Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
               const SizedBox(height: 24),
               Text(
                 errorMessage!,
@@ -417,10 +416,7 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
                       dashboardStats['last_updated'] != null)
                     Text(
                       'อัพเดต: ${_formatLastUpdated(dashboardStats['last_updated'])}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: _warmStone,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: _warmStone),
                     ),
                 ],
               ),
@@ -435,7 +431,8 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
                   childAspectRatio: 1.1,
                 ),
                 itemCount: items.length,
-                itemBuilder: (context, index) => _buildDashboardCard(items[index]),
+                itemBuilder: (context, index) =>
+                    _buildDashboardCard(items[index]),
               ),
               const SizedBox(height: 100),
             ],
@@ -495,40 +492,44 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
             backgroundColor: Colors.white.withValues(alpha: 0.2),
             child: lawModel!.img != null && lawModel!.img!.isNotEmpty
                 ? ClipOval(
-              child: Image.network(
-                lawModel!.img!,
-                width: 64,
-                height: 64,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 2,
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) => Text(
-                  lawModel!.firstName != null && lawModel!.firstName!.isNotEmpty
-                      ? lawModel!.firstName!.substring(0, 1).toUpperCase()
-                      : 'N',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            )
+                    child: Image.network(
+                      lawModel!.img!,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                          strokeWidth: 2,
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) => Text(
+                        lawModel!.firstName != null &&
+                                lawModel!.firstName!.isNotEmpty
+                            ? lawModel!.firstName!.substring(0, 1).toUpperCase()
+                            : 'N',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  )
                 : Text(
-              lawModel!.firstName != null && lawModel!.firstName!.isNotEmpty
-                  ? lawModel!.firstName!.substring(0, 1).toUpperCase()
-                  : 'N',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                    lawModel!.firstName != null &&
+                            lawModel!.firstName!.isNotEmpty
+                        ? lawModel!.firstName!.substring(0, 1).toUpperCase()
+                        : 'N',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -626,7 +627,10 @@ class _LawDashboardPageState extends State<LawDashboardPage> {
               child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontSize: 12, color: _warmStone)),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 12, color: _warmStone),
+            ),
             const SizedBox(height: 4),
             Text(
               value,

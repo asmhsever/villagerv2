@@ -18,23 +18,45 @@ class HouseEditAnimalPage extends StatefulWidget {
 }
 
 class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
-  // Theme Colors - เดียวกับหน้า detail
-
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _typeController =
-      TextEditingController(); // เปลี่ยนเป็น TextEditingController
+  final _typeController = TextEditingController();
 
-  // Image - Updated variables เหมือนหน้า add
+  // Image - Updated variables
   File? _selectedImageFile;
   Uint8List? _selectedImageBytes;
   bool _removeImage = false;
   bool _isLoading = false;
   bool _isLoadingData = true;
-
+  String? _selectedStatus; // เพิ่มตัวแปรสำหรับสถานะ
   AnimalModel? _animal;
 
   final ImagePicker _picker = ImagePicker();
+
+  // เพิ่มรายการสถานะ
+  final List<Map<String, dynamic>> animalStatuses = [
+    {
+      'status': 'active',
+      'label': 'มีชีวิต',
+      'icon': Icons.favorite,
+      'color': ThemeColors.oliveGreen,
+      'description': 'สัตว์เลี้ยงมีสุขภาพดี',
+    },
+    {
+      'status': 'inactive',
+      'label': 'ไม่ได้ดูแล',
+      'icon': Icons.pause_circle,
+      'color': ThemeColors.burntOrange,
+      'description': 'ชั่วคราวไม่ได้ดูแล',
+    },
+    {
+      'status': 'dead',
+      'label': 'เสียชีวิต',
+      'icon': Icons.sentiment_very_dissatisfied,
+      'color': ThemeColors.clayOrange,
+      'description': 'สัตว์เลี้ยงเสียชีวิตแล้ว',
+    },
+  ];
 
   @override
   void initState() {
@@ -45,7 +67,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
   @override
   void dispose() {
     _nameController.dispose();
-    _typeController.dispose(); // dispose type controller
+    _typeController.dispose();
     super.dispose();
   }
 
@@ -62,8 +84,8 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
         setState(() {
           _animal = animal;
           _nameController.text = animal.name?.toString() ?? '';
-          _typeController.text =
-              animal.type?.toString() ?? ''; // ใช้ type controller
+          _typeController.text = animal.type?.toString() ?? '';
+          _selectedStatus = animal.status ?? 'active'; // โหลดสถานะ
           _isLoadingData = false;
         });
       } else {
@@ -71,7 +93,6 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
           setState(() {
             _isLoadingData = false;
           });
-          // แสดง error หากไม่พบข้อมูล
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('ไม่พบข้อมูลสัตว์เลี้ยงที่ต้องการแก้ไข'),
@@ -97,7 +118,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
     }
   }
 
-  // Updated Image Functions เหมือนหน้า add
+  // Updated Image Functions
   bool _hasSelectedImage() {
     return (kIsWeb && _selectedImageBytes != null) ||
         (!kIsWeb && _selectedImageFile != null);
@@ -240,9 +261,15 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
     });
   }
 
-  // บันทึกข้อมูล
+  // บันทึกข้อมูล - เพิ่มส่ง status
   Future<void> _saveAnimal() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // ตรวจสอบสถานะ
+    if (_selectedStatus == null) {
+      _showErrorSnackBar('กรุณาเลือกสถานะสัตว์เลี้ยง');
       return;
     }
 
@@ -265,15 +292,15 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
       await AnimalDomain.update(
         animalId: widget.animalId,
         type: _typeController.text.trim(),
-        // ใช้ type controller
         name: _nameController.text.trim(),
+        status: _selectedStatus!,
+        // เพิ่มส่งสถานะ
         imageFile: imageFile,
         removeImage: _removeImage,
       );
 
       if (mounted) {
         _showSuccessSnackBar('บันทึกข้อมูลสำเร็จ');
-        // กลับไปหน้าก่อนหน้าพร้อมส่ง result = true เพื่อ refresh
         Navigator.of(context).pop(true);
       }
     } catch (e) {
@@ -287,6 +314,111 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
         });
       }
     }
+  }
+
+  // เพิ่ม method สำหรับ build status section
+  Widget _buildStatusSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: ThemeColors.ivoryWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: ThemeColors.sandyTan, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: ThemeColors.warmStone.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'สถานะสัตว์เลี้ยง',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: ThemeColors.softBrown,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // แสดงสถานะเป็น Radio Tiles
+          Column(
+            children: animalStatuses.map((status) {
+              final isSelected = _selectedStatus == status['status'];
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? status['color'].withOpacity(0.1)
+                      : ThemeColors.beige.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? status['color'] : ThemeColors.sandyTan,
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: RadioListTile<String>(
+                  value: status['status'],
+                  groupValue: _selectedStatus,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedStatus = value;
+                    });
+                  },
+                  title: Row(
+                    children: [
+                      Icon(
+                        status['icon'],
+                        color: isSelected
+                            ? status['color']
+                            : ThemeColors.warmStone,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        status['label'],
+                        style: TextStyle(
+                          color: isSelected
+                              ? status['color']
+                              : ThemeColors.earthClay,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                  subtitle: Text(
+                    status['description'],
+                    style: TextStyle(
+                      color: ThemeColors.warmStone,
+                      fontSize: 12,
+                    ),
+                  ),
+                  activeColor: status['color'],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
+          if (_selectedStatus == null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'กรุณาเลือกสถานะสัตว์เลี้ยง',
+              style: TextStyle(color: Colors.red[700], fontSize: 12),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   @override
@@ -557,7 +689,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
 
               const SizedBox(height: 24),
 
-              // Animal Type Field - เปลี่ยนเป็นแบบพิมพ์
+              // Animal Type Field
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -645,7 +777,12 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
 
               const SizedBox(height: 24),
 
-              // Image Section - Updated เหมือนหน้า add
+              // Status Section - เพิ่มใหม่
+              _buildStatusSection(),
+
+              const SizedBox(height: 24),
+
+              // Image Section
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -688,10 +825,12 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: BuildImage(
-                              imagePath: _animal!.img!,
-                              tablePath: "animal",
-                            ),
+                            child: _hasSelectedImage()
+                                ? _buildImagePreview()
+                                : BuildImage(
+                                    imagePath: _animal!.img!,
+                                    tablePath: "animal",
+                                  ),
                           ),
                           Positioned(
                             top: 8,
@@ -702,12 +841,14 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: ThemeColors.burntOrange,
+                                color: _hasSelectedImage()
+                                    ? ThemeColors.oliveGreen
+                                    : ThemeColors.burntOrange,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Text(
-                                'รูปเดิม',
-                                style: TextStyle(
+                              child: Text(
+                                _hasSelectedImage() ? 'รูปใหม่' : 'รูปเดิม',
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
                                 ),
@@ -725,7 +866,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: TextButton.icon(
-                                onPressed: _pickImage,
+                                onPressed: _showImageSourceDialog,
                                 icon: const Icon(
                                   Icons.edit_rounded,
                                   color: Colors.white,
@@ -742,7 +883,7 @@ class _HouseEditAnimalPageState extends State<HouseEditAnimalPage> {
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
                                   ),
-                                  minimumSize: Size.zero, // ลด minimum size
+                                  minimumSize: Size.zero,
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                 ),

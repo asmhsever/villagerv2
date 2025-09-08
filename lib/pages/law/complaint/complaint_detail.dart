@@ -1,7 +1,5 @@
-// File: lib/pages/law/complaint/complaint_detail.dart
-// Update: remove bottom bar; move "ลบคำร้อง" button under the "การจัดการคำร้อง" card.
-// Also supports statuses: pending, received, in_progress, resolved, rejected.
-
+import 'package:fullproject/pages/law/complaint/send_complaint.dart';
+import 'package:fullproject/services/image_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fullproject/domains/complaint_domain.dart';
 import 'package:fullproject/domains/complaint_type_domain.dart';
@@ -9,7 +7,6 @@ import 'package:fullproject/models/complaint_model.dart';
 import 'package:fullproject/models/complaint_type_model.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:fullproject/pages/law/complaint/complaint_delete.dart';
-import 'package:fullproject/pages/law/complaint/complaint_success.dart';
 import 'package:fullproject/theme/Color.dart';
 import 'package:intl/intl.dart';
 
@@ -30,15 +27,6 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
   bool isUpdatingStatus = false;
 
   // Palette
-
-  // Valid status options
-  static const List<String> _statusOptions = <String>[
-    'pending',
-    'received',
-    'in_progress',
-    'resolved',
-    'rejected',
-  ];
 
   @override
   void initState() {
@@ -249,114 +237,22 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
 
   // --- Data ops ---
   Future<void> _refreshData() async {
+    if (!mounted) return;
+
     try {
       final updatedComplaint = await ComplaintDomain.getById(
         currentComplaint.complaintId!,
       );
+
       if (updatedComplaint != null && mounted) {
+        // ใช้ microtask เพื่อป้องกัน build conflicts
+        await Future.microtask(() {});
         setState(() => currentComplaint = updatedComplaint);
         await _loadAdditionalData();
       }
     } catch (e) {
       if (mounted) _showErrorSnackBar('เกิดข้อผิดพลาดในการโหลดข้อมูล: $e');
     }
-  }
-
-  Future<void> _updateStatus(String newStatus) async {
-    if (isUpdatingStatus) return;
-
-    // Navigate to success form when resolved; no bottom button needed.
-    if (newStatus == 'resolved') {
-      _navigateToSuccess();
-      return;
-    }
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: ThemeColors.ivoryWhite,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: getStatusColor(newStatus).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                newStatus == 'in_progress'
-                    ? Icons.play_arrow
-                    : newStatus == 'received'
-                    ? Icons.mark_email_read_rounded
-                    : newStatus == 'rejected'
-                    ? Icons.block
-                    : Icons.pending,
-                color: getStatusColor(newStatus),
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'อัปเดตสถานะ',
-              style: TextStyle(
-                color: getStatusColor(newStatus),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'เปลี่ยนสถานะเป็น "${getStatusLabel(newStatus)}" ใช่หรือไม่?',
-          style: const TextStyle(color: ThemeColors.earthClay),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('ยกเลิก'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: getStatusColor(newStatus),
-              foregroundColor: ThemeColors.ivoryWhite,
-            ),
-            child: const Text('ยืนยัน'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
-    setState(() => isUpdatingStatus = true);
-    try {
-      final success = await ComplaintDomain.updateStatus(
-        complaintId: currentComplaint.complaintId!,
-        status: newStatus,
-      );
-      if (success && mounted) {
-        _showSuccessSnackBar('อัปเดตสถานะสำเร็จ');
-        await _refreshData();
-      } else {
-        throw Exception('ไม่สามารถอัปเดตสถานะได้');
-      }
-    } catch (e) {
-      if (mounted) _showErrorSnackBar('เกิดข้อผิดพลาด: $e');
-    } finally {
-      if (mounted) setState(() => isUpdatingStatus = false);
-    }
-  }
-
-  void _navigateToSuccess() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            LawSuccessComplaintFormPage(complaint: currentComplaint),
-      ),
-    );
-    if (result == true) Navigator.pop(context, true);
   }
 
   void _navigateToDelete() async {
@@ -492,51 +388,320 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
     );
   }
 
-  Widget _buildImageWidget(String imageUrl) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        imageUrl,
-        width: double.infinity,
-        height: 200,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            height: 200,
-            color: ThemeColors.beige,
-            child: Center(
-              child: CircularProgressIndicator(
-                color: ThemeColors.softBrown,
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                    : null,
+  // เพิ่ม functions เหล่านี้ในคลาส _LawComplaintDetailPageState
+
+  Future<void> _acceptComplaint() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: ThemeColors.ivoryWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: ThemeColors.oliveGreen.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.check_circle_outline,
+                color: ThemeColors.oliveGreen,
+                size: 28,
               ),
             ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) => Container(
-          height: 200,
-          color: ThemeColors.beige,
-          child: const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.broken_image,
-                  color: ThemeColors.earthClay,
-                  size: 48,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'รับคำร้องเรียน',
+                style: TextStyle(
+                  color: ThemeColors.softBrown,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
                 ),
-                SizedBox(height: 8),
-                Text(
-                  'ไม่สามารถโหลดรูปภาพได้',
-                  style: TextStyle(color: ThemeColors.earthClay),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: ThemeColors.oliveGreen.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: ThemeColors.oliveGreen,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'การรับคำร้องเรียน',
+                        style: TextStyle(
+                          color: ThemeColors.oliveGreen,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'สถานะจะเปลี่ยนเป็น "กำลังดำเนินการ"',
+                    style: TextStyle(
+                      color: ThemeColors.earthClay,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'ยืนยันการรับคำร้องเรียนนี้?',
+              style: TextStyle(color: ThemeColors.earthClay, fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: ThemeColors.beige,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'หัวข้อ: ${currentComplaint.header}',
+                style: TextStyle(
+                  color: ThemeColors.softBrown,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: ThemeColors.warmStone,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: const Text(
+              'ยกเลิก',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.oliveGreen,
+              foregroundColor: ThemeColors.ivoryWhite,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_circle, size: 18),
+                const SizedBox(width: 6),
+                const Text(
+                  'รับคำร้องเรียน',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
           ),
-        ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await _performAcceptComplaint();
+    }
+  }
+
+  Future<void> _performAcceptComplaint() async {
+    setState(() => isUpdatingStatus = true);
+
+    try {
+      const acceptedByLawId = 1; // แทนที่ด้วย law user ID จริง
+
+      await ComplaintDomain.acceptComplaint(
+        complaintId: currentComplaint.complaintId!,
+        acceptedByLawId: acceptedByLawId,
+      );
+
+      if (mounted) {
+        _showSuccessSnackBar('รับคำร้องเรียนสำเร็จ');
+        await _refreshData();
+      }
+    } catch (e) {
+      print('Error accepting complaint: $e');
+      if (mounted) {
+        _showErrorSnackBar(
+          'เกิดข้อผิดพลาดในการรับคำร้องเรียน: ${e.toString()}',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isUpdatingStatus = false);
+      }
+    }
+  }
+
+  // Widget สำหรับแสดงปุ่ม Action ตามสถานะ
+  Widget _buildStatusActionButtons() {
+    final status = currentComplaint.status?.toLowerCase();
+
+    if (status == 'pending' || status == null) {
+      // แสดงปุ่มรับคำร้องเรียน
+      return Column(
+        children: [
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  ThemeColors.oliveGreen,
+                  ThemeColors.oliveGreen.withValues(alpha: 0.8),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ElevatedButton.icon(
+              onPressed: isUpdatingStatus ? null : _acceptComplaint,
+              icon: isUpdatingStatus
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          ThemeColors.ivoryWhite,
+                        ),
+                      ),
+                    )
+                  : Icon(Icons.check_circle_outline, size: 24),
+              label: Text(
+                isUpdatingStatus ? 'กำลังรับเรื่อง...' : 'รับคำร้องเรียน',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: ThemeColors.ivoryWhite,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (status == 'in_progress') {
+      // แสดงปุ่มส่งคำร้องเรียน
+      return Column(
+        children: [
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  ThemeColors.oliveGreen,
+                  ThemeColors.oliveGreen.withValues(alpha: 0.8),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ElevatedButton.icon(
+              onPressed: isUpdatingStatus ? null : _resolveComplaint,
+              icon: isUpdatingStatus
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          ThemeColors.ivoryWhite,
+                        ),
+                      ),
+                    )
+                  : Icon(Icons.send_rounded, size: 24),
+              label: Text(
+                isUpdatingStatus ? 'กำลังส่งเรื่อง...' : 'ส่งคำร้องเรียน',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: ThemeColors.ivoryWhite,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox.shrink(); // ไม่แสดงปุ่มสำหรับสถานะอื่น
+  }
+
+  Future<void> _resolveComplaint() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            LawComplaintResolveFormPage(complaint: currentComplaint),
+      ),
+    );
+  }
+
+  Widget _buildImageWidget(String imageUrl) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: BuildImage(
+        imagePath: currentComplaint.complaintImg!,
+        tablePath: "complaint/complaint",
       ),
     );
   }
@@ -842,6 +1007,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                                   ),
                                 ],
                               ),
+                              _buildStatusActionButtons(),
                               const SizedBox(height: 24),
                               Container(
                                 height: 1,
@@ -947,10 +1113,6 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                       icon: Icons.report_problem,
                       children: [
                         _buildInfoRow(
-                          'รหัสร้องเรียน:',
-                          '${currentComplaint.complaintId}',
-                        ),
-                        _buildInfoRow(
                           'วันที่ส่ง:',
                           formatDateFromString(currentComplaint.createAt),
                         ),
@@ -1022,166 +1184,215 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                       ],
                     ),
 
-                    // Status management
-                    _buildInfoCard(
-                      title: 'การจัดการคำร้อง',
-                      icon: Icons.admin_panel_settings,
-                      backgroundColor: ThemeColors.softBrown.withValues(
-                        alpha: 0.05,
-                      ),
-                      iconColor: ThemeColors.softBrown,
-                      children: [
-                        Row(
-                          children: const [
-                            Icon(
-                              Icons.assignment,
-                              color: ThemeColors.earthClay,
-                              size: 20,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'อัปเดตสถานะคำร้อง:',
-                              style: TextStyle(
-                                color: ThemeColors.earthClay,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: ThemeColors.warmStone),
-                            borderRadius: BorderRadius.circular(8),
-                            color: ThemeColors.ivoryWhite,
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value:
-                                  _statusOptions.contains(
-                                    currentComplaint.status?.toLowerCase(),
-                                  )
-                                  ? currentComplaint.status!.toLowerCase()
-                                  : null,
-                              hint: const Text(
-                                'เลือกสถานะ',
-                                style: TextStyle(color: ThemeColors.earthClay),
-                              ),
-                              isExpanded: true,
-                              icon: const Icon(
-                                Icons.arrow_drop_down,
-                                color: ThemeColors.softBrown,
-                              ),
-                              style: const TextStyle(
-                                color: ThemeColors.softBrown,
-                                fontSize: 16,
-                              ),
-                              onChanged: isUpdatingStatus
-                                  ? null
-                                  : (String? newValue) {
-                                      if (newValue != null &&
-                                          newValue != currentComplaint.status) {
-                                        _updateStatus(newValue);
-                                      }
-                                    },
-                              items: _statusOptions
-                                  .map<DropdownMenuItem<String>>(
-                                    (String value) => DropdownMenuItem(
-                                      value: value,
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 12,
-                                            height: 12,
-                                            decoration: BoxDecoration(
-                                              color: getStatusColor(value),
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(getStatusLabel(value)),
-                                          if (value == 'resolved') ...[
-                                            const Spacer(),
-                                            Icon(
-                                              Icons.arrow_forward,
-                                              color: ThemeColors.oliveGreen,
-                                              size: 16,
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.blue.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.info_outline,
-                                color: Colors.blue,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'หมายเหตุ: เลือก "เสร็จสิ้น" จะพาไปหน้าบันทึกผล • เลือก "ปฏิเสธ" จะบันทึกสถานะว่าไม่รับเรื่อง',
-                                  style: TextStyle(
-                                    color: Colors.blue.shade700,
-                                    fontSize: 12,
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        // DELETE button moved here (bottom of management section)
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: _navigateToDelete,
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            label: const Text(
-                              'ลบคำร้อง',
-                              style: TextStyle(color: Colors.red),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.red),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: const EdgeInsets.all(12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    if (currentComplaint.img != null &&
-                        currentComplaint.img!.isNotEmpty)
+                    if (currentComplaint.complaintImg != null &&
+                        currentComplaint.complaintImg!.isNotEmpty)
                       _buildInfoCard(
                         title: 'รูปภาพปัญหา',
                         icon: Icons.image,
-                        children: [_buildImageWidget(currentComplaint.img!)],
+                        children: [
+                          _buildImageWidget(currentComplaint.complaintImg!),
+                        ],
+                      ),
+
+                    // Show resolved information if status is resolved
+                    if (currentComplaint.status?.toLowerCase() == 'resolved')
+                      _buildInfoCard(
+                        title: 'ข้อมูลการแก้ไข',
+                        icon: Icons.task_alt,
+                        backgroundColor: ThemeColors.oliveGreen.withValues(
+                          alpha: 0.05,
+                        ),
+                        iconColor: ThemeColors.oliveGreen,
+                        children: [
+                          if (currentComplaint.updateAt != null)
+                            _buildInfoRow(
+                              'วันที่แก้ไข:',
+                              formatDateFromString(currentComplaint.updateAt),
+                              valueColor: ThemeColors.oliveGreen,
+                            ),
+
+                          if (currentComplaint.resolvedByLawId != null)
+                            _buildInfoRow(
+                              'ผู้แก้ไข:',
+                              'เจ้าหน้าที่ ID: ${currentComplaint.resolvedByLawId}',
+                              valueColor: ThemeColors.softBrown,
+                            ),
+
+                          if (currentComplaint.resolvedDescription != null &&
+                              currentComplaint
+                                  .resolvedDescription!
+                                  .isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            const Text(
+                              'รายละเอียดการแก้ไข:',
+                              style: TextStyle(
+                                color: ThemeColors.earthClay,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    ThemeColors.oliveGreen.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    ThemeColors.oliveGreen.withValues(
+                                      alpha: 0.05,
+                                    ),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: ThemeColors.oliveGreen.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: ThemeColors.oliveGreen.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle_outline,
+                                        color: ThemeColors.oliveGreen,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'การแก้ไขปัญหา',
+                                        style: TextStyle(
+                                          color: ThemeColors.oliveGreen,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    currentComplaint.resolvedDescription!,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: ThemeColors.softBrown,
+                                      height: 1.6,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+
+                          // Show resolved image if exists
+                          if (currentComplaint.resolvedImg != null &&
+                              currentComplaint.resolvedImg!.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            const Text(
+                              'รูปภาพการแก้ไข:',
+                              style: TextStyle(
+                                color: ThemeColors.earthClay,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: ThemeColors.oliveGreen.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: ThemeColors.oliveGreen.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: BuildImage(
+                                  imagePath: currentComplaint.resolvedImg!,
+                                  tablePath: "complaint/resolved",
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // Success message
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: ThemeColors.oliveGreen.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: ThemeColors.oliveGreen.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.verified,
+                                    color: ThemeColors.oliveGreen,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'คำร้องเรียนได้รับการแก้ไขเรียบร้อย',
+                                          style: TextStyle(
+                                            color: ThemeColors.oliveGreen,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        Text(
+                                          'ขอบคุณที่รอคอย เจ้าหน้าที่ได้ดำเนินการแก้ไขปัญหาแล้ว',
+                                          style: TextStyle(
+                                            color: ThemeColors.earthClay,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                   ],
                 ),

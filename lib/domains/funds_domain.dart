@@ -12,7 +12,8 @@ class FundDomain {
     required String type, // income, outcome
     required double amount,
     required String description,
-    dynamic receiptImageFile, // รูปใบเสร็จ
+    dynamic receiptImageFile, // รูปใบเสร็จ (File หรือ Uint8List)
+    dynamic approvImageFile, // รูปอนุมัติ (File หรือ Uint8List)
   }) async {
     try {
       // 1. สร้าง fund ก่อน (ยังไม่มีรูป)
@@ -25,34 +26,58 @@ class FundDomain {
             'description': description,
             'created_at': DateTime.now().toIso8601String(),
             'receipt_img': null,
+            'approv_img': null,
           })
           .select()
           .single();
 
       final createdFund = FundModel.fromJson(response);
 
-      // 2. อัปโหลดรูปใบเสร็จ (ถ้ามี)
-      if (createdFund.fundId != null &&
-          createdFund.fundId != 0 &&
-          receiptImageFile != null) {
-        String? receiptImageUrl = await SupabaseImage().uploadImage(
-          imageFile: receiptImageFile,
-          tableName: "funds",
-          rowName: "fund_id",
-          rowImgName: "receipt_img",
-          rowKey: createdFund.fundId!,
-          bucketPath: "funds",
-          imgName: "funds",
-        );
+      String? receiptImageUrl;
+      String? approvImageUrl;
 
-        // 3. อัปเดต fund ด้วย receiptImageUrl
-        if (receiptImageUrl != null) {
+      // 2. อัปโหลดรูปภาพ (ถ้ามี)
+      if (createdFund.fundId != null && createdFund.fundId != 0) {
+        // อัปโหลดรูปใบเสร็จ
+        if (receiptImageFile != null) {
+          receiptImageUrl = await SupabaseImage().uploadImage(
+            imageFile: receiptImageFile,
+
+            tableName: "funds",
+            rowName: "fund_id",
+            rowImgName: "receipt_img",
+            rowKey: createdFund.fundId!,
+            bucketPath: "funds/receipt",
+            imgName: "receipt",
+          );
+        }
+
+        // อัปโหลดรูปอนุมัติ
+        if (approvImageFile != null) {
+          approvImageUrl = await SupabaseImage().uploadImage(
+            imageFile: approvImageFile,
+            tableName: "funds",
+            rowName: "fund_id",
+            rowImgName: "approv_img",
+            rowKey: createdFund.fundId!,
+            bucketPath: "funds/approv",
+            imgName: "approv}",
+          );
+        }
+
+        // 3. อัปเดต fund ด้วย imageUrls
+        if (receiptImageUrl != null || approvImageUrl != null) {
+          final updateData = <String, dynamic>{};
+          if (receiptImageUrl != null)
+            updateData['receipt_img'] = receiptImageUrl;
+          if (approvImageUrl != null) updateData['approv_img'] = approvImageUrl;
+
           await _client
               .from(_table)
-              .update({'receipt_img': receiptImageUrl})
+              .update(updateData)
               .eq('fund_id', createdFund.fundId);
 
-          // Return fund ที่มี receiptImageUrl
+          // Return fund ที่มี imageUrls
           return FundModel(
             fundId: createdFund.fundId,
             villageId: createdFund.villageId,
@@ -61,6 +86,7 @@ class FundDomain {
             description: createdFund.description,
             createdAt: createdFund.createdAt,
             receiptImg: receiptImageUrl,
+            approvImg: approvImageUrl,
           );
         }
       }
@@ -79,11 +105,14 @@ class FundDomain {
     required String type,
     required double amount,
     required String description,
-    dynamic receiptImageFile, // รูปใบเสร็จใหม่
+    dynamic receiptImageFile, // รูปใบเสร็จใหม่ (File หรือ Uint8List)
+    dynamic approvImageFile, // รูปอนุมัติใหม่ (File หรือ Uint8List)
     bool removeReceiptImage = false, // flag สำหรับลบรูปใบเสร็จ
+    bool removeApprovImage = false, // flag สำหรับลบรูปอนุมัติ
   }) async {
     try {
       String? finalReceiptImageUrl;
+      String? finalApprovImageUrl;
 
       // จัดการรูปใบเสร็จ
       if (removeReceiptImage) {
@@ -95,8 +124,23 @@ class FundDomain {
           rowName: "fund_id",
           rowImgName: "receipt_img",
           rowKey: fundId,
-          bucketPath: "funds",
-          imgName: "funds",
+          bucketPath: "funds/receipt",
+          imgName: "receipt",
+        );
+      }
+
+      // จัดการรูปอนุมัติ
+      if (removeApprovImage) {
+        finalApprovImageUrl = null;
+      } else if (approvImageFile != null) {
+        finalApprovImageUrl = await SupabaseImage().uploadImage(
+          imageFile: approvImageFile,
+          tableName: "funds",
+          rowName: "fund_id",
+          rowImgName: "approv_img",
+          rowKey: fundId,
+          bucketPath: "funds/approv",
+          imgName: "approv",
         );
       }
 
@@ -108,15 +152,55 @@ class FundDomain {
         'description': description,
       };
 
-      // เพิ่ม receipt_img field เฉพาะเมื่อต้องการเปลี่ยนรูป
+      // เพิ่ม image fields เฉพาะเมื่อต้องการเปลี่ยนรูป
       if (removeReceiptImage || receiptImageFile != null) {
         updateData['receipt_img'] = finalReceiptImageUrl;
+      }
+
+      if (removeApprovImage || approvImageFile != null) {
+        updateData['approv_img'] = finalApprovImageUrl;
       }
 
       await _client.from(_table).update(updateData).eq('fund_id', fundId);
     } catch (e) {
       print('Error updating fund: $e');
       throw Exception('Failed to update fund: $e');
+    }
+  }
+
+  // Delete - ลบรายการกองทุน
+  static Future<void> delete(int fundId) async {
+    try {
+      // 1. ดึงข้อมูล fund เพื่อเช็ค imageUrls ก่อน
+      final response = await _client
+          .from(_table)
+          .select('receipt_img, approv_img')
+          .eq('fund_id', fundId)
+          .single();
+
+      final receiptImageUrl = response['receipt_img'] as String?;
+      final approvImageUrl = response['approv_img'] as String?;
+
+      // 2. ลบรูปภาพออกจาก storage ก่อน (ถ้ามี)
+      if (receiptImageUrl != null && receiptImageUrl.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "funds/receipt",
+          imageUrl: receiptImageUrl,
+        );
+      }
+
+      if (approvImageUrl != null && approvImageUrl.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "funds/approv",
+          imageUrl: approvImageUrl,
+        );
+      }
+
+      // 3. ลบข้อมูล fund จากฐานข้อมูล
+      await _client.from(_table).delete().eq('fund_id', fundId);
+    } catch (e) {
+      print('Error deleting fund: $e');
+      throw Exception('Failed to delete fund: $e');
     }
   }
 
@@ -207,33 +291,6 @@ class FundDomain {
     } catch (e) {
       print('Error getting fund by id: $e');
       return null;
-    }
-  }
-
-  static Future<void> delete(int fundId) async {
-    try {
-      // 1. ดึงข้อมูล vehicle เพื่อเช็ค imageUrl ก่อน
-      final response = await _client
-          .from(_table)
-          .select('img')
-          .eq('fund_id', fundId)
-          .single();
-
-      final imageUrl = response['img'] as String?;
-
-      // 2. ลบรูปภาพออกจาก storage ก่อน (ถ้ามี)
-      if (imageUrl != null && imageUrl.isNotEmpty) {
-        await SupabaseImage().deleteImage(
-          bucketPath: "funds",
-          imageUrl: imageUrl,
-        );
-      }
-
-      // 3. ลบข้อมูล vehicle จากฐานข้อมูล
-      await _client.from(_table).delete().eq('fund_id', fundId);
-    } catch (e) {
-      print('Error deleting vehicle: $e');
-      throw Exception('Failed to delete vehicle: $e');
     }
   }
 

@@ -129,7 +129,7 @@ class NotionDomain {
             'header': header,
             'description': description,
             'type': type,
-            'create_date': DateTime.now().toIso8601String(),
+            'created_at': DateTime.now().toIso8601String(),
             'img': null,
           })
           .select()

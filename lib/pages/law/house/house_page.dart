@@ -11,6 +11,7 @@ import 'house_detail.dart';
 
 class LawHouseManagePage extends StatefulWidget {
   final int villageId;
+
   const LawHouseManagePage({super.key, required this.villageId});
 
   @override
@@ -38,7 +39,9 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
 
   Future<List<HouseModel>> _fetchHouses() async {
     // WHY: Centralize domain call; safe to reuse for RefreshIndicator and on-return reloads.
-    final houses = await HouseDomain.getAllInVillage(villageId: widget.villageId);
+    final houses = await HouseDomain.getAllInVillage(
+      villageId: widget.villageId,
+    );
     houses.sort((a, b) => (a.houseNumber ?? '').compareTo(b.houseNumber ?? ''));
     return houses;
   }
@@ -50,9 +53,15 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
 
   // Derived statistics based on given list
   Map<String, int> _getStatistics(List<HouseModel> list) {
-    final owned = list.where((h) => (h.status ?? '').toLowerCase() == 'owned').length;
-    final vacant = list.where((h) => (h.status ?? '').toLowerCase() == 'vacant').length;
-    final rented = list.where((h) => (h.status ?? '').toLowerCase() == 'rented').length;
+    final owned = list
+        .where((h) => (h.status ?? '').toLowerCase() == 'owned')
+        .length;
+    final vacant = list
+        .where((h) => (h.status ?? '').toLowerCase() == 'vacant')
+        .length;
+    final rented = list
+        .where((h) => (h.status ?? '').toLowerCase() == 'rented')
+        .length;
     return {
       'total': list.length,
       'owned': owned,
@@ -111,12 +120,15 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
             // Filtering derived from inputs
             final filtered = list.where((house) {
               final q = _searchQuery.trim().toLowerCase();
-              final matchesSearch = q.isEmpty ||
+              final matchesSearch =
+                  q.isEmpty ||
                   ((house.houseNumber ?? '').toLowerCase().contains(q)) ||
                   ((house.owner ?? '').toLowerCase().contains(q));
 
               final target = _selectedStatus.toLowerCase();
-              final matchesStatus = target == 'all' || (house.status ?? '').toLowerCase() == target;
+              final matchesStatus =
+                  target == 'all' ||
+                  (house.status ?? '').toLowerCase() == target;
 
               return matchesSearch && matchesStatus;
             }).toList();
@@ -132,15 +144,16 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                   child: filtered.isEmpty
                       ? _buildEmpty()
                       : RefreshIndicator(
-                    color: ThemeColors.softBrown,
-                    backgroundColor: ThemeColors.ivoryWhite,
-                    onRefresh: _reload,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) => _buildHouseCard(filtered[index]),
-                    ),
-                  ),
+                          color: ThemeColors.softBrown,
+                          backgroundColor: ThemeColors.ivoryWhite,
+                          onRefresh: _reload,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) =>
+                                _buildHouseCard(filtered[index]),
+                          ),
+                        ),
                 ),
               ],
             );
@@ -163,7 +176,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
           end: Alignment.bottomRight,
         ),
         boxShadow: [
-          BoxShadow(color: ThemeColors.softBrown.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: ThemeColors.softBrown.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
@@ -174,10 +191,17 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
-              child: const Icon(Icons.arrow_back_rounded, size: 24, color: ThemeColors.ivoryWhite),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                size: 24,
+                color: ThemeColors.ivoryWhite,
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -194,8 +218,15 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
           ),
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.home_work_rounded, size: 24, color: ThemeColors.ivoryWhite),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.home_work_rounded,
+              size: 24,
+              color: ThemeColors.ivoryWhite,
+            ),
           ),
         ],
       ),
@@ -210,7 +241,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
         color: ThemeColors.ivoryWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: ThemeColors.softBrown.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: ThemeColors.softBrown.withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -219,24 +254,61 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: ThemeColors.sandyTan, borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.analytics_rounded, color: ThemeColors.softBrown, size: 20),
+                decoration: BoxDecoration(
+                  color: ThemeColors.sandyTan,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.analytics_rounded,
+                  color: ThemeColors.softBrown,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
-              Text('สรุปข้อมูลบ้าน',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: ThemeColors.softBrown)),
+              Text(
+                'สรุปข้อมูลบ้าน',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: ThemeColors.softBrown,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 20),
           Row(
             children: [
-              Expanded(child: _buildStatItem('ทั้งหมด', stats['total'] ?? 0, ThemeColors.softBrown)),
+              Expanded(
+                child: _buildStatItem(
+                  'ทั้งหมด',
+                  stats['total'] ?? 0,
+                  ThemeColors.softBrown,
+                ),
+              ),
               Container(width: 1, height: 60, color: ThemeColors.softBorder),
-              Expanded(child: _buildStatItem('มีเจ้าของ', stats['owned'] ?? 0, ThemeColors.oliveGreen)),
+              Expanded(
+                child: _buildStatItem(
+                  'มีเจ้าของ',
+                  stats['owned'] ?? 0,
+                  ThemeColors.oliveGreen,
+                ),
+              ),
               Container(width: 1, height: 60, color: ThemeColors.softBorder),
-              Expanded(child: _buildStatItem('ว่าง', stats['vacant'] ?? 0, ThemeColors.warmAmber)),
+              Expanded(
+                child: _buildStatItem(
+                  'ว่าง',
+                  stats['vacant'] ?? 0,
+                  ThemeColors.warmAmber,
+                ),
+              ),
               Container(width: 1, height: 60, color: ThemeColors.softBorder),
-              Expanded(child: _buildStatItem('ให้เช่า', stats['rented'] ?? 0, ThemeColors.softTerracotta)),
+              Expanded(
+                child: _buildStatItem(
+                  'ให้เช่า',
+                  stats['rented'] ?? 0,
+                  ThemeColors.softTerracotta,
+                ),
+              ),
             ],
           ),
         ],
@@ -255,31 +327,53 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'ค้นหาเลขที่บ้านหรือชื่อเจ้าของ...',
-                hintStyle: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
+                hintStyle: TextStyle(
+                  color: ThemeColors.earthClay,
+                  fontSize: 14,
+                ),
                 prefixIcon: Container(
                   padding: const EdgeInsets.all(12),
-                  child: const Icon(Icons.search_rounded, color: ThemeColors.softBrown, size: 20),
+                  child: const Icon(
+                    Icons.search_rounded,
+                    color: ThemeColors.softBrown,
+                    size: 20,
+                  ),
                 ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                  icon: Icon(Icons.clear_rounded, color: ThemeColors.earthClay),
-                  onPressed: () {
-                    _searchController.clear();
-                    _searchQuery = '';
-                    _applyFilters();
-                  },
-                )
+                        icon: Icon(
+                          Icons.clear_rounded,
+                          color: ThemeColors.earthClay,
+                        ),
+                        onPressed: () {
+                          _searchController.clear();
+                          _searchQuery = '';
+                          _applyFilters();
+                        },
+                      )
                     : null,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: ThemeColors.focusedBrown, width: 2),
+                  borderSide: const BorderSide(
+                    color: ThemeColors.focusedBrown,
+                    width: 2,
+                  ),
                 ),
                 filled: true,
                 fillColor: ThemeColors.ivoryWhite,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
               ),
-              style: TextStyle(color: ThemeColors.softBrown, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: ThemeColors.softBrown,
+                fontWeight: FontWeight.w500,
+              ),
               onChanged: (value) {
                 _searchQuery = value;
                 _applyFilters();
@@ -294,14 +388,25 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: ThemeColors.softBorder, width: 2),
               boxShadow: [
-                BoxShadow(color: ThemeColors.softBrown.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 2)),
+                BoxShadow(
+                  color: ThemeColors.softBrown.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _selectedStatus,
-                icon: const Icon(Icons.tune_rounded, size: 20, color: ThemeColors.softBrown),
-                style: TextStyle(color: ThemeColors.softBrown, fontWeight: FontWeight.w600),
+                icon: const Icon(
+                  Icons.tune_rounded,
+                  size: 20,
+                  color: ThemeColors.softBrown,
+                ),
+                style: TextStyle(
+                  color: ThemeColors.softBrown,
+                  fontWeight: FontWeight.w600,
+                ),
                 items: const [
                   DropdownMenuItem(value: 'all', child: Text('ทั้งหมด')),
                   DropdownMenuItem(value: 'owned', child: Text('มีเจ้าของ')),
@@ -334,7 +439,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
             ),
             child: Text(
               'พบ $count รายการ',
-              style: TextStyle(color: ThemeColors.softBrown, fontSize: 14, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: ThemeColors.softBrown,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -354,7 +463,9 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
           onTap: () async {
             final updated = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => HouseDetailPage(houseId: house.houseId)),
+              MaterialPageRoute(
+                builder: (_) => HouseDetailPage(houseId: house.houseId),
+              ),
             );
             if (updated == true && mounted) _reload();
           },
@@ -387,7 +498,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.home_rounded, color: ThemeColors.ivoryWhite, size: 32),
+                  child: const Icon(
+                    Icons.home_rounded,
+                    color: ThemeColors.ivoryWhite,
+                    size: 32,
+                  ),
                 ),
                 const SizedBox(width: 20),
                 // House info
@@ -400,24 +515,35 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                           Expanded(
                             child: Text(
                               'บ้านเลขที่ ${house.houseNumber ?? '-'}',
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ThemeColors.softBrown),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: ThemeColors.softBrown,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 12),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
                                   _getStatusColor(house.status),
-                                  _getStatusColor(house.status).withOpacity(0.8),
+                                  _getStatusColor(
+                                    house.status,
+                                  ).withOpacity(0.8),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _getStatusColor(house.status).withOpacity(0.3),
+                                  color: _getStatusColor(
+                                    house.status,
+                                  ).withOpacity(0.3),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -425,7 +551,11 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                             ),
                             child: Text(
                               _getStatusText(house.status),
-                              style: const TextStyle(color: ThemeColors.ivoryWhite, fontSize: 11, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                color: ThemeColors.ivoryWhite,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -442,12 +572,20 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.person_rounded, size: 16, color: ThemeColors.earthClay),
+                              const Icon(
+                                Icons.person_rounded,
+                                size: 16,
+                                color: ThemeColors.earthClay,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   house.owner!,
-                                  style: TextStyle(color: ThemeColors.softBrown, fontSize: 14, fontWeight: FontWeight.w500),
+                                  style: TextStyle(
+                                    color: ThemeColors.softBrown,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -465,12 +603,20 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.phone_rounded, size: 16, color: ThemeColors.earthClay),
+                              const Icon(
+                                Icons.phone_rounded,
+                                size: 16,
+                                color: ThemeColors.earthClay,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   house.phone!,
-                                  style: TextStyle(color: ThemeColors.softBrown, fontSize: 14, fontWeight: FontWeight.w500),
+                                  style: TextStyle(
+                                    color: ThemeColors.softBrown,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -487,12 +633,20 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.home_work_rounded, size: 16, color: ThemeColors.earthClay),
+                              const Icon(
+                                Icons.home_work_rounded,
+                                size: 16,
+                                color: ThemeColors.earthClay,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   house.houseType!,
-                                  style: TextStyle(color: ThemeColors.softBrown, fontSize: 14, fontWeight: FontWeight.w500),
+                                  style: TextStyle(
+                                    color: ThemeColors.softBrown,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -523,14 +677,27 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
               color: ThemeColors.ivoryWhite,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
-                BoxShadow(color: ThemeColors.softBrown.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 2)),
+                BoxShadow(
+                  color: ThemeColors.softBrown.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
-            child: CircularProgressIndicator(color: ThemeColors.softBrown, strokeWidth: 3),
+            child: CircularProgressIndicator(
+              color: ThemeColors.softBrown,
+              strokeWidth: 3,
+            ),
           ),
           const SizedBox(height: 20),
-          Text('กำลังโหลดข้อมูลบ้าน...',
-              style: TextStyle(color: ThemeColors.earthClay, fontSize: 16, fontWeight: FontWeight.w500)),
+          Text(
+            'กำลังโหลดข้อมูลบ้าน...',
+            style: TextStyle(
+              color: ThemeColors.earthClay,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );
@@ -543,11 +710,19 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: ThemeColors.softTerracotta, size: 40),
+            const Icon(
+              Icons.error_outline,
+              color: ThemeColors.softTerracotta,
+              size: 40,
+            ),
             const SizedBox(height: 12),
             const Text('เกิดข้อผิดพลาดในการโหลดข้อมูล'),
             const SizedBox(height: 6),
-            Text('$error', textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54)),
+            Text(
+              '$error',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.black54),
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _reload,
@@ -567,13 +742,30 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
         children: [
           Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(color: ThemeColors.warmStone.withOpacity(0.1), shape: BoxShape.circle),
-            child: Icon(Icons.home_outlined, size: 64, color: ThemeColors.warmStone),
+            decoration: BoxDecoration(
+              color: ThemeColors.warmStone.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.home_outlined,
+              size: 64,
+              color: ThemeColors.warmStone,
+            ),
           ),
           const SizedBox(height: 20),
-          Text('ยังไม่มีข้อมูลบ้าน', style: TextStyle(fontSize: 18, color: ThemeColors.earthClay, fontWeight: FontWeight.w600)),
+          Text(
+            'ยังไม่มีข้อมูลบ้าน',
+            style: TextStyle(
+              fontSize: 18,
+              color: ThemeColors.earthClay,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 8),
-          const Text('เริ่มต้นด้วยการเพิ่มข้อมูลบ้านใหม่', style: TextStyle(fontSize: 14, color: ThemeColors.warmStone)),
+          const Text(
+            'เริ่มต้นด้วยการเพิ่มข้อมูลบ้านใหม่',
+            style: TextStyle(fontSize: 14, color: ThemeColors.warmStone),
+          ),
         ],
       ),
     );
@@ -589,10 +781,24 @@ class _LawHouseManagePageState extends State<LawHouseManagePage> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: color.withOpacity(0.3)),
           ),
-          child: Text('$value', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
+          child: Text(
+            '$value',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
         ),
         const SizedBox(height: 8),
-        Text(label, style: TextStyle(fontSize: 13, color: ThemeColors.earthClay, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: ThemeColors.earthClay,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }

@@ -267,7 +267,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                       fontSize: 13,
                     ),
                   ),
-                  if (widget.complaint.img?.isNotEmpty == true)
+                  if (widget.complaint.complaintImg?.isNotEmpty == true)
                     Text(
                       '• รูปภาพประกอบ: มี',
                       style: TextStyle(
@@ -674,7 +674,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                   ),
 
                   // Image Information
-                  if (widget.complaint.img?.isNotEmpty == true)
+                  if (widget.complaint.complaintImg?.isNotEmpty == true)
                     _buildInfoCard(
                       title: 'รูปภาพประกอบ',
                       icon: Icons.image,
@@ -709,7 +709,7 @@ class _LawComplaintDeletePageState extends State<LawComplaintDeletePage> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Image.network(
-                            widget.complaint.img!,
+                            widget.complaint.complaintImg!,
                             width: double.infinity,
                             height: 200,
                             fit: BoxFit.cover,

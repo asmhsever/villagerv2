@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fullproject/models/funds_model.dart';
+import 'package:fullproject/pages/law/fund/fund_edit_page.dart';
+import 'package:fullproject/services/image_service.dart';
 import 'package:fullproject/theme/Color.dart';
 import 'package:intl/intl.dart';
 
@@ -8,30 +10,32 @@ class LawFundDetailPage extends StatelessWidget {
 
   const LawFundDetailPage({Key? key, required this.fund}) : super(key: key);
 
-  // Theme Colors
-
   String _formatCurrency(double amount) {
     final formatter = NumberFormat('#,##0.00');
     return '฿${formatter.format(amount)}';
   }
 
-  // String _formatDate(DateTime? date) {
-  //   if (date == null) return '-';
-  //   final formatter = DateFormat('dd MMMM yyyy เวลา HH:mm น.', 'th');
-  //   return formatter.format(date);
-  // }
-  //
-  // String _formatDateShort(DateTime? date) {
-  //   if (date == null) return '-';
-  //   final formatter = DateFormat('dd/MM/yyyy HH:mm');
-  //   return formatter.format(date);
-  // }
-
-  void _showFullScreenImage(BuildContext context, String imageUrl) {
+  void _showFullScreenImage(
+    BuildContext context,
+    String imageUrl,
+    String title,
+    String bucketPath,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => _FullScreenImageViewer(imageUrl: imageUrl),
+        builder: (context) => _FullScreenImageViewer(
+          imageUrl: imageUrl,
+          title: title,
+          bucketPath: bucketPath,
+        ),
       ),
+    );
+  }
+
+  void _navigateToEdit(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LawFundEditPage(fund: fund)),
     );
   }
 
@@ -47,6 +51,11 @@ class LawFundDetailPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           'รายละเอียดรายการ',
           style: TextStyle(
@@ -98,13 +107,46 @@ class LawFundDetailPage extends StatelessWidget {
                       children: [
                         Icon(icon, color: ThemeColors.ivoryWhite, size: 20),
                         SizedBox(width: 8),
-                        Text(
-                          typeText,
-                          style: TextStyle(
-                            color: ThemeColors.ivoryWhite,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              typeText,
+                              style: TextStyle(
+                                color: ThemeColors.ivoryWhite,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(width: 20),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () => _navigateToEdit(context),
+                              child: Container(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.edit_outlined,
+                                      color: ThemeColors.ivoryWhite,
+                                      size: 16,
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'แก้ไข',
+                                      style: TextStyle(
+                                        color: ThemeColors.ivoryWhite,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -210,8 +252,8 @@ class LawFundDetailPage extends StatelessWidget {
               ),
             ),
 
-            // Receipt Image Section
-            if (fund.receiptImg != null) ...[
+            // Images Section - Display both receipt and approval images
+            if (fund.receiptImg != null || fund.approvImg != null) ...[
               SizedBox(height: 16),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16),
@@ -235,13 +277,13 @@ class LawFundDetailPage extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          Icons.receipt_long_outlined,
+                          Icons.image_outlined,
                           color: ThemeColors.softBrown,
                           size: 24,
                         ),
                         SizedBox(width: 8),
                         Text(
-                          'หลักฐานการทำรายการ',
+                          'รูปภาพ',
                           style: TextStyle(
                             color: ThemeColors.softBrown,
                             fontSize: 20,
@@ -252,127 +294,36 @@ class LawFundDetailPage extends StatelessWidget {
                     ),
                     SizedBox(height: 16),
 
-                    // Image Container
-                    GestureDetector(
-                      onTap: () =>
-                          _showFullScreenImage(context, fund.receiptImg!),
-                      child: Container(
-                        width: double.infinity,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: ThemeColors.sandyTan,
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: ThemeColors.warmStone.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: Offset(0, 4),
+                    // Images Row
+                    Row(
+                      children: [
+                        // Receipt Image
+                        if (fund.receiptImg != null)
+                          Expanded(
+                            child: _buildImageCard(
+                              context,
+                              fund.receiptImg!,
+                              'รูปใบเสร็จ',
+                              Icons.receipt_long_outlined,
+                              "funds/receipt",
                             ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            fund.receiptImg!,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: ThemeColors.ivoryWhite,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              ThemeColors.softBrown,
-                                            ),
-                                        strokeWidth: 2,
-                                      ),
-                                      SizedBox(height: 12),
-                                      Text(
-                                        'กำลังโหลดรูปภาพ...',
-                                        style: TextStyle(
-                                          color: ThemeColors.earthClay,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: ThemeColors.burntOrange.withOpacity(
-                                    0.1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.broken_image_outlined,
-                                        size: 48,
-                                        color: ThemeColors.burntOrange,
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        'ไม่สามารถโหลดรูปภาพได้',
-                                        style: TextStyle(
-                                          color: ThemeColors.burntOrange,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
                           ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 12),
 
-                    // View Full Size Button
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: () =>
-                            _showFullScreenImage(context, fund.receiptImg!),
-                        icon: Icon(
-                          Icons.zoom_in_outlined,
-                          color: ThemeColors.softTerracotta,
-                        ),
-                        label: Text(
-                          'ดูขนาดเต็ม',
-                          style: TextStyle(
-                            color: ThemeColors.softTerracotta,
-                            fontWeight: FontWeight.w600,
+                        if (fund.receiptImg != null && fund.approvImg != null)
+                          SizedBox(width: 12),
+
+                        // Approval Image
+                        if (fund.approvImg != null)
+                          Expanded(
+                            child: _buildImageCard(
+                              context,
+                              fund.approvImg!,
+                              'รูปหลักฐานอนุมัติ',
+                              Icons.approval_outlined,
+                              "funds/approv",
+                            ),
                           ),
-                        ),
-                        style: TextButton.styleFrom(
-                          backgroundColor: ThemeColors.softTerracotta
-                              .withOpacity(0.1),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -426,13 +377,120 @@ class LawFundDetailPage extends StatelessWidget {
       ],
     );
   }
+
+  Widget _buildImageCard(
+    BuildContext context,
+    String imageUrl,
+    String title,
+    IconData icon,
+    String bucketPath,
+  ) {
+    print(imageUrl);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title
+        Row(
+          children: [
+            Icon(icon, color: ThemeColors.softTerracotta, size: 16),
+            SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: ThemeColors.softTerracotta,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+
+        // Image
+        GestureDetector(
+          onTap: () =>
+              _showFullScreenImage(context, imageUrl, title, bucketPath),
+          child: Container(
+            width: double.infinity,
+            height: 120,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: ThemeColors.sandyTan, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: ThemeColors.warmStone.withOpacity(0.2),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(11),
+                  child: BuildImage(imagePath: imageUrl, tablePath: bucketPath),
+                ),
+                // Tap indicator
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.zoom_in, color: Colors.white, size: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 8),
+
+        // View button
+        Center(
+          child: TextButton(
+            onPressed: () =>
+                _showFullScreenImage(context, imageUrl, title, bucketPath),
+            style: TextButton.styleFrom(
+              backgroundColor: ThemeColors.softTerracotta.withOpacity(0.1),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              minimumSize: Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'ดูขนาดเต็ม',
+              style: TextStyle(
+                color: ThemeColors.softTerracotta,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 // Full Screen Image Viewer
 class _FullScreenImageViewer extends StatelessWidget {
   final String imageUrl;
+  final String title;
+  final String bucketPath;
 
-  const _FullScreenImageViewer({required this.imageUrl});
+  const _FullScreenImageViewer({
+    required this.imageUrl,
+    required this.title,
+    required this.bucketPath,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -441,55 +499,14 @@ class _FullScreenImageViewer extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        elevation: 0,
-        title: Text('หลักฐานการทำรายการ'),
+        title: Text(title),
         centerTitle: true,
       ),
       body: Center(
         child: InteractiveViewer(
           minScale: 0.5,
           maxScale: 3.0,
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.contain,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'กำลังโหลดรูปภาพ...',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.broken_image_outlined,
-                      size: 64,
-                      color: Colors.white54,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'ไม่สามารถโหลดรูปภาพได้',
-                      style: TextStyle(color: Colors.white54),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          child: BuildImage(imagePath: imageUrl, tablePath: bucketPath),
         ),
       ),
     );

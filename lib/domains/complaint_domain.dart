@@ -27,10 +27,13 @@ class ComplaintDomain {
             'header': header,
             'description': description,
             'level': level,
-            'private': isPrivate,
-            'img': null,
+            'private': isPrivate, // แก้ไขชื่อ field
+            'complaint_img': null,
             'status': null,
             'update_at': null,
+            'resolved_by_law_id': null,
+            'resolved_description': null,
+            'resolved_img': null,
           })
           .select()
           .single();
@@ -45,9 +48,9 @@ class ComplaintDomain {
           imageFile: imageFile,
           tableName: "complaint",
           rowName: "complaint_id",
-          rowImgName: "img",
+          rowImgName: "complaint_img",
           rowKey: createdComplaint.complaintId!,
-          bucketPath: "complaint",
+          bucketPath: "complaint/complaint",
           imgName: "complaint",
         );
 
@@ -55,7 +58,7 @@ class ComplaintDomain {
         if (imageUrl != null) {
           await _client
               .from(_tableName)
-              .update({'img': imageUrl})
+              .update({'complaint_img': imageUrl})
               .eq('complaint_id', createdComplaint.complaintId!);
 
           // Return complaint ที่มี imageUrl
@@ -68,9 +71,12 @@ class ComplaintDomain {
             description: createdComplaint.description,
             level: createdComplaint.level,
             isPrivate: createdComplaint.isPrivate,
-            img: imageUrl,
+            complaintImg: imageUrl,
             status: createdComplaint.status,
             updateAt: createdComplaint.updateAt,
+            resolvedByLawId: createdComplaint.resolvedByLawId,
+            resolvedDescription: createdComplaint.resolvedDescription,
+            resolvedImg: createdComplaint.resolvedImg,
           );
         }
       }
@@ -122,7 +128,7 @@ class ComplaintDomain {
         'header': header,
         'description': description,
         'level': level,
-        'is_private': isPrivate,
+        'private': isPrivate,
         'status': status,
         'update_at': DateTime.now().toIso8601String(),
       };
@@ -142,6 +148,69 @@ class ComplaintDomain {
     }
   }
 
+  // Accept complaint - รับเรื่องร้องเรียน (เปลี่ยนสถานะเป็น in_progress)
+  static Future<void> acceptComplaint({
+    required int complaintId,
+    required int acceptedByLawId,
+  }) async {
+    try {
+      await _client
+          .from(_tableName)
+          .update({
+            'status': 'in_progress',
+            'resolved_by_law_id': acceptedByLawId, // ใครเป็นคนรับเรื่อง
+            'update_at': DateTime.now().toIso8601String(),
+          })
+          .eq('complaint_id', complaintId);
+    } catch (e) {
+      print('Error accepting complaint: $e');
+      throw Exception('Failed to accept complaint: $e');
+    }
+  }
+
+  // Resolve complaint - แก้ไขร้องเรียน (สำหรับ Admin/Law)
+  static Future<void> resolve({
+    required int complaintId,
+    required int resolvedByLawId,
+    required String resolvedDescription,
+    required dynamic resolvedImageFile, // รูปภาพการแก้ไข
+    String status = 'resolved',
+  }) async {
+    try {
+      String? resolvedImageUrl;
+
+      // อัปโหลดรูปการแก้ไข (ถ้ามี)
+      if (resolvedImageFile != null) {
+        resolvedImageUrl = await SupabaseImage().uploadImage(
+          imageFile: resolvedImageFile,
+          tableName: "complaint",
+          rowName: "complaint_id",
+          rowImgName: "resolved_img",
+          rowKey: complaintId,
+          bucketPath: "complaint/resolved",
+          imgName: "resolved",
+        );
+      }
+
+      // อัปเดตข้อมูลการแก้ไข
+      final updateData = {
+        'status': status,
+        'resolved_by_law_id': resolvedByLawId,
+        'resolved_description': resolvedDescription,
+        'resolved_img': resolvedImageUrl,
+        'update_at': DateTime.now().toIso8601String(),
+      };
+
+      await _client
+          .from(_tableName)
+          .update(updateData)
+          .eq('complaint_id', complaintId);
+    } catch (e) {
+      print('Error resolving complaint: $e');
+      throw Exception('Failed to resolve complaint: $e');
+    }
+  }
+
   // Read - อ่านร้องเรียนทั้งหมดในระบบ (Admin only)
   static Future<List<ComplaintModel>> getAll() async {
     try {
@@ -156,6 +225,98 @@ class ComplaintDomain {
     } catch (e) {
       print('Error getting all complaints: $e');
       return [];
+    }
+  }
+
+  // Read by house - อ่านร้องเรียนของบ้านหลังหนึ่ง
+  static Future<List<ComplaintModel>> getByHouseId(int houseId) async {
+    try {
+      final response = await _client
+          .from(_tableName)
+          .select()
+          .eq('house_id', houseId)
+          .order('create_at', ascending: false);
+
+      return response
+          .map<ComplaintModel>((json) => ComplaintModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      print('Error getting complaints by house: $e');
+      return [];
+    }
+  }
+
+  // Read by status - อ่านร้องเรียนตามสถานะ
+  static Future<List<ComplaintModel>> getByStatus(String status) async {
+    try {
+      final response = await _client
+          .from(_tableName)
+          .select()
+          .eq('status', status)
+          .order('create_at', ascending: false);
+
+      return response
+          .map<ComplaintModel>((json) => ComplaintModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      print('Error getting complaints by status: $e');
+      return [];
+    }
+  }
+
+  // Read pending complaints - ร้องเรียนที่รอดำเนินการ
+  static Future<List<ComplaintModel>> getPendingComplaints() async {
+    try {
+      final response = await _client
+          .from(_tableName)
+          .select()
+          .or('status.is.null,status.eq.pending')
+          .order('create_at', ascending: true); // เก่าก่อนใหม่หลัง
+
+      return response
+          .map<ComplaintModel>((json) => ComplaintModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      print('Error getting pending complaints: $e');
+      return [];
+    }
+  }
+
+  // Delete - ลบร้องเรียน
+  static Future<bool> delete(int complaintId) async {
+    try {
+      // 1. ดึงข้อมูล complaint เพื่อเช็ค imageUrls ก่อน
+      final response = await _client
+          .from(_tableName)
+          .select('complaint_img, resolved_img')
+          .eq('complaint_id', complaintId)
+          .single();
+
+      final complaintImg = response['complaint_img'] as String?;
+      final resolvedImg = response['resolved_img'] as String?;
+
+      // 2. ลบรูปภาพออกจาก storage (ถ้ามี)
+      if (complaintImg != null && complaintImg.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "complaint/complaint",
+          imageUrl: complaintImg,
+        );
+      }
+
+      if (resolvedImg != null && resolvedImg.isNotEmpty) {
+        await SupabaseImage().deleteImage(
+          bucketPath: "complaint/resolved",
+          imageUrl: resolvedImg,
+        );
+      }
+
+      // 3. ลบข้อมูล complaint จากฐานข้อมูล
+      await _client.from(_tableName).delete().eq('complaint_id', complaintId);
+
+      return true;
+    } catch (e) {
+      print('Error deleting complaint: $e');
+      return false;
     }
   }
 
@@ -497,18 +658,6 @@ class ComplaintDomain {
       return true;
     } catch (e) {
       print('Error updating complaint level: $e');
-      return false;
-    }
-  }
-
-  // Delete - ลบร้องเรียน
-  static Future<bool> delete(int complaintId) async {
-    try {
-      await _client.from(_tableName).delete().eq('complaint_id', complaintId);
-
-      return true;
-    } catch (e) {
-      print('Error deleting complaint: $e');
       return false;
     }
   }

@@ -244,6 +244,211 @@ class BillDomain {
     }
   }
 
+  // เพิ่มฟังก์ชันเหล่านี้ใน BillDomain class
+
+  // 1. ส่งบิล - นิติส่งบิลพร้อมรูปบิล (PENDING)
+  static Future<bool> sendBill({
+    required int billId,
+    required dynamic billImageFile, // รูปบิลที่จะส่ง
+  }) async {
+    try {
+      // อัปโหลดรูปบิล
+      final billImageUrl = await SupabaseImage().uploadImage(
+        imageFile: billImageFile,
+        tableName: "bill",
+        rowName: "bill_id",
+        rowImgName: "bill_img",
+        rowKey: billId,
+        bucketPath: "bill/bill",
+        imgName: "bill",
+      );
+
+      if (billImageUrl == null) {
+        print('Error: Failed to upload bill image');
+        return false;
+      }
+
+      // อัปเดตสถานะเป็น PENDING พร้อมรูปบิล
+      await _client
+          .from(_table)
+          .update({
+            'status': 'PENDING',
+            'bill_img': billImageUrl,
+            'bill_date': DateTime.now().toIso8601String(), // วันที่ส่งบิล
+          })
+          .eq('bill_id', billId);
+
+      return true;
+    } catch (e) {
+      print('Error sending bill: $e');
+      return false;
+    }
+  }
+
+  // 2. จ่ายบิล - ลูกบ้านจ่ายพร้อมส่งใบเสร็จ (UNDER_REVIEW)
+  static Future<bool> payBill({
+    required int billId,
+    required dynamic slipImageFile, // รูปสลิปการโอน
+    required String paidMethod, // วิธีชำระเงิน
+    String? referenceNo, // เลขที่อ้างอิง
+  }) async {
+    try {
+      // อัปโหลดรูปสลิปการโอน
+      final slipImageUrl = await SupabaseImage().uploadImage(
+        imageFile: slipImageFile,
+        tableName: "bill",
+        rowName: "bill_id",
+        rowImgName: "slip_img",
+        rowKey: billId,
+        bucketPath: "bill/slip",
+        imgName: "slip",
+      );
+
+      if (slipImageUrl == null) {
+        print('Error: Failed to upload slip image');
+        return false;
+      }
+
+      // อัปเดตสถานะเป็น UNDER_REVIEW พร้อมข้อมูลการชำระ
+      final updateData = {
+        'status': 'UNDER_REVIEW',
+        'slip_img': slipImageUrl,
+        'paid_method': paidMethod,
+        'paid_status': 1, // เปลี่ยนเป็นจ่ายแล้ว
+        'paid_date': DateTime.now().toIso8601String(), // วันที่จ่าย
+        'slip_date': DateTime.now().toIso8601String(), // วันที่อัปโหลดสลิป
+      };
+
+      // เพิ่มเลขที่อ้างอิงถ้ามี
+      if (referenceNo != null && referenceNo.isNotEmpty) {
+        updateData['reference_no'] = referenceNo;
+      }
+
+      await _client.from(_table).update(updateData).eq('bill_id', billId);
+
+      return true;
+    } catch (e) {
+      print('Error paying bill: $e');
+      return false;
+    }
+  }
+
+  // 3. ตรวจใบเสร็จ - นิติตรวจใบเสร็จ (WAIT_RECEIPT)
+  static Future<bool> reviewPayment({
+    required int billId,
+    bool isApproved = true, // true = อนุมัติ, false = ปฏิเสธ
+    String? rejectionReason, // เหตุผลที่ปฏิเสธ (ถ้ามี)
+  }) async {
+    try {
+      String newStatus;
+
+      if (isApproved) {
+        newStatus = 'WAIT_RECEIPT'; // อนุมัติแล้ว รอส่งใบเสร็จ
+      } else {
+        newStatus = 'PENDING'; // ปฏิเสธ กลับไปสถานะ PENDING
+      }
+
+      final updateData = {'status': newStatus};
+
+      await _client.from(_table).update(updateData).eq('bill_id', billId);
+
+      return true;
+    } catch (e) {
+      print('Error reviewing payment: $e');
+      return false;
+    }
+  }
+
+  // 4. ส่งใบเสร็จ - นิติส่งรูปใบเสร็จ (RECEIPT_SENT)
+  static Future<bool> sendReceipt({
+    required int billId,
+    required dynamic receiptImageFile, // รูปใบเสร็จ
+  }) async {
+    try {
+      // อัปโหลดรูปใบเสร็จ
+      final receiptImageUrl = await SupabaseImage().uploadImage(
+        imageFile: receiptImageFile,
+        tableName: "bill",
+        rowName: "bill_id",
+        rowImgName: "receipt_img",
+        rowKey: billId,
+        bucketPath: "bill/receipt",
+        imgName: "receipt",
+      );
+
+      if (receiptImageUrl == null) {
+        print('Error: Failed to upload receipt image');
+        return false;
+      }
+
+      // อัปเดตสถานะเป็น RECEIPT_SENT พร้อมรูปใบเสร็จ
+      await _client
+          .from(_table)
+          .update({'status': 'RECEIPT_SENT', 'receipt_img': receiptImageUrl})
+          .eq('bill_id', billId);
+
+      return true;
+    } catch (e) {
+      print('Error sending receipt: $e');
+      return false;
+    }
+  }
+
+  // ฟังก์ชันเสริม: ดึงบิลตามสถานะ
+  static Future<List<BillModel>> getBillsByStatus(String status) async {
+    try {
+      final response = await _client
+          .from(_table)
+          .select()
+          .eq('status', status)
+          .order('bill_date', ascending: false);
+
+      return response
+          .map<BillModel>((json) => BillModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      print('Error getting bills by status: $e');
+      return [];
+    }
+  }
+
+  // ฟังก์ชันเสริม: ดึงบิลของลูกบ้านที่ยังไม่จ่าย
+  static Future<List<BillModel>> getUnpaidBillsByHouse(int houseId) async {
+    try {
+      final response = await _client
+          .from(_table)
+          .select()
+          .eq('house_id', houseId)
+          .eq('paid_status', 0)
+          .order('due_date', ascending: true); // เรียงตาม due date
+
+      return response
+          .map<BillModel>((json) => BillModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      print('Error getting unpaid bills by house: $e');
+      return [];
+    }
+  }
+
+  // ฟังก์ชันเสริม: ดึงบิลของลูกบ้านทั้งหมด
+  static Future<List<BillModel>> getBillsByHouse(int houseId) async {
+    try {
+      final response = await _client
+          .from(_table)
+          .select()
+          .eq('house_id', houseId)
+          .order('bill_date', ascending: false);
+
+      return response
+          .map<BillModel>((json) => BillModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      print('Error getting bills by house: $e');
+      return [];
+    }
+  }
+
   // Read - อ่านบิลทั้งหมดในระบบ (Admin only)
   static Future<List<BillModel>> getAll() async {
     try {

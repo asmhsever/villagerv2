@@ -1,12 +1,9 @@
-// lib/pages/law/complaint/complaint_page.dart
 import 'package:flutter/material.dart';
 import 'package:fullproject/domains/complaint_domain.dart';
 import 'package:fullproject/domains/complaint_type_domain.dart';
 import 'package:fullproject/models/complaint_model.dart';
 import 'package:fullproject/models/law_model.dart';
 import 'package:fullproject/pages/law/complaint/complaint_detail.dart';
-import 'package:fullproject/pages/law/complaint/complaint_detail_success.dart'
-    hide ComplaintDetailPage;
 import 'package:fullproject/services/auth_service.dart';
 import 'package:fullproject/config/supabase_config.dart';
 import 'package:fullproject/theme/Color.dart';
@@ -21,7 +18,7 @@ class LawComplaintPage extends StatefulWidget {
 
 class _LawComplaintPageState extends State<LawComplaintPage> {
   Future<List<ComplaintModel>>? _complaints;
-  LawModel? law;
+  LawModel? lawData;
   Map<int, String> houseMap = {};
   Map<int, String> complaintTypeMap = {};
   String? filterStatus;
@@ -29,8 +26,6 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
   int? selectedHouseId;
   bool? filterPrivacy;
   bool isLoading = false;
-
-  // Earthy Theme Colors
 
   @override
   void initState() {
@@ -44,7 +39,8 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
     try {
       final user = await AuthService.getCurrentUser();
       if (user is LawModel) {
-        setState(() => law = user);
+        setState(() => lawData = user);
+
         await _loadHouseMap(user.villageId);
         await _loadComplaintTypeMap();
         await _refreshComplaints();
@@ -114,13 +110,13 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
   String getStatusLabel(String? status) {
     switch (status) {
       case 'pending':
-        return 'รออนุมัติ';
+        return 'รอรับเรื่อง';
       case 'in_progress':
         return 'กำลังดำเนินการ';
       case 'resolved':
         return 'เสร็จสิ้น';
       case null:
-        return 'รอดำเนินการ';
+        return 'รอรับเรื่อง';
       default:
         return status ?? 'ไม่ระบุ';
     }
@@ -131,11 +127,11 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
       case 'pending':
         return ThemeColors.burntOrange;
       case 'in_progress':
-        return Colors.blue;
+        return Color(0xFF7B9FAB); // Dusty Blue
       case 'resolved':
         return ThemeColors.oliveGreen;
       case null:
-        return ThemeColors.warmStone;
+        return ThemeColors.burntOrange;
       default:
         return ThemeColors.earthClay;
     }
@@ -189,39 +185,193 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
   }
 
   Future<void> _refreshComplaints() async {
-    if (law != null) {
+    if (lawData != null) {
       setState(() {
         if (selectedHouseId != null) {
-          // แสดงเฉพาะคำร้องของบ้านที่เลือก
           _complaints = ComplaintDomain.getAllInHouse(selectedHouseId!);
         } else {
-          // แสดงทั้งหมู่บ้าน - ใช้ getAll() แทน getAllInVillage()
-          // เพราะ getAllInVillage() กรองเฉพาะที่ไม่ private
           _complaints = ComplaintDomain.getAll();
         }
       });
     }
   }
 
-  void _navigateToDetail(ComplaintModel complaint) async {
-    Widget targetPage;
+  // เพิ่มฟังก์ชันเหล่านี้ในคลาส
+  void _showAcceptDialog(ComplaintModel complaint) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: ThemeColors.ivoryWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'รับคำร้องเรียน',
+          style: TextStyle(
+            color: ThemeColors.softBrown,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'ยืนยันการรับคำร้องเรียนนี้?',
+              style: TextStyle(color: ThemeColors.earthClay),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: ThemeColors.beige,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'หัวข้อ: ${complaint.header}',
+                style: TextStyle(
+                  color: ThemeColors.softBrown,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'ยกเลิก',
+              style: TextStyle(color: ThemeColors.warmStone),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _acceptComplaint(complaint);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.oliveGreen,
+              foregroundColor: ThemeColors.ivoryWhite,
+            ),
+            child: const Text('รับคำร้องเรียน'),
+          ),
+        ],
+      ),
+    );
+  }
 
-    // ถ้าคำร้องเสร็จสิ้นแล้ว ไปหน้า detail success
-    if (complaint.status == 'resolved') {
-      targetPage = LawComplaintDetailSuccessPage(complaint: complaint);
-    } else {
-      // ถ้ายังไม่เสร็จสิ้น ไปหน้า detail ปกติ
-      targetPage = LawComplaintDetailPage(complaint: complaint);
+  void _showResolveDialog(ComplaintModel complaint) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: ThemeColors.ivoryWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'ส่งคำร้องเรียน',
+          style: TextStyle(
+            color: ThemeColors.softBrown,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'ยืนยันการส่งคำร้องเรียนนี้?',
+              style: TextStyle(color: ThemeColors.earthClay),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'กรุณาตรวจสอบให้แน่ใจว่าได้แก้ไขปัญหาเรียบร้อยแล้ว',
+              style: TextStyle(
+                color: ThemeColors.warmStone,
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: ThemeColors.beige,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'หัวข้อ: ${complaint.header}',
+                style: TextStyle(
+                  color: ThemeColors.softBrown,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'ยกเลิก',
+              style: TextStyle(color: ThemeColors.warmStone),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _resolveComplaint(complaint);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.oliveGreen,
+              foregroundColor: ThemeColors.ivoryWhite,
+            ),
+            child: const Text('ส่งคำร้องเรียน'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ฟังก์ชันสำหรับจัดการ actions
+  void _acceptComplaint(ComplaintModel complaint) async {
+    try {
+      final acceptedByLawId = lawData!.lawId; // TODO: ใส่ law user ID จริง
+      await ComplaintDomain.acceptComplaint(
+        complaintId: complaint.complaintId!,
+        acceptedByLawId: acceptedByLawId,
+      );
+
+      // รีเฟรช list
+      _refreshComplaints();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('รับคำร้องเรียนสำเร็จ'),
+          backgroundColor: ThemeColors.oliveGreen,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('เกิดข้อผิดพลาด: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+  }
 
+  void _resolveComplaint(ComplaintModel complaint) {
+    _navigateToDetail(complaint); // ไปยังหน้ารายละเอียดเพื่อแก้ไข
+  }
+
+  void _navigateToDetail(ComplaintModel complaint) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => targetPage),
+      MaterialPageRoute(
+        builder: (_) => LawComplaintDetailPage(complaint: complaint),
+      ),
     );
 
-    if (result == true) {
-      await _refreshComplaints();
-    }
+    // if (result == true) {
+    await _refreshComplaints();
+    // }
   }
 
   List<ComplaintModel> _filterComplaints(List<ComplaintModel> complaints) {
@@ -233,7 +383,13 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
     }).toList();
 
     if (filterStatus != null) {
-      filtered = filtered.where((c) => c.status == filterStatus).toList();
+      if (filterStatus == 'pending') {
+        filtered = filtered
+            .where((c) => c.status == null || c.status == 'pending')
+            .toList();
+      } else {
+        filtered = filtered.where((c) => c.status == filterStatus).toList();
+      }
     }
 
     if (filterType != null) {
@@ -248,164 +404,431 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
     return filtered;
   }
 
-  Widget _buildHouseSelector() {
+  Widget _buildSummaryCard(List<ComplaintModel> filtered) {
     if (houseMap.isEmpty) return const SizedBox.shrink();
 
+    final totalCount = filtered.length;
+    final pendingCount = filtered
+        .where((c) => c.status == null || c.status == 'pending')
+        .length;
+    final inProgressCount = filtered
+        .where((c) => c.status == 'in_progress')
+        .length;
+    final resolvedCount = filtered.where((c) => c.status == 'resolved').length;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          // House Selector
-          Expanded(
-            flex: 2,
-            child: DropdownButtonFormField<int?>(
-              value: selectedHouseId,
-              decoration: InputDecoration(
-                labelText: 'เลือกบ้าน',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: ThemeColors.warmStone),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: ThemeColors.softBrown,
-                    width: 2,
-                  ),
-                ),
-                prefixIcon: Icon(Icons.home, color: ThemeColors.earthClay),
-                fillColor: ThemeColors.ivoryWhite,
-                filled: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-              ),
-              items: [
-                DropdownMenuItem<int?>(
-                  value: null,
-                  child: Text('ทั้งหมู่บ้าน'),
-                ),
-                ...houseMap.entries.map(
-                  (entry) => DropdownMenuItem<int?>(
-                    value: entry.key,
-                    child: Text('บ้านเลขที่ ${entry.value}'),
-                  ),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  selectedHouseId = value;
-                });
-                _refreshComplaints();
-              },
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          // Privacy Filter
-          Expanded(
-            flex: 1,
-            child: DropdownButtonFormField<bool?>(
-              value: filterPrivacy,
-              decoration: InputDecoration(
-                labelText: 'ความเป็นส่วนตัว',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: ThemeColors.warmStone),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: ThemeColors.softBrown,
-                    width: 2,
-                  ),
-                ),
-                prefixIcon: Icon(
-                  Icons.visibility,
-                  color: ThemeColors.earthClay,
-                ),
-                fillColor: ThemeColors.ivoryWhite,
-                filled: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-              ),
-              items: [
-                DropdownMenuItem<bool?>(value: null, child: Text('ทั้งหมด')),
-                DropdownMenuItem<bool?>(
-                  value: false,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.public,
-                        color: ThemeColors.oliveGreen,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text('สาธารณะ'),
-                    ],
-                  ),
-                ),
-                DropdownMenuItem<bool?>(
-                  value: true,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.lock,
-                        color: ThemeColors.burntOrange,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text('ส่วนตัว'),
-                    ],
-                  ),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  filterPrivacy = value;
-                });
-              },
-            ),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: ThemeColors.ivoryWhite,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: ThemeColors.softBrown.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-    );
-  }
+      child: Column(
+        children: [
+          // Filters Section
+          Row(
+            children: [
+              // House Selector
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'บ้าน',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: ThemeColors.earthClay,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: ThemeColors.warmStone),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<int?>(
+                          value: selectedHouseId,
+                          isExpanded: true,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 1,
+                          ),
+                          icon: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: ThemeColors.earthClay,
+                            size: 18,
+                          ),
+                          items: [
+                            DropdownMenuItem<int?>(
+                              value: null,
+                              child: Text(
+                                'ทั้งหมู่บ้าน',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: ThemeColors.earthClay,
+                                ),
+                              ),
+                            ),
+                            ...houseMap.entries.map(
+                              (entry) => DropdownMenuItem<int?>(
+                                value: entry.key,
+                                child: Text(
+                                  'บ้านเลขที่ ${entry.value}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: ThemeColors.earthClay,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              selectedHouseId = value;
+                            });
+                            _refreshComplaints();
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
-  Widget _buildFilterChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (color ?? ThemeColors.softBrown)
-              : ThemeColors.ivoryWhite,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? (color ?? ThemeColors.softBrown)
-                : ThemeColors.warmStone,
-            width: 1,
+              const SizedBox(width: 12),
+
+              // Privacy Filter
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ความเป็นส่วนตัว',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: ThemeColors.earthClay,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: ThemeColors.warmStone),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<bool?>(
+                          value: filterPrivacy,
+                          isExpanded: true,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 1,
+                          ),
+                          icon: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: ThemeColors.earthClay,
+                            size: 18,
+                          ),
+                          items: [
+                            DropdownMenuItem<bool?>(
+                              value: null,
+                              child: Text(
+                                'ทั้งหมด',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: ThemeColors.earthClay,
+                                ),
+                              ),
+                            ),
+                            DropdownMenuItem<bool?>(
+                              value: false,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.public,
+                                    color: ThemeColors.oliveGreen,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'สาธารณะ',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: ThemeColors.earthClay,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            DropdownMenuItem<bool?>(
+                              value: true,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.lock,
+                                    color: ThemeColors.burntOrange,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'ส่วนตัว',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: ThemeColors.earthClay,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              filterPrivacy = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? ThemeColors.ivoryWhite : ThemeColors.earthClay,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 12,
+
+          const SizedBox(height: 16),
+
+          // Summary Header
+          Row(
+            children: [
+              Icon(Icons.analytics, color: ThemeColors.softBrown),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  selectedHouseId != null
+                      ? 'สรุปคำร้องบ้านเลขที่ ${houseMap[selectedHouseId]} (${totalCount} รายการ)'
+                      : 'สรุปข้อมูลร้องเรียน (${totalCount} รายการ)',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: ThemeColors.softBrown,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              // รอรับเรื่อง (เป็นปุ่ม filter)
+              Expanded(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      setState(() {
+                        filterStatus = 'pending';
+                        filterType = null;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: filterStatus == 'pending'
+                            ? ThemeColors.burntOrange.withOpacity(0.1)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: filterStatus == 'pending'
+                            ? Border.all(
+                                color: ThemeColors.burntOrange.withOpacity(0.3),
+                              )
+                            : null,
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '$pendingCount',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: filterStatus == 'pending'
+                                  ? ThemeColors.burntOrange
+                                  : ThemeColors.burntOrange.withOpacity(0.7),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.pending_actions,
+                                size: 10,
+                                color: filterStatus == 'pending'
+                                    ? ThemeColors.burntOrange
+                                    : ThemeColors.burntOrange.withOpacity(0.7),
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                'รอรับเรื่อง',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: ThemeColors.earthClay,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(width: 1, height: 30, color: ThemeColors.warmStone),
+
+              // กำลังดำเนินการ (เป็นปุ่ม filter)
+              Expanded(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      setState(() {
+                        filterStatus = 'in_progress';
+                        filterType = null;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: filterStatus == 'in_progress'
+                            ? Color(0xFF7B9FAB).withOpacity(0.1) // Dusty Blue
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: filterStatus == 'in_progress'
+                            ? Border.all(
+                                color: Color(0xFF7B9FAB).withOpacity(0.3),
+                              )
+                            : null,
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '$inProgressCount',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: filterStatus == 'in_progress'
+                                  ? Color(0xFF7B9FAB) // Dusty Blue
+                                  : Color(0xFF7B9FAB).withOpacity(0.7),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.hourglass_empty,
+                                size: 10,
+                                color: filterStatus == 'in_progress'
+                                    ? Color(0xFF7B9FAB) // Dusty Blue
+                                    : Color(0xFF7B9FAB).withOpacity(0.7),
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                'ดำเนินการ',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: ThemeColors.earthClay,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(width: 1, height: 30, color: ThemeColors.warmStone),
+
+              // เสร็จสิ้น (เป็นปุ่ม filter)
+              Expanded(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      setState(() {
+                        filterStatus = 'resolved';
+                        filterType = null;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: filterStatus == 'resolved'
+                            ? ThemeColors.oliveGreen.withOpacity(0.1)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: filterStatus == 'resolved'
+                            ? Border.all(
+                                color: ThemeColors.oliveGreen.withOpacity(0.3),
+                              )
+                            : null,
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '$resolvedCount',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: filterStatus == 'resolved'
+                                  ? ThemeColors.oliveGreen
+                                  : ThemeColors.oliveGreen.withOpacity(0.7),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                size: 10,
+                                color: filterStatus == 'resolved'
+                                    ? ThemeColors.oliveGreen
+                                    : ThemeColors.oliveGreen.withOpacity(0.7),
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                'เสร็จสิ้น',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: ThemeColors.earthClay,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -415,198 +838,649 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
     final typeName = complaintTypeMap[complaint.typeComplaint] ?? 'ไม่ระบุ';
     final isHighPriority = complaint.level == '3' || complaint.level == '4';
     final isResolved = complaint.status == 'resolved';
+    final isPending = complaint.status == 'pending' || complaint.status == null;
+    final isInProgress = complaint.status == 'in_progress';
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth <= 0) {
+          return const SizedBox.shrink();
+        }
 
-    return Card(
-      elevation: 3,
-      color: ThemeColors.ivoryWhite,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => _navigateToDetail(complaint),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Row
-              Row(
+        final houseNumber = houseMap[complaint.houseId] ?? 'ไม่ทราบ';
+        final typeName = complaintTypeMap[complaint.typeComplaint] ?? 'ไม่ระบุ';
+
+        // ส่วนที่เหลือของ card...
+        return Card(
+          elevation: 3,
+          color: ThemeColors.ivoryWhite,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => _navigateToDetail(complaint),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: isResolved
-                          ? ThemeColors.oliveGreen.withValues(alpha: 0.1)
-                          : ThemeColors.beige,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      isResolved
-                          ? Icons.check_circle
-                          : getTypeIcon(complaint.typeComplaint),
-                      color: isResolved
-                          ? ThemeColors.oliveGreen
-                          : ThemeColors.softBrown,
-                      size: 20,
-                    ),
+                  // Header Row with Action Button
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isResolved
+                              ? ThemeColors.oliveGreen.withValues(alpha: 0.1)
+                              : ThemeColors.beige,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          isResolved
+                              ? Icons.check_circle
+                              : getTypeIcon(complaint.typeComplaint),
+                          color: isResolved
+                              ? ThemeColors.oliveGreen
+                              : ThemeColors.softBrown,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              complaint.header,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: ThemeColors.softBrown,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              'บ้านเลขที่ $houseNumber • $typeName',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: ThemeColors.earthClay,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Priority Badge
+                      if (isHighPriority)
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'ด่วน',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+
+                      // Action Button (Right side)
+                      _buildActionButton(
+                        complaint,
+                        isPending,
+                        isInProgress,
+                        isResolved,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          complaint.header,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: ThemeColors.softBrown,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'บ้านเลขที่ $houseNumber • $typeName',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: ThemeColors.earthClay,
-                          ),
-                        ),
-                      ],
+
+                  const SizedBox(height: 12),
+
+                  // Description
+                  Text(
+                    complaint.description,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ThemeColors.earthClay,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (isHighPriority)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'ด่วน',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
+
+                  const SizedBox(height: 12),
+
+                  // Status and Level Row
+                  Row(
+                    children: [
+                      // Status - ทำให้เป็นปุ่มกดได้
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            setState(() {
+                              filterStatus = complaint.status ?? 'pending';
+                              filterType = null;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: getStatusColor(
+                                complaint.status,
+                              ).withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border:
+                                  (filterStatus == complaint.status ||
+                                      (filterStatus == 'pending' &&
+                                          (complaint.status == null ||
+                                              complaint.status == 'pending')))
+                                  ? Border.all(
+                                      color: getStatusColor(complaint.status),
+                                    )
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isResolved) ...[
+                                  Icon(
+                                    Icons.check,
+                                    color: ThemeColors.oliveGreen,
+                                    size: 12,
+                                  ),
+                                  const SizedBox(width: 2),
+                                ] else if (complaint.status ==
+                                    'in_progress') ...[
+                                  Icon(
+                                    Icons.hourglass_empty,
+                                    color: Color(0xFF7B9FAB), // Dusty Blue
+                                    size: 12,
+                                  ),
+                                  const SizedBox(width: 2),
+                                ] else ...[
+                                  Icon(
+                                    Icons.pending_actions,
+                                    color: getStatusColor(complaint.status),
+                                    size: 12,
+                                  ),
+                                  const SizedBox(width: 2),
+                                ],
+                                Text(
+                                  getStatusLabel(complaint.status),
+                                  style: TextStyle(
+                                    color: getStatusColor(complaint.status),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              ),
 
-              const SizedBox(height: 12),
+                      const SizedBox(width: 8),
 
-              // Description
-              Text(
-                complaint.description,
-                style: TextStyle(fontSize: 14, color: ThemeColors.earthClay),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              const SizedBox(height: 12),
-
-              // Status and Level Row
-              Row(
-                children: [
-                  // Status
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: getStatusColor(
-                        complaint.status,
-                      ).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (isResolved) ...[
-                          Icon(
-                            Icons.check,
-                            color: ThemeColors.oliveGreen,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 2),
-                        ],
-                        Text(
-                          getStatusLabel(complaint.status),
+                      // Level
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: getLevelColor(
+                            complaint.level,
+                          ).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'ระดับ ${getLevelLabel(complaint.level)}',
                           style: TextStyle(
-                            color: getStatusColor(complaint.status),
+                            color: getLevelColor(complaint.level),
                             fontWeight: FontWeight.bold,
                             fontSize: 11,
                           ),
                         ),
+                      ),
+
+                      const Spacer(),
+
+                      // Date
+                      Text(
+                        formatDateFromString(complaint.createAt),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: ThemeColors.warmStone,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Private indicator
+                  if (complaint.isPrivate) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.lock,
+                          color: ThemeColors.warmStone,
+                          size: 12,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'ร้องเรียนแบบส่วนตัว',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: ThemeColors.warmStone,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
                       ],
                     ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Widget _buildComplaintCard(ComplaintModel complaint) {
+  //   final houseNumber = houseMap[complaint.houseId] ?? 'ไม่ทราบ';
+  //   final typeName = complaintTypeMap[complaint.typeComplaint] ?? 'ไม่ระบุ';
+  //   final isHighPriority = complaint.level == '3' || complaint.level == '4';
+  //   final isResolved = complaint.status == 'resolved';
+  //   final isPending = complaint.status == 'pending' || complaint.status == null;
+  //   final isInProgress = complaint.status == 'in_progress';
+  //
+  //   return Card(
+  //     elevation: 3,
+  //     color: ThemeColors.ivoryWhite,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+  //     child: InkWell(
+  //       borderRadius: BorderRadius.circular(12),
+  //       onTap: () => _navigateToDetail(complaint),
+  //       child: Padding(
+  //         padding: const EdgeInsets.all(16),
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             // Header Row with Action Button
+  //             Row(
+  //               children: [
+  //                 Container(
+  //                   padding: const EdgeInsets.all(8),
+  //                   decoration: BoxDecoration(
+  //                     color: isResolved
+  //                         ? ThemeColors.oliveGreen.withValues(alpha: 0.1)
+  //                         : ThemeColors.beige,
+  //                     borderRadius: BorderRadius.circular(8),
+  //                   ),
+  //                   child: Icon(
+  //                     isResolved
+  //                         ? Icons.check_circle
+  //                         : getTypeIcon(complaint.typeComplaint),
+  //                     color: isResolved
+  //                         ? ThemeColors.oliveGreen
+  //                         : ThemeColors.softBrown,
+  //                     size: 20,
+  //                   ),
+  //                 ),
+  //                 const SizedBox(width: 12),
+  //                 Expanded(
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //                       Text(
+  //                         complaint.header,
+  //                         style: TextStyle(
+  //                           fontSize: 16,
+  //                           fontWeight: FontWeight.bold,
+  //                           color: ThemeColors.softBrown,
+  //                         ),
+  //                         maxLines: 1,
+  //                         overflow: TextOverflow.ellipsis,
+  //                       ),
+  //                       Text(
+  //                         'บ้านเลขที่ $houseNumber • $typeName',
+  //                         style: TextStyle(
+  //                           fontSize: 12,
+  //                           color: ThemeColors.earthClay,
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //
+  //                 // Priority Badge
+  //                 if (isHighPriority)
+  //                   Container(
+  //                     margin: const EdgeInsets.only(right: 8),
+  //                     padding: const EdgeInsets.symmetric(
+  //                       horizontal: 6,
+  //                       vertical: 2,
+  //                     ),
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.red.withValues(alpha: 0.2),
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                     child: Text(
+  //                       'ด่วน',
+  //                       style: TextStyle(
+  //                         color: Colors.red,
+  //                         fontWeight: FontWeight.bold,
+  //                         fontSize: 10,
+  //                       ),
+  //                     ),
+  //                   ),
+  //
+  //                 // Action Button (Right side)
+  //                 _buildActionButton(
+  //                   complaint,
+  //                   isPending,
+  //                   isInProgress,
+  //                   isResolved,
+  //                 ),
+  //               ],
+  //             ),
+  //
+  //             const SizedBox(height: 12),
+  //
+  //             // Description
+  //             Text(
+  //               complaint.description,
+  //               style: TextStyle(fontSize: 14, color: ThemeColors.earthClay),
+  //               maxLines: 2,
+  //               overflow: TextOverflow.ellipsis,
+  //             ),
+  //
+  //             const SizedBox(height: 12),
+  //
+  //             // Status and Level Row
+  //             Row(
+  //               children: [
+  //                 // Status - ทำให้เป็นปุ่มกดได้
+  //                 Material(
+  //                   color: Colors.transparent,
+  //                   child: InkWell(
+  //                     borderRadius: BorderRadius.circular(12),
+  //                     onTap: () {
+  //                       setState(() {
+  //                         filterStatus = complaint.status ?? 'pending';
+  //                         filterType = null;
+  //                       });
+  //                     },
+  //                     child: Container(
+  //                       padding: const EdgeInsets.symmetric(
+  //                         horizontal: 8,
+  //                         vertical: 4,
+  //                       ),
+  //                       decoration: BoxDecoration(
+  //                         color: getStatusColor(
+  //                           complaint.status,
+  //                         ).withValues(alpha: 0.2),
+  //                         borderRadius: BorderRadius.circular(12),
+  //                         border:
+  //                             (filterStatus == complaint.status ||
+  //                                 (filterStatus == 'pending' &&
+  //                                     (complaint.status == null ||
+  //                                         complaint.status == 'pending')))
+  //                             ? Border.all(
+  //                                 color: getStatusColor(complaint.status),
+  //                               )
+  //                             : null,
+  //                       ),
+  //                       child: Row(
+  //                         mainAxisSize: MainAxisSize.min,
+  //                         children: [
+  //                           if (isResolved) ...[
+  //                             Icon(
+  //                               Icons.check,
+  //                               color: ThemeColors.oliveGreen,
+  //                               size: 12,
+  //                             ),
+  //                             const SizedBox(width: 2),
+  //                           ] else if (complaint.status == 'in_progress') ...[
+  //                             Icon(
+  //                               Icons.hourglass_empty,
+  //                               color: Color(0xFF7B9FAB), // Dusty Blue
+  //                               size: 12,
+  //                             ),
+  //                             const SizedBox(width: 2),
+  //                           ] else ...[
+  //                             Icon(
+  //                               Icons.pending_actions,
+  //                               color: getStatusColor(complaint.status),
+  //                               size: 12,
+  //                             ),
+  //                             const SizedBox(width: 2),
+  //                           ],
+  //                           Text(
+  //                             getStatusLabel(complaint.status),
+  //                             style: TextStyle(
+  //                               color: getStatusColor(complaint.status),
+  //                               fontWeight: FontWeight.bold,
+  //                               fontSize: 11,
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //
+  //                 const SizedBox(width: 8),
+  //
+  //                 // Level
+  //                 Container(
+  //                   padding: const EdgeInsets.symmetric(
+  //                     horizontal: 8,
+  //                     vertical: 4,
+  //                   ),
+  //                   decoration: BoxDecoration(
+  //                     color: getLevelColor(
+  //                       complaint.level,
+  //                     ).withValues(alpha: 0.2),
+  //                     borderRadius: BorderRadius.circular(12),
+  //                   ),
+  //                   child: Text(
+  //                     'ระดับ ${getLevelLabel(complaint.level)}',
+  //                     style: TextStyle(
+  //                       color: getLevelColor(complaint.level),
+  //                       fontWeight: FontWeight.bold,
+  //                       fontSize: 11,
+  //                     ),
+  //                   ),
+  //                 ),
+  //
+  //                 const Spacer(),
+  //
+  //                 // Date
+  //                 Text(
+  //                   formatDateFromString(complaint.createAt),
+  //                   style: TextStyle(
+  //                     fontSize: 11,
+  //                     color: ThemeColors.warmStone,
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //
+  //             // Private indicator
+  //             if (complaint.isPrivate) ...[
+  //               const SizedBox(height: 8),
+  //               Row(
+  //                 children: [
+  //                   Icon(Icons.lock, color: ThemeColors.warmStone, size: 12),
+  //                   const SizedBox(width: 4),
+  //                   Text(
+  //                     'ร้องเรียนแบบส่วนตัว',
+  //                     style: TextStyle(
+  //                       fontSize: 11,
+  //                       color: ThemeColors.warmStone,
+  //                       fontStyle: FontStyle.italic,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ],
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  Widget _buildActionButton(
+    ComplaintModel complaint,
+    bool isPending,
+    bool isInProgress,
+    bool isResolved,
+  ) {
+    if (isResolved) {
+      // แสดงปุ่มดูรายละเอียด
+      return Container(
+        decoration: BoxDecoration(
+          color: ThemeColors.oliveGreen.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => _navigateToDetail(complaint),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.visibility,
+                    size: 16,
+                    color: ThemeColors.oliveGreen,
                   ),
-
-                  const SizedBox(width: 8),
-
-                  // Level
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: getLevelColor(
-                        complaint.level,
-                      ).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'ระดับ ${getLevelLabel(complaint.level)}',
-                      style: TextStyle(
-                        color: getLevelColor(complaint.level),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  // Date
+                  const SizedBox(width: 4),
                   Text(
-                    formatDateFromString(complaint.createAt),
+                    'ดู',
                     style: TextStyle(
-                      fontSize: 11,
-                      color: ThemeColors.warmStone,
+                      color: ThemeColors.oliveGreen,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
                     ),
                   ),
                 ],
               ),
-
-              // Private indicator
-              if (complaint.isPrivate) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.lock, color: ThemeColors.warmStone, size: 12),
-                    const SizedBox(width: 4),
-                    Text(
-                      'ร้องเรียนแบบส่วนตัว',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: ThemeColors.warmStone,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    } else if (isPending) {
+      // แสดงปุ่มรับคำร้องเรียน
+      return Container(
+        decoration: BoxDecoration(
+          color: ThemeColors.oliveGreen,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => _showAcceptDialog(complaint),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: 16,
+                    color: ThemeColors.ivoryWhite,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'รับ',
+                    style: TextStyle(
+                      color: ThemeColors.ivoryWhite,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    } else if (isInProgress) {
+      // แสดงปุ่มส่งคำร้องเรียน
+      return Container(
+        decoration: BoxDecoration(
+          color: ThemeColors.oliveGreen,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => _showResolveDialog(complaint),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.send, size: 16, color: ThemeColors.ivoryWhite),
+                  const SizedBox(width: 4),
+                  Text(
+                    'ส่ง',
+                    style: TextStyle(
+                      color: ThemeColors.ivoryWhite,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink(); // ถ้าไม่มีปุ่มให้แสดง
   }
 
   @override
@@ -614,9 +1488,13 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
     return Scaffold(
       backgroundColor: ThemeColors.beige,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         backgroundColor: ThemeColors.softBrown,
         foregroundColor: ThemeColors.ivoryWhite,
-        elevation: 0,
+        elevation: 1,
         title: const Text(
           'จัดการร้องเรียน',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -630,405 +1508,161 @@ class _LawComplaintPageState extends State<LawComplaintPage> {
             ),
         ],
       ),
-      body: _complaints == null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: ThemeColors.softBrown),
-                  const SizedBox(height: 16),
-                  Text(
-                    'กำลังโหลดข้อมูล...',
-                    style: TextStyle(color: ThemeColors.earthClay),
-                  ),
-                ],
-              ),
-            )
-          : Column(
-              children: [
-                // House Selector
-                _buildHouseSelector(),
+      body: SafeArea(
+        child: _complaints == null
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: ThemeColors.softBrown),
+                    const SizedBox(height: 16),
+                    Text(
+                      'กำลังโหลดข้อมูล...',
+                      style: TextStyle(color: ThemeColors.earthClay),
+                    ),
+                  ],
+                ),
+              )
+            : FutureBuilder<List<ComplaintModel>>(
+                future: _complaints,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            color: ThemeColors.softBrown,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'กำลังโหลดข้อมูล...',
+                            style: TextStyle(color: ThemeColors.earthClay),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: ThemeColors.burntOrange,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'เกิดข้อผิดพลาด',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: ThemeColors.burntOrange,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              '${snapshot.error}',
+                              style: TextStyle(color: ThemeColors.earthClay),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _refreshComplaints,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ThemeColors.burntOrange,
+                              foregroundColor: ThemeColors.ivoryWhite,
+                            ),
+                            child: const Text('ลองใหม่'),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.report_outlined,
+                            color: ThemeColors.warmStone,
+                            size: 64,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'ไม่มีข้อมูลร้องเรียน',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: ThemeColors.earthClay,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            selectedHouseId != null
+                                ? 'ไม่มีคำร้องของบ้านนี้'
+                                : 'ไม่มีข้อมูลร้องเรียนในระบบ',
+                            style: TextStyle(color: ThemeColors.earthClay),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    final filtered = _filterComplaints(snapshot.data!);
 
-                Expanded(
-                  child: FutureBuilder<List<ComplaintModel>>(
-                    future: _complaints,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                color: ThemeColors.softBrown,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'กำลังโหลดข้อมูล...',
-                                style: TextStyle(color: ThemeColors.earthClay),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: ThemeColors.burntOrange,
-                                size: 48,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'เกิดข้อผิดพลาด',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: ThemeColors.burntOrange,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '${snapshot.error}',
-                                style: TextStyle(color: ThemeColors.earthClay),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: _refreshComplaints,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: ThemeColors.burntOrange,
-                                  foregroundColor: ThemeColors.ivoryWhite,
-                                ),
-                                child: const Text('ลองใหม่'),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.report_outlined,
-                                color: ThemeColors.warmStone,
-                                size: 64,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'ไม่มีข้อมูลร้องเรียน',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: ThemeColors.earthClay,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                selectedHouseId != null
-                                    ? 'ไม่มีคำร้องของบ้านนี้'
-                                    : 'ไม่มีข้อมูลร้องเรียนในระบบ',
-                                style: TextStyle(color: ThemeColors.earthClay),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        final filtered = _filterComplaints(snapshot.data!);
-                        final totalCount = filtered.length;
-                        final pendingCount = filtered
-                            .where(
-                              (c) =>
-                                  c.status == null ||
-                                  c.status == 'pending' ||
-                                  c.status == 'in_progress',
-                            )
-                            .length;
-                        final resolvedCount = filtered
-                            .where((c) => c.status == 'resolved')
-                            .length;
-                        final privateCount = filtered
-                            .where((c) => c.isPrivate)
-                            .length;
+                    return Column(
+                      children: [
+                        // Summary Card with Filters
+                        _buildSummaryCard(filtered),
 
-                        return Column(
-                          children: [
-                            // Summary Card
-                            Container(
-                              margin: const EdgeInsets.all(16),
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: ThemeColors.ivoryWhite,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: ThemeColors.softBrown.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
+                        // Complaints List
+                        Expanded(
+                          child: filtered.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(
-                                        Icons.analytics,
-                                        color: ThemeColors.softBrown,
+                                        Icons.filter_alt_off,
+                                        color: ThemeColors.warmStone,
+                                        size: 48,
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(height: 16),
                                       Text(
-                                        selectedHouseId != null
-                                            ? 'สรุปคำร้องบ้านเลขที่ ${houseMap[selectedHouseId]}'
-                                            : 'สรุปข้อมูลร้องเรียน',
+                                        'ไม่มีรายการตามเงื่อนไขที่เลือก',
                                         style: TextStyle(
                                           fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: ThemeColors.softBrown,
+                                          color: ThemeColors.earthClay,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              '$totalCount',
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: ThemeColors.softBrown,
-                                              ),
-                                            ),
-                                            Text(
-                                              'ทั้งหมด',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: ThemeColors.earthClay,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 1,
-                                        height: 30,
-                                        color: ThemeColors.warmStone,
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              '$pendingCount',
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: ThemeColors.burntOrange,
-                                              ),
-                                            ),
-                                            Text(
-                                              'รอดำเนินการ',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: ThemeColors.earthClay,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 1,
-                                        height: 30,
-                                        color: ThemeColors.warmStone,
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              '$resolvedCount',
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: ThemeColors.oliveGreen,
-                                              ),
-                                            ),
-                                            Text(
-                                              'เสร็จสิ้น',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: ThemeColors.earthClay,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 1,
-                                        height: 30,
-                                        color: ThemeColors.warmStone,
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              '$privateCount',
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: ThemeColors.burntOrange,
-                                              ),
-                                            ),
-                                            Text(
-                                              'ส่วนตัว',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: ThemeColors.earthClay,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                )
+                              : RefreshIndicator(
+                                  color: ThemeColors.softBrown,
+                                  backgroundColor: ThemeColors.ivoryWhite,
+                                  onRefresh: _refreshComplaints,
+                                  child: ListView.builder(
+                                    padding: const EdgeInsets.only(bottom: 80),
+                                    itemCount: filtered.length,
+                                    itemBuilder: (context, index) {
+                                      return _buildComplaintCard(
+                                        filtered[index],
+                                      );
+                                    },
                                   ),
-                                ],
-                              ),
-                            ),
-
-                            // Filter Chips
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'กรอง: ',
-                                      style: TextStyle(
-                                        color: ThemeColors.earthClay,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildFilterChip(
-                                      label: 'ทั้งหมด',
-                                      isSelected:
-                                          filterStatus == null &&
-                                          filterType == null &&
-                                          filterPrivacy == null,
-                                      onTap: () => setState(() {
-                                        filterStatus = null;
-                                        filterType = null;
-                                        filterPrivacy = null;
-                                      }),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildFilterChip(
-                                      label: 'รอดำเนินการ',
-                                      isSelected: filterStatus == 'pending',
-                                      onTap: () => setState(
-                                        () => filterStatus = 'pending',
-                                      ),
-                                      color: ThemeColors.burntOrange,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildFilterChip(
-                                      label: 'กำลังดำเนินการ',
-                                      isSelected: filterStatus == 'in_progress',
-                                      onTap: () => setState(
-                                        () => filterStatus = 'in_progress',
-                                      ),
-                                      color: Colors.blue,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildFilterChip(
-                                      label: 'เสร็จสิ้น',
-                                      isSelected: filterStatus == 'resolved',
-                                      onTap: () => setState(
-                                        () => filterStatus = 'resolved',
-                                      ),
-                                      color: ThemeColors.oliveGreen,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildFilterChip(
-                                      label: 'สาธารณะ',
-                                      isSelected: filterPrivacy == false,
-                                      onTap: () =>
-                                          setState(() => filterPrivacy = false),
-                                      color: ThemeColors.oliveGreen,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildFilterChip(
-                                      label: 'ส่วนตัว',
-                                      isSelected: filterPrivacy == true,
-                                      onTap: () =>
-                                          setState(() => filterPrivacy = true),
-                                      color: ThemeColors.burntOrange,
-                                    ),
-                                  ],
                                 ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Complaints List
-                            Expanded(
-                              child: filtered.isEmpty
-                                  ? Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.filter_alt_off,
-                                            color: ThemeColors.warmStone,
-                                            size: 48,
-                                          ),
-                                          const SizedBox(height: 16),
-                                          Text(
-                                            'ไม่มีรายการตามเงื่อนไขที่เลือก',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              color: ThemeColors.earthClay,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : RefreshIndicator(
-                                      color: ThemeColors.softBrown,
-                                      backgroundColor: ThemeColors.ivoryWhite,
-                                      onRefresh: _refreshComplaints,
-                                      child: ListView.builder(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 80,
-                                        ),
-                                        itemCount: filtered.length,
-                                        itemBuilder: (context, index) {
-                                          return _buildComplaintCard(
-                                            filtered[index],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                            ),
-                          ],
-                        );
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+      ),
     );
   }
 }

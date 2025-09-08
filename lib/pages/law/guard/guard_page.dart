@@ -4,7 +4,10 @@ import 'package:fullproject/domains/guard_domain.dart';
 import 'package:fullproject/models/guard_model.dart';
 import 'package:fullproject/pages/law/guard/add_guard_page.dart';
 import 'package:fullproject/pages/law/guard/edit_guard_page.dart';
+import 'package:fullproject/services/image_service.dart';
 import 'package:fullproject/config/supabase_config.dart';
+
+import 'guard_detail.dart';
 
 class LawGuardListPage extends StatefulWidget {
   final int villageId;
@@ -51,6 +54,19 @@ class _LawGuardListPageState extends State<LawGuardListPage> {
       context,
       MaterialPageRoute(
         builder: (context) => EditGuardPage(guard: guard),
+      ),
+    );
+
+    if (result == true && mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _navigateToGuardDetail(GuardModel guard) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GuardDetailPage(guard: guard),
       ),
     );
 
@@ -423,177 +439,211 @@ class _LawGuardListPageState extends State<LawGuardListPage> {
       elevation: 4,
       shadowColor: cardColor.withOpacity(0.2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [ivoryWhite, cardColor.withOpacity(0.1)],
+      child: InkWell(
+        onTap: () => _navigateToGuardDetail(guard),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [ivoryWhite, cardColor.withOpacity(0.1)],
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with Avatar, Title and Action Buttons
-              Row(
-                children: [
-                  _buildGuardAvatar(guard, cardColor),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _getDisplayName(guard),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                            letterSpacing: -0.3,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header with Avatar, Title and Action Buttons
+                Row(
+                  children: [
+                    _buildGuardAvatar(guard, cardColor),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getDisplayName(guard),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                              letterSpacing: -0.3,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        // Status Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: oliveGreen.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: oliveGreen.withOpacity(0.3),
-                              width: 1,
+                          const SizedBox(height: 4),
+                          // Status Badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: oliveGreen.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: oliveGreen.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: oliveGreen,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'ปฏิบัติงาน',
+                                  style: TextStyle(
+                                    color: oliveGreen,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: oliveGreen,
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'ปฏิบัติงาน',
-                                style: TextStyle(
-                                  color: oliveGreen,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  // ปุ่ม Edit
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: burntOrange.withOpacity(0.2),
-                          blurRadius: 3,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: burntOrange.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                      child: InkWell(
+                    // ปุ่ม View Detail
+                    Container(
+                      decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        onTap: _isRefreshing ? null : () => _navigateToEditGuard(guard),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Icon(
-                            Icons.edit,
-                            color: burntOrange,
-                            size: 20,
+                        boxShadow: [
+                          BoxShadow(
+                            color: softBrown.withOpacity(0.2),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: softBrown.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => _navigateToGuardDetail(guard),
+                          child: const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.visibility,
+                              color: softBrown,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  // ปุ่ม Delete
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: danger.withOpacity(0.15),
-                          blurRadius: 3,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: danger.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(10),
-                      child: InkWell(
+                    const SizedBox(width: 8),
+                    // ปุ่ม Edit
+                    Container(
+                      decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        onTap: _isRefreshing ? null : () => _confirmDelete(guard),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Icon(
-                            Icons.delete_outline,
-                            color: danger,
-                            size: 20,
+                        boxShadow: [
+                          BoxShadow(
+                            color: burntOrange.withOpacity(0.2),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: burntOrange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: _isRefreshing ? null : () => _navigateToEditGuard(guard),
+                          child: const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.edit,
+                              color: burntOrange,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
+                    const SizedBox(width: 8),
+                    // ปุ่ม Delete
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: danger.withOpacity(0.15),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: danger.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: _isRefreshing ? null : () => _confirmDelete(guard),
+                          child: const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: danger,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
-              // Guard Details แบบ horizontal
-              Row(
-                children: [
-                  // รหัสเจ้าหน้าที่
-                  Expanded(
-                    child: _buildCompactDetailItem(
-                      label: 'รหัส',
-                      value: guard.guardId.toString(),
-                      color: cardColor,
+                // Guard Details แบบ horizontal
+                Row(
+                  children: [
+                    // รหัสเจ้าหน้าที่
+                    Expanded(
+                      child: _buildCompactDetailItem(
+                        label: 'รหัส',
+                        value: guard.guardId.toString(),
+                        color: cardColor,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // เบอร์โทร
-                  Expanded(
-                    child: _buildCompactDetailItem(
-                      label: 'เบอร์โทร',
-                      value: guard.phone ?? 'ไม่ระบุ',
-                      color: cardColor.withOpacity(0.8),
+                    const SizedBox(width: 12),
+                    // เบอร์โทร
+                    Expanded(
+                      child: _buildCompactDetailItem(
+                        label: 'เบอร์โทร',
+                        value: guard.phone ?? 'ไม่ระบุ',
+                        color: cardColor.withOpacity(0.8),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // ชื่อเล่น
-                  Expanded(
-                    child: _buildCompactDetailItem(
-                      label: 'ชื่อเล่น',
-                      value: guard.nickname ?? 'ไม่ระบุ',
-                      color: cardColor.withOpacity(0.6),
+                    const SizedBox(width: 12),
+                    // ชื่อเล่น
+                    Expanded(
+                      child: _buildCompactDetailItem(
+                        label: 'ชื่อเล่น',
+                        value: guard.nickname ?? 'ไม่ระบุ',
+                        color: cardColor.withOpacity(0.6),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -601,7 +651,6 @@ class _LawGuardListPageState extends State<LawGuardListPage> {
   }
 
   Widget _buildGuardAvatar(GuardModel guard, Color cardColor) {
-    final url = _resolveImageUrl(_bucketName, guard.img);
     final initials = _getInitials(_getDisplayName(guard));
 
     return Container(
@@ -618,8 +667,38 @@ class _LawGuardListPageState extends State<LawGuardListPage> {
           ),
         ],
       ),
-      child: url == null
-          ? Center(
+      child: guard.img != null && guard.img!.isNotEmpty
+          ? ClipRRect(
+        borderRadius: BorderRadius.circular(25),
+        child: BuildImage(
+          imagePath: guard.img!,
+          tablePath: 'guard',
+          fit: BoxFit.cover,
+          width: 50,
+          height: 50,
+          placeholder: Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+          ),
+          errorWidget: Center(
+            child: Text(
+              initials,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      )
+          : Center(
         child: Text(
           initials,
           style: const TextStyle(
@@ -627,38 +706,6 @@ class _LawGuardListPageState extends State<LawGuardListPage> {
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
-        ),
-      )
-          : ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: Image.network(
-          url,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return Center(
-              child: Text(
-                initials,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            );
-          },
         ),
       ),
     );
@@ -684,14 +731,6 @@ class _LawGuardListPageState extends State<LawGuardListPage> {
     return parts.length == 1
         ? getFirstChar(parts.first)
         : '${getFirstChar(parts.first)}${getLastChar(parts.last)}';
-  }
-
-  String? _resolveImageUrl(String bucket, String? pathOrUrl) {
-    if (pathOrUrl == null || pathOrUrl.isEmpty) return null;
-    final s = pathOrUrl.trim();
-    if (s.startsWith('http://') || s.startsWith('https://')) return s;
-    final client = SupabaseConfig.client;
-    return client.storage.from(bucket).getPublicUrl(s);
   }
 
   // Helper Widget สำหรับแสดงข้อมูลแบบกะทัดรัด

@@ -18,11 +18,7 @@ class EditHousePage extends StatefulWidget {
   final int villageId;
   final HouseModel? house; // null = create, not null = edit
 
-  const EditHousePage({
-    super.key,
-    required this.villageId,
-    this.house,
-  });
+  const EditHousePage({super.key, required this.villageId, this.house});
 
   @override
   State<EditHousePage> createState() => _EditHousePageState();
@@ -56,28 +52,93 @@ class _EditHousePageState extends State<EditHousePage> {
 
   // Option definitions with ThemeColors
   final List<Map<String, dynamic>> houseStatuses = const [
-    {'value': 'owned', 'label': 'มีคนอยู่อาศัย', 'icon': Icons.home, 'color': ThemeColors.successGreen},
-    {'value': 'vacant', 'label': 'ว่าง', 'icon': Icons.home_outlined, 'color': ThemeColors.warningAmber},
-    {'value': 'sold', 'label': 'ขายแล้ว', 'icon': Icons.home_work, 'color': ThemeColors.infoBlue},
-    {'value': 'rented', 'label': 'ให้เช่าแล้ว', 'icon': Icons.key, 'color': ThemeColors.burntOrange},
+    {
+      'value': 'owned',
+      'label': 'มีคนอยู่อาศัย',
+      'icon': Icons.home,
+      'color': ThemeColors.successGreen,
+    },
+    {
+      'value': 'vacant',
+      'label': 'ว่าง',
+      'icon': Icons.home_outlined,
+      'color': ThemeColors.warningAmber,
+    },
+    {
+      'value': 'sold',
+      'label': 'ขายแล้ว',
+      'icon': Icons.home_work,
+      'color': ThemeColors.infoBlue,
+    },
+    {
+      'value': 'rented',
+      'label': 'ให้เช่าแล้ว',
+      'icon': Icons.key,
+      'color': ThemeColors.burntOrange,
+    },
   ];
 
   final List<Map<String, dynamic>> ownershipTypes = const [
-    {'value': 'owner', 'label': 'เจ้าของบ้าน', 'icon': Icons.person, 'color': ThemeColors.softBrown},
-    {'value': 'tenant', 'label': 'ผู้เช่า', 'icon': Icons.person_outline, 'color': ThemeColors.sageGreen},
+    {
+      'value': 'owner',
+      'label': 'เจ้าของบ้าน',
+      'icon': Icons.person,
+      'color': ThemeColors.softBrown,
+    },
+    {
+      'value': 'tenant',
+      'label': 'ผู้เช่า',
+      'icon': Icons.person_outline,
+      'color': ThemeColors.sageGreen,
+    },
   ];
 
   final List<Map<String, dynamic>> houseTypes = const [
-    {'value': 'detached', 'label': 'บ้านเดี่ยว', 'icon': Icons.home, 'color': ThemeColors.infoBlue},
-    {'value': 'duplex', 'label': 'บ้านแฝด', 'icon': Icons.home_work, 'color': ThemeColors.sageGreen},
-    {'value': 'townhouse', 'label': 'ทาวน์เฮาส์', 'icon': Icons.apartment, 'color': ThemeColors.rustOrange},
-    {'value': 'condo', 'label': 'คอนโด', 'icon': Icons.business, 'color': ThemeColors.terracottaRed},
+    {
+      'value': 'detached',
+      'label': 'บ้านเดี่ยว',
+      'icon': Icons.home,
+      'color': ThemeColors.infoBlue,
+    },
+    {
+      'value': 'duplex',
+      'label': 'บ้านแฝด',
+      'icon': Icons.home_work,
+      'color': ThemeColors.sageGreen,
+    },
+    {
+      'value': 'townhouse',
+      'label': 'ทาวน์เฮาส์',
+      'icon': Icons.apartment,
+      'color': ThemeColors.rustOrange,
+    },
+    {
+      'value': 'condo',
+      'label': 'คอนโด',
+      'icon': Icons.business,
+      'color': ThemeColors.terracottaRed,
+    },
   ];
 
   final List<Map<String, dynamic>> usageStatuses = const [
-    {'value': 'active', 'label': 'ใช้งานปกติ', 'icon': Icons.check_circle, 'color': ThemeColors.successGreen},
-    {'value': 'inactive', 'label': 'ไม่ใช้งาน', 'icon': Icons.cancel, 'color': ThemeColors.errorRust},
-    {'value': 'maintenance', 'label': 'ซ่อมแซม', 'icon': Icons.build, 'color': ThemeColors.warningAmber},
+    {
+      'value': 'active',
+      'label': 'ใช้งานปกติ',
+      'icon': Icons.check_circle,
+      'color': ThemeColors.successGreen,
+    },
+    {
+      'value': 'inactive',
+      'label': 'ไม่ใช้งาน',
+      'icon': Icons.cancel,
+      'color': ThemeColors.errorRust,
+    },
+    {
+      'value': 'maintenance',
+      'label': 'ซ่อมแซม',
+      'icon': Icons.build,
+      'color': ThemeColors.warningAmber,
+    },
   ];
 
   @override
@@ -100,9 +161,10 @@ class _EditHousePageState extends State<EditHousePage> {
       _phoneController.text = h.phone ?? '';
       _sizeController.text = h.size ?? '';
       _usableAreaController.text = h.usableArea ?? '';
-      _floorsController.text = (h.floors == null || h.floors! < 1) ? '' : h.floors!.toString();
+      _floorsController.text = (h.floors == null || h.floors! < 1)
+          ? ''
+          : h.floors!.toString();
       _selectedStatus = h.status;
-      _selectedOwnershipType = h.ownershipType;
       _selectedHouseType = h.houseType;
       _selectedUsageStatus = h.usageStatus;
       _currentImageUrl = h.img;
@@ -133,9 +195,16 @@ class _EditHousePageState extends State<EditHousePage> {
         backgroundColor: ThemeColors.ivoryWhite,
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: ThemeColors.warningAmber, size: 28),
+            Icon(
+              Icons.warning_amber_rounded,
+              color: ThemeColors.warningAmber,
+              size: 28,
+            ),
             const SizedBox(width: 12),
-            Text('ยืนยันการออก', style: TextStyle(color: ThemeColors.darkChocolate)),
+            Text(
+              'ยืนยันการออก',
+              style: TextStyle(color: ThemeColors.darkChocolate),
+            ),
           ],
         ),
         content: Text(
@@ -193,13 +262,25 @@ class _EditHousePageState extends State<EditHousePage> {
                 const SizedBox(height: 20),
                 if (!kIsWeb)
                   ListTile(
-                    leading: _iconChip(Icons.photo_camera, ThemeColors.infoBlue),
-                    title: Text('ถ่ายรูป', style: TextStyle(color: ThemeColors.darkChocolate)),
-                    subtitle: Text('ใช้กล้องถ่ายรูปใหม่', style: TextStyle(color: ThemeColors.dustyBrown)),
+                    leading: _iconChip(
+                      Icons.photo_camera,
+                      ThemeColors.infoBlue,
+                    ),
+                    title: Text(
+                      'ถ่ายรูป',
+                      style: TextStyle(color: ThemeColors.darkChocolate),
+                    ),
+                    subtitle: Text(
+                      'ใช้กล้องถ่ายรูปใหม่',
+                      style: TextStyle(color: ThemeColors.dustyBrown),
+                    ),
                     onTap: () => Navigator.pop(context, 'camera'),
                   ),
                 ListTile(
-                  leading: _iconChip(Icons.photo_library, ThemeColors.sageGreen),
+                  leading: _iconChip(
+                    Icons.photo_library,
+                    ThemeColors.sageGreen,
+                  ),
                   title: Text(
                     kIsWeb ? 'เลือกรูปภาพ' : 'เลือกจากแกลเลอรี่',
                     style: TextStyle(color: ThemeColors.darkChocolate),
@@ -380,10 +461,16 @@ class _EditHousePageState extends State<EditHousePage> {
 
   // Helpers
   bool _hasNewImage() => _selectedImage != null || _webImage != null;
+
   bool _hasCurrentImage() => _currentImageUrl != null && !_removeCurrentImage;
+
   bool _hasAnyImage() => _hasNewImage() || _hasCurrentImage();
 
-  void _showSnack(String message, {bool isError = false, bool isWarning = false}) {
+  void _showSnack(
+    String message, {
+    bool isError = false,
+    bool isWarning = false,
+  }) {
     if (!mounted) return;
     final bg = isError
         ? ThemeColors.errorRust
@@ -395,11 +482,18 @@ class _EditHousePageState extends State<EditHousePage> {
         content: Row(
           children: [
             Icon(
-              isError ? Icons.error : (isWarning ? Icons.warning : Icons.check_circle),
+              isError
+                  ? Icons.error
+                  : (isWarning ? Icons.warning : Icons.check_circle),
               color: ThemeColors.ivoryWhite,
             ),
             const SizedBox(width: 12),
-            Expanded(child: Text(message, style: TextStyle(color: ThemeColors.ivoryWhite))),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(color: ThemeColors.ivoryWhite),
+              ),
+            ),
           ],
         ),
         backgroundColor: bg,
@@ -438,7 +532,9 @@ class _EditHousePageState extends State<EditHousePage> {
             if (_hasUnsavedChanges)
               TextButton(
                 onPressed: _resetForm,
-                style: TextButton.styleFrom(foregroundColor: ThemeColors.softBrown),
+                style: TextButton.styleFrom(
+                  foregroundColor: ThemeColors.softBrown,
+                ),
                 child: const Text('รีเซ็ต'),
               ),
           ],
@@ -488,10 +584,24 @@ class _EditHousePageState extends State<EditHousePage> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: kIsWeb && _webImage != null
-                      ? Image.memory(_webImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
+                      ? Image.memory(
+                          _webImage!,
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        )
                       : (_selectedImage != null
-                      ? Image.file(_selectedImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
-                      : Container(width: double.infinity, height: 200, color: ThemeColors.lightTaupe)),
+                            ? Image.file(
+                                _selectedImage!,
+                                width: double.infinity,
+                                height: 200,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                width: double.infinity,
+                                height: 200,
+                                color: ThemeColors.lightTaupe,
+                              )),
                 ),
                 Positioned(
                   top: 12,
@@ -537,7 +647,11 @@ class _EditHousePageState extends State<EditHousePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.broken_image, size: 48, color: ThemeColors.dustyBrown),
+                            Icon(
+                              Icons.broken_image,
+                              size: 48,
+                              color: ThemeColors.dustyBrown,
+                            ),
                             const SizedBox(height: 8),
                             Text(
                               'ไม่สามารถโหลดรูปภาพได้',
@@ -564,16 +678,26 @@ class _EditHousePageState extends State<EditHousePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.home_outlined, size: 64, color: ThemeColors.dustyBrown),
+                  Icon(
+                    Icons.home_outlined,
+                    size: 64,
+                    color: ThemeColors.dustyBrown,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'ยังไม่มีรูปภาพบ้าน',
-                    style: TextStyle(color: ThemeColors.darkChocolate, fontSize: 16),
+                    style: TextStyle(
+                      color: ThemeColors.darkChocolate,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'กดปุ่มด้านล่างเพื่อเพิ่มรูป',
-                    style: TextStyle(color: ThemeColors.dustyBrown, fontSize: 14),
+                    style: TextStyle(
+                      color: ThemeColors.dustyBrown,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
@@ -594,7 +718,9 @@ class _EditHousePageState extends State<EditHousePage> {
               ),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: ThemeColors.softBrown),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -618,7 +744,9 @@ class _EditHousePageState extends State<EditHousePage> {
               icon: Icons.home,
             ),
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (value) => (value == null || value.trim().isEmpty) ? 'กรุณาระบุหมายเลขบ้าน' : null,
+            validator: (value) => (value == null || value.trim().isEmpty)
+                ? 'กรุณาระบุหมายเลขบ้าน'
+                : null,
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
@@ -630,7 +758,9 @@ class _EditHousePageState extends State<EditHousePage> {
               icon: Icons.person,
             ),
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (value) => (value == null || value.trim().isEmpty) ? 'กรุณาระบุชื่อเจ้าของ' : null,
+            validator: (value) => (value == null || value.trim().isEmpty)
+                ? 'กรุณาระบุชื่อเจ้าของ'
+                : null,
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
@@ -642,7 +772,10 @@ class _EditHousePageState extends State<EditHousePage> {
               icon: Icons.phone,
             ),
             keyboardType: TextInputType.phone,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(15)],
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(15),
+            ],
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (value) {
               final v = (value ?? '').trim();
@@ -692,11 +825,15 @@ class _EditHousePageState extends State<EditHousePage> {
               icon: Icons.layers,
             ),
             keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(2)],
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(2),
+            ],
             validator: (value) {
               if (value?.trim().isEmpty ?? true) return null;
               final floors = int.tryParse(value!.trim());
-              if (floors == null || floors < 1) return 'กรุณาระบุจำนวนชั้นที่ถูกต้อง (1-10)';
+              if (floors == null || floors < 1)
+                return 'กรุณาระบุจำนวนชั้นที่ถูกต้อง (1-10)';
               if (floors > 10) return 'จำนวนชั้นไม่ควรเกิน 10 ชั้น';
               return null;
             },
@@ -795,19 +932,23 @@ class _EditHousePageState extends State<EditHousePage> {
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? color.withValues(alpha: 0.15) : ThemeColors.ivoryWhite,
+                  color: isSelected
+                      ? color.withValues(alpha: 0.15)
+                      : ThemeColors.ivoryWhite,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected ? color : ThemeColors.softBorder,
                     width: isSelected ? 2 : 1,
                   ),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.2),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                    ),
-                  ] : null,
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: color.withValues(alpha: 0.2),
+                            blurRadius: 4,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -823,7 +964,9 @@ class _EditHousePageState extends State<EditHousePage> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: isSelected ? color : ThemeColors.darkChocolate,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                         fontSize: 13,
                       ),
                     ),
@@ -858,35 +1001,37 @@ class _EditHousePageState extends State<EditHousePage> {
               disabledBackgroundColor: ThemeColors.disabledGrey,
               elevation: 4,
               shadowColor: ThemeColors.softBrown.withValues(alpha: 0.3),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: _isSaving
                 ? Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: ThemeColors.ivoryWhite,
-                    strokeWidth: 2,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'กำลังบันทึก...',
-                  style: TextStyle(color: ThemeColors.ivoryWhite),
-                ),
-              ],
-            )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: ThemeColors.ivoryWhite,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'กำลังบันทึก...',
+                        style: TextStyle(color: ThemeColors.ivoryWhite),
+                      ),
+                    ],
+                  )
                 : Text(
-              widget.house != null ? 'บันทึกการแก้ไข' : 'เพิ่มบ้านใหม่',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: ThemeColors.ivoryWhite,
-              ),
-            ),
+                    widget.house != null ? 'บันทึกการแก้ไข' : 'เพิ่มบ้านใหม่',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: ThemeColors.ivoryWhite,
+                    ),
+                  ),
           ),
         ),
         const SizedBox(height: 12),
@@ -897,17 +1042,19 @@ class _EditHousePageState extends State<EditHousePage> {
             onPressed: _isSaving
                 ? null
                 : () async {
-              if (_hasUnsavedChanges) {
-                final shouldPop = await _onWillPop();
-                if (shouldPop && mounted) Navigator.pop(context);
-              } else {
-                if (mounted) Navigator.pop(context);
-              }
-            },
+                    if (_hasUnsavedChanges) {
+                      final shouldPop = await _onWillPop();
+                      if (shouldPop && mounted) Navigator.pop(context);
+                    } else {
+                      if (mounted) Navigator.pop(context);
+                    }
+                  },
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: ThemeColors.softBorder),
               foregroundColor: ThemeColors.softBrown,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: const Text('ยกเลิก'),
           ),
@@ -946,7 +1093,9 @@ class _EditHousePageState extends State<EditHousePage> {
       filled: true,
       fillColor: ThemeColors.inputFill,
       labelStyle: TextStyle(color: ThemeColors.dustyBrown),
-      hintStyle: TextStyle(color: ThemeColors.dustyBrown.withValues(alpha: 0.7)),
+      hintStyle: TextStyle(
+        color: ThemeColors.dustyBrown.withValues(alpha: 0.7),
+      ),
     );
   }
 
@@ -1012,13 +1161,21 @@ class _EditHousePageState extends State<EditHousePage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: (iconColor ?? ThemeColors.softBrown).withValues(alpha: 0.1),
+                    color: (iconColor ?? ThemeColors.softBrown).withValues(
+                      alpha: 0.1,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: (iconColor ?? ThemeColors.softBrown).withValues(alpha: 0.3),
+                      color: (iconColor ?? ThemeColors.softBrown).withValues(
+                        alpha: 0.3,
+                      ),
                     ),
                   ),
-                  child: Icon(icon, color: iconColor ?? ThemeColors.softBrown, size: 20),
+                  child: Icon(
+                    icon,
+                    color: iconColor ?? ThemeColors.softBrown,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(

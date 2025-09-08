@@ -1,8 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fullproject/domains/funds_domain.dart';
 import 'package:fullproject/models/funds_model.dart';
+import 'package:fullproject/services/image_service.dart';
 import 'package:fullproject/theme/Color.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -19,14 +22,23 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
 
-  // Theme Colors
+  String _selectedType = 'income';
 
-  String _selectedType = 'income'; // income, outcome
-  File? _newReceiptImage;
+  // Receipt Image
+  File? _newReceiptImageFile;
+  Uint8List? _newReceiptImageBytes;
   bool _removeReceiptImage = false;
-  bool _isLoading = false;
   String? _currentReceiptUrl;
+
+  // Approval Image
+  File? _newApprovImageFile;
+  Uint8List? _newApprovImageBytes;
+  bool _removeApprovImage = false;
+  String? _currentApprovUrl;
+
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -39,6 +51,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
     _amountController.text = widget.fund.amount.toString();
     _selectedType = widget.fund.type;
     _currentReceiptUrl = widget.fund.receiptImg;
+    _currentApprovUrl = widget.fund.approvImg;
   }
 
   @override
@@ -48,126 +61,182 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
+  bool _hasSelectedImage(String imageType) {
+    if (imageType == 'receipt') {
+      return (kIsWeb && _newReceiptImageBytes != null) ||
+          (!kIsWeb && _newReceiptImageFile != null);
+    } else {
+      return (kIsWeb && _newApprovImageBytes != null) ||
+          (!kIsWeb && _newApprovImageFile != null);
+    }
+  }
+
+  Future<void> _pickImage(String imageType) async {
     try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
+      final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 80,
       );
 
       if (image != null) {
-        setState(() {
-          _newReceiptImage = File(image.path);
-          _removeReceiptImage = false;
-        });
+        if (kIsWeb) {
+          final bytes = await image.readAsBytes();
+          setState(() {
+            if (imageType == 'receipt') {
+              _newReceiptImageBytes = bytes;
+              _newReceiptImageFile = null;
+              _removeReceiptImage = false;
+            } else {
+              _newApprovImageBytes = bytes;
+              _newApprovImageFile = null;
+              _removeApprovImage = false;
+            }
+          });
+        } else {
+          setState(() {
+            if (imageType == 'receipt') {
+              _newReceiptImageFile = File(image.path);
+              _newReceiptImageBytes = null;
+              _removeReceiptImage = false;
+            } else {
+              _newApprovImageFile = File(image.path);
+              _newApprovImageBytes = null;
+              _removeApprovImage = false;
+            }
+          });
+        }
       }
     } catch (e) {
       _showErrorSnackBar('เกิดข้อผิดพลาดในการเลือกรูปภาพ: $e');
     }
   }
 
-  Future<void> _takePhoto() async {
+  Future<void> _pickImageFromCamera(String imageType) async {
     try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
+      final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 80,
       );
 
       if (image != null) {
-        setState(() {
-          _newReceiptImage = File(image.path);
-          _removeReceiptImage = false;
-        });
+        if (kIsWeb) {
+          final bytes = await image.readAsBytes();
+          setState(() {
+            if (imageType == 'receipt') {
+              _newReceiptImageBytes = bytes;
+              _newReceiptImageFile = null;
+              _removeReceiptImage = false;
+            } else {
+              _newApprovImageBytes = bytes;
+              _newApprovImageFile = null;
+              _removeApprovImage = false;
+            }
+          });
+        } else {
+          setState(() {
+            if (imageType == 'receipt') {
+              _newReceiptImageFile = File(image.path);
+              _newReceiptImageBytes = null;
+              _removeReceiptImage = false;
+            } else {
+              _newApprovImageFile = File(image.path);
+              _newApprovImageBytes = null;
+              _removeApprovImage = false;
+            }
+          });
+        }
       }
     } catch (e) {
-      _showErrorSnackBar('เกิดข้อผิดพลาดในการถ่ายรูป: $e');
+      _showErrorSnackBar('เกิดข้อผิดพลาดในการถ่ายภาพ: $e');
     }
   }
 
-  void _removeImage() {
+  void _removeImage(String imageType) {
     setState(() {
-      _newReceiptImage = null;
-      _removeReceiptImage = true;
+      if (imageType == 'receipt') {
+        _newReceiptImageFile = null;
+        _newReceiptImageBytes = null;
+        _removeReceiptImage = true;
+      } else {
+        _newApprovImageFile = null;
+        _newApprovImageBytes = null;
+        _removeApprovImage = true;
+      }
     });
   }
 
-  void _showImagePicker() {
+  void _showImagePicker(String imageType) {
+    final title = imageType == 'receipt' ? 'รูปใบเสร็จ' : 'รูปอนุมัติ';
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: ThemeColors.beige,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: ThemeColors.beige,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: ThemeColors.warmStone,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 50,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: ThemeColors.warmStone,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+            SizedBox(height: 16),
+            Text(
+              'เลือก$title',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: ThemeColors.softBrown,
               ),
-              SizedBox(height: 20),
-              Text(
-                'เลือกรูปใบเสร็จ',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: ThemeColors.softBrown,
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildImageOption(
+                  icon: Icons.camera_alt_outlined,
+                  label: 'ถ่ายรูป',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImageFromCamera(imageType);
+                  },
                 ),
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
+                _buildImageOption(
+                  icon: Icons.photo_library_outlined,
+                  label: 'แกลลอรี่',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(imageType);
+                  },
+                ),
+                if (_hasImageToShow(imageType))
                   _buildImageOption(
-                    icon: Icons.camera_alt_outlined,
-                    label: 'ถ่ายรูป',
+                    icon: Icons.delete_outline,
+                    label: 'ลบรูป',
+                    color: ThemeColors.burntOrange,
                     onTap: () {
                       Navigator.pop(context);
-                      _takePhoto();
+                      _removeImage(imageType);
                     },
                   ),
-                  _buildImageOption(
-                    icon: Icons.photo_library_outlined,
-                    label: 'เลือกจากแกลลอรี่',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _pickImage();
-                    },
-                  ),
-                  if (_currentReceiptUrl != null || _newReceiptImage != null)
-                    _buildImageOption(
-                      icon: Icons.delete_outline,
-                      label: 'ลบรูป',
-                      color: ThemeColors.burntOrange,
-                      onTap: () {
-                        Navigator.pop(context);
-                        _removeImage();
-                      },
-                    ),
-                ],
-              ),
-              SizedBox(height: 20),
-            ],
-          ),
-        );
-      },
+              ],
+            ),
+            SizedBox(height: 16),
+          ],
+        ),
+      ),
     );
   }
 
@@ -183,27 +252,37 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
       child: Column(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
-              color: optionColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: optionColor.withOpacity(0.3), width: 2),
+              color: optionColor.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(color: optionColor.withOpacity(0.3)),
             ),
-            child: Icon(icon, color: optionColor, size: 30),
+            child: Icon(icon, color: optionColor, size: 24),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 6),
           Text(
             label,
             style: TextStyle(
               color: optionColor,
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
           ),
         ],
       ),
     );
+  }
+
+  bool _hasImageToShow(String imageType) {
+    if (imageType == 'receipt') {
+      return (_currentReceiptUrl != null && !_removeReceiptImage) ||
+          _hasSelectedImage(imageType);
+    } else {
+      return (_currentApprovUrl != null && !_removeApprovImage) ||
+          _hasSelectedImage(imageType);
+    }
   }
 
   Future<void> _saveChanges() async {
@@ -216,18 +295,40 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
     try {
       final amount = double.parse(_amountController.text);
 
+      // เตรียม imageFile สำหรับรูปใบเสร็จ
+      dynamic receiptImageFile;
+      if (_hasSelectedImage('receipt')) {
+        if (kIsWeb && _newReceiptImageBytes != null) {
+          receiptImageFile = _newReceiptImageBytes!;
+        } else if (!kIsWeb && _newReceiptImageFile != null) {
+          receiptImageFile = _newReceiptImageFile!;
+        }
+      }
+
+      // เตรียม imageFile สำหรับรูปอนุมัติ
+      dynamic approvImageFile;
+      if (_hasSelectedImage('approv')) {
+        if (kIsWeb && _newApprovImageBytes != null) {
+          approvImageFile = _newApprovImageBytes!;
+        } else if (!kIsWeb && _newApprovImageFile != null) {
+          approvImageFile = _newApprovImageFile!;
+        }
+      }
+
       await FundDomain.update(
         fundId: widget.fund.fundId,
         villageId: widget.fund.villageId,
         type: _selectedType,
         amount: amount,
         description: _descriptionController.text,
-        receiptImageFile: _newReceiptImage,
+        receiptImageFile: receiptImageFile,
+        approvImageFile: approvImageFile,
         removeReceiptImage: _removeReceiptImage,
+        removeApprovImage: _removeApprovImage,
       );
 
       _showSuccessSnackBar('บันทึกข้อมูลเรียบร้อยแล้ว');
-      Navigator.pop(context, true); // Return true to indicate success
+      Navigator.pop(context, true);
     } catch (e) {
       _showErrorSnackBar('เกิดข้อผิดพลาดในการบันทึกข้อมูล: $e');
     } finally {
@@ -248,7 +349,7 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
           ],
         ),
         backgroundColor: ThemeColors.oliveGreen,
-        duration: Duration(seconds: 3),
+        duration: Duration(seconds: 2),
       ),
     );
   }
@@ -264,337 +365,172 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
           ],
         ),
         backgroundColor: ThemeColors.burntOrange,
-        duration: Duration(seconds: 4),
+        duration: Duration(seconds: 3),
       ),
     );
   }
 
-  Widget _buildTypeSelector() {
-    return Container(
-      padding: EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: ThemeColors.beige,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ThemeColors.sandyTan, width: 1),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildTypeOption(
-              type: 'income',
-              label: 'รายรับ',
-              icon: Icons.trending_up_rounded,
-              color: ThemeColors.oliveGreen,
-            ),
-          ),
-          Expanded(
-            child: _buildTypeOption(
-              type: 'outcome',
-              label: 'รายจ่าย',
-              icon: Icons.trending_down_rounded,
-              color: ThemeColors.burntOrange,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildImageCard(String imageType) {
+    final title = imageType == 'receipt' ? 'ใบเสร็จ' : 'หลักฐานอนุมัติ';
 
-  Widget _buildTypeOption({
-    required String type,
-    required String label,
-    required IconData icon,
-    required Color color,
-  }) {
-    final isSelected = _selectedType == type;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedType = type;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.15) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: isSelected ? Border.all(color: color, width: 1.5) : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isSelected ? color : ThemeColors.warmStone,
-            ),
-            SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? color : ThemeColors.warmStone,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReceiptSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'หลักฐานการทำรายการ',
+          title,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: ThemeColors.softBrown,
           ),
         ),
-        SizedBox(height: 12),
-
-        if (_removeReceiptImage)
-          _buildNoImageState()
-        else if (_newReceiptImage != null)
-          _buildNewImagePreview()
-        else if (_currentReceiptUrl != null && _currentReceiptUrl!.isNotEmpty)
-          _buildCurrentImagePreview()
-        else
-          _buildNoImageState(),
+        SizedBox(height: 8),
+        Container(
+          height: 120,
+          decoration: BoxDecoration(
+            color: ThemeColors.beige,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: ThemeColors.sandyTan),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => _showImagePicker(imageType),
+              child: _buildImageContent(imageType),
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildNoImageState() {
-    return GestureDetector(
-      onTap: _showImagePicker,
-      child: Container(
-        width: double.infinity,
-        height: 200,
-        decoration: BoxDecoration(
-          color: ThemeColors.beige,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: ThemeColors.sandyTan,
-            width: 2,
-            style: BorderStyle.none,
+  Widget _buildImageContent(String imageType) {
+    // Check if image should be removed
+    if ((imageType == 'receipt' && _removeReceiptImage) ||
+        (imageType == 'approv' && _removeApprovImage)) {
+      return _buildEmptyImageState(imageType);
+    }
+
+    // Show new selected image
+    if (_hasSelectedImage(imageType)) {
+      return _buildSelectedImagePreview(imageType);
+    }
+
+    // Show current image from server
+    final currentUrl = imageType == 'receipt'
+        ? _currentReceiptUrl
+        : _currentApprovUrl;
+    if (currentUrl != null && currentUrl.isNotEmpty) {
+      return _buildCurrentImagePreview(currentUrl, "funds/${imageType}");
+    }
+
+    // Show empty state
+    return _buildEmptyImageState(imageType);
+  }
+
+  Widget _buildEmptyImageState(String imageType) {
+    final title = imageType == 'receipt'
+        ? 'เพิ่มรูปใบเสร็จ'
+        : 'เพิ่มรูปหลักฐานอนุมัติ';
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.add_photo_alternate_outlined,
+          size: 48,
+          color: ThemeColors.warmStone,
+        ),
+        SizedBox(height: 12),
+        Text(
+          title,
+          style: TextStyle(
+            color: ThemeColors.warmStone,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(20),
+        SizedBox(height: 4),
+        Text(
+          'แตะเพื่อเลือกรูปภาพ',
+          style: TextStyle(color: ThemeColors.earthClay, fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSelectedImagePreview(String imageType) {
+    Widget imageWidget;
+
+    if (kIsWeb) {
+      final bytes = imageType == 'receipt'
+          ? _newReceiptImageBytes
+          : _newApprovImageBytes;
+      imageWidget = bytes != null
+          ? Image.memory(
+              bytes,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            )
+          : _buildEmptyImageState(imageType);
+    } else {
+      final file = imageType == 'receipt'
+          ? _newReceiptImageFile
+          : _newApprovImageFile;
+      imageWidget = file != null
+          ? Image.file(
+              file,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            )
+          : _buildEmptyImageState(imageType);
+    }
+
+    return Stack(
+      children: [
+        ClipRRect(borderRadius: BorderRadius.circular(11), child: imageWidget),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: GestureDetector(
+            onTap: () => _removeImage(imageType),
+            child: Container(
+              padding: EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: ThemeColors.warmStone.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(50),
+                color: ThemeColors.burntOrange,
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                Icons.add_photo_alternate_outlined,
-                size: 48,
-                color: ThemeColors.warmStone,
-              ),
+              child: Icon(Icons.close, color: ThemeColors.ivoryWhite, size: 16),
             ),
-            SizedBox(height: 16),
-            Text(
-              'เพิ่มรูปใบเสร็จ',
-              style: TextStyle(
-                color: ThemeColors.warmStone,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'แตะเพื่อเลือกรูปภาพ',
-              style: TextStyle(color: ThemeColors.earthClay, fontSize: 14),
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildNewImagePreview() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ThemeColors.sandyTan, width: 2),
-      ),
-      child: Column(
-        children: [
-          Container(
-            height: 200,
+  Widget _buildCurrentImagePreview(String imageUrl, String bucketPath) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(11),
+          child: BuildImage(imagePath: imageUrl, tablePath: bucketPath),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Container(
+            padding: EdgeInsets.all(4),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-              child: Image.file(
-                _newReceiptImage!,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
+            child: Icon(Icons.edit, color: Colors.white, size: 16),
           ),
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: ThemeColors.beige,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(10),
-                bottomRight: Radius.circular(10),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton.icon(
-                  onPressed: _showImagePicker,
-                  icon: Icon(
-                    Icons.edit_outlined,
-                    color: ThemeColors.softTerracotta,
-                  ),
-                  label: Text(
-                    'เปลี่ยนรูป',
-                    style: TextStyle(color: ThemeColors.softTerracotta),
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: _removeImage,
-                  icon: Icon(
-                    Icons.delete_outline,
-                    color: ThemeColors.burntOrange,
-                  ),
-                  label: Text(
-                    'ลบรูป',
-                    style: TextStyle(color: ThemeColors.burntOrange),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCurrentImagePreview() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ThemeColors.sandyTan, width: 2),
-      ),
-      child: Column(
-        children: [
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-              child: Image.network(
-                _currentReceiptUrl!,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    height: 200,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          ThemeColors.softBrown,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 200,
-                    color: ThemeColors.burntOrange.withOpacity(0.1),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.broken_image_outlined,
-                            size: 48,
-                            color: ThemeColors.burntOrange,
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'ไม่สามารถโหลดรูปภาพได้',
-                            style: TextStyle(color: ThemeColors.burntOrange),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: ThemeColors.beige,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(10),
-                bottomRight: Radius.circular(10),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton.icon(
-                  onPressed: _showImagePicker,
-                  icon: Icon(
-                    Icons.edit_outlined,
-                    color: ThemeColors.softTerracotta,
-                  ),
-                  label: Text(
-                    'เปลี่ยนรูป',
-                    style: TextStyle(color: ThemeColors.softTerracotta),
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: _removeImage,
-                  icon: Icon(
-                    Icons.delete_outline,
-                    color: ThemeColors.burntOrange,
-                  ),
-                  label: Text(
-                    'ลบรูป',
-                    style: TextStyle(color: ThemeColors.burntOrange),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -603,36 +539,10 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
     return Scaffold(
       backgroundColor: ThemeColors.ivoryWhite,
       appBar: AppBar(
-        title: Text(
-          'แก้ไขรายการกองทุน',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: ThemeColors.ivoryWhite,
-            fontSize: 20,
-          ),
-        ),
+        title: Text('แก้ไขรายการกองทุน'),
         backgroundColor: ThemeColors.softBrown,
         foregroundColor: ThemeColors.ivoryWhite,
-        elevation: 0,
         centerTitle: true,
-        actions: [
-          if (_isLoading)
-            Container(
-              margin: EdgeInsets.only(right: 16),
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      ThemeColors.ivoryWhite,
-                    ),
-                    strokeWidth: 2,
-                  ),
-                ),
-              ),
-            ),
-        ],
       ),
       body: Form(
         key: _formKey,
@@ -642,28 +552,99 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Type Selector
-              Text(
-                'ประเภทรายการ',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: ThemeColors.softBrown,
+              Container(
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: ThemeColors.beige,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: ThemeColors.sandyTan),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedType = 'income'),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: _selectedType == 'income'
+                                ? ThemeColors.oliveGreen.withOpacity(0.15)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            border: _selectedType == 'income'
+                                ? Border.all(color: ThemeColors.oliveGreen)
+                                : null,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.trending_up_rounded,
+                                size: 18,
+                                color: _selectedType == 'income'
+                                    ? ThemeColors.oliveGreen
+                                    : ThemeColors.warmStone,
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'รายรับ',
+                                style: TextStyle(
+                                  color: _selectedType == 'income'
+                                      ? ThemeColors.oliveGreen
+                                      : ThemeColors.warmStone,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedType = 'outcome'),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: _selectedType == 'outcome'
+                                ? ThemeColors.burntOrange.withOpacity(0.15)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            border: _selectedType == 'outcome'
+                                ? Border.all(color: ThemeColors.burntOrange)
+                                : null,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.trending_down_rounded,
+                                size: 18,
+                                color: _selectedType == 'outcome'
+                                    ? ThemeColors.burntOrange
+                                    : ThemeColors.warmStone,
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'รายจ่าย',
+                                style: TextStyle(
+                                  color: _selectedType == 'outcome'
+                                      ? ThemeColors.burntOrange
+                                      : ThemeColors.warmStone,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 8),
-              _buildTypeSelector(),
-              SizedBox(height: 24),
+              SizedBox(height: 20),
 
               // Amount Field
-              Text(
-                'จำนวนเงิน',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: ThemeColors.softBrown,
-                ),
-              ),
-              SizedBox(height: 8),
               TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -671,28 +652,17 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
                 ],
                 decoration: InputDecoration(
-                  hintText: 'กรอกจำนวนเงิน',
+                  labelText: 'จำนวนเงิน',
                   prefixText: '฿ ',
-                  prefixStyle: TextStyle(
-                    color: ThemeColors.softBrown,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
                   filled: true,
                   fillColor: ThemeColors.beige,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: ThemeColors.sandyTan,
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: ThemeColors.sandyTan),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: ThemeColors.sandyTan,
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: ThemeColors.sandyTan),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -701,107 +671,133 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                       width: 2,
                     ),
                   ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: ThemeColors.burntOrange,
-                      width: 1,
-                    ),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                ),
-                style: TextStyle(
-                  fontSize: 16,
-                  color: ThemeColors.softBrown,
-                  fontWeight: FontWeight.w500,
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'กรุณากรอกจำนวนเงิน';
-                  }
-                  final amount = double.tryParse(value);
-                  if (amount == null) {
-                    return 'กรุณากรอกตัวเลขที่ถูกต้อง';
-                  }
-                  if (amount <= 0) {
-                    return 'จำนวนเงินต้องมากกว่า 0';
-                  }
+                  if (value?.isEmpty ?? true) return 'กรุณากรอกจำนวนเงิน';
+                  final amount = double.tryParse(value!);
+                  if (amount == null) return 'กรุณากรอกตัวเลขที่ถูกต้อง';
+                  if (amount <= 0) return 'จำนวนเงินต้องมากกว่า 0';
                   return null;
                 },
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 16),
 
               // Description Field
+              TextFormField(
+                controller: _descriptionController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'คำอธิบาย',
+                  filled: true,
+                  fillColor: ThemeColors.beige,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ThemeColors.sandyTan),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ThemeColors.sandyTan),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: ThemeColors.softBrown,
+                      width: 2,
+                    ),
+                  ),
+                ),
+                validator: (value) {
+                  if (value?.trim().isEmpty ?? true) return 'กรุณากรอกคำอธิบาย';
+                  if (value!.trim().length < 3)
+                    return 'คำอธิบายต้องมีอย่างน้อย 3 ตัวอักษร';
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+
+              // Images Section
               Text(
-                'คำอธิบาย',
+                'รูปภาพ',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: ThemeColors.softBrown,
                 ),
               ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'กรอกคำอธิบายรายการ...',
-                  filled: true,
-                  fillColor: ThemeColors.beige,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: ThemeColors.sandyTan,
-                      width: 1,
+              SizedBox(height: 12),
+
+              // Receipt Image - Full Width
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'รูปใบเสร็จ',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: ThemeColors.softTerracotta,
                     ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: ThemeColors.sandyTan,
-                      width: 1,
+                  SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: ThemeColors.beige,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: ThemeColors.sandyTan),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => _showImagePicker('receipt'),
+                        child: _buildImageContent('receipt'),
+                      ),
                     ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: ThemeColors.softBrown,
-                      width: 2,
+                ],
+              ),
+              SizedBox(height: 16),
+
+              // Approval Image - Full Width
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'รูปหลักฐานอนุมัติ',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: ThemeColors.softTerracotta,
                     ),
                   ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: ThemeColors.burntOrange,
-                      width: 1,
+                  SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: ThemeColors.beige,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: ThemeColors.sandyTan),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => _showImagePicker('approv'),
+                        child: _buildImageContent('approv'),
+                      ),
                     ),
                   ),
-                  contentPadding: EdgeInsets.all(16),
-                ),
-                style: TextStyle(fontSize: 16, color: ThemeColors.softBrown),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'กรุณากรอกคำอธิบาย';
-                  }
-                  if (value.trim().length < 3) {
-                    return 'คำอธิบายต้องมีอย่างน้อย 3 ตัวอักษร';
-                  }
-                  return null;
-                },
+                ],
               ),
               SizedBox(height: 24),
-
-              // Receipt Section
-              _buildReceiptSection(),
-              SizedBox(height: 32),
 
               // Save Button
               SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _saveChanges,
                   style: ElevatedButton.styleFrom(
@@ -809,35 +805,20 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                         ? ThemeColors.oliveGreen
                         : ThemeColors.burntOrange,
                     foregroundColor: ThemeColors.ivoryWhite,
-                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    disabledBackgroundColor: ThemeColors.warmStone,
                   ),
                   child: _isLoading
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  ThemeColors.ivoryWhite,
-                                ),
-                                strokeWidth: 2,
-                              ),
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              ThemeColors.ivoryWhite,
                             ),
-                            SizedBox(width: 12),
-                            Text(
-                              'กำลังบันทึก...',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                            strokeWidth: 2,
+                          ),
                         )
                       : Text(
                           'บันทึกการเปลี่ยนแปลง',
@@ -848,7 +829,6 @@ class _LawFundEditPageState extends State<LawFundEditPage> {
                         ),
                 ),
               ),
-              SizedBox(height: 16),
             ],
           ),
         ),

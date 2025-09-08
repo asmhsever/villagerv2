@@ -21,8 +21,31 @@ class _HouseFundPageState extends State<HouseFundPage> {
 
   // Filter state
   String _selectedFilter = 'all'; // 'all', 'income', 'outcome'
+  int _selectedYear = DateTime.now().year;
+  int? _selectedMonth; // null = all months
 
-  // Theme Colors
+  // Get available years from funds
+  List<int> _getAvailableYears(List<FundModel> funds) {
+    final years = funds
+        .where((fund) => fund.createdAt != null)
+        .map((fund) => fund.createdAt!.year)
+        .toSet()
+        .toList();
+    years.sort((a, b) => b.compareTo(a)); // Sort descending
+    if (years.isEmpty) years.add(DateTime.now().year);
+    return years;
+  }
+
+  // Get available months for selected year
+  List<int> _getAvailableMonths(List<FundModel> funds, int year) {
+    final months = funds
+        .where((fund) => fund.createdAt != null && fund.createdAt!.year == year)
+        .map((fund) => fund.createdAt!.month)
+        .toSet()
+        .toList();
+    months.sort();
+    return months;
+  }
 
   Future<void> _refreshData() async {
     setState(() {});
@@ -39,12 +62,33 @@ class _HouseFundPageState extends State<HouseFundPage> {
     return formatter.format(date);
   }
 
+  String _getMonthName(int month) {
+    const monthNames = [
+      '',
+      'ม.ค.',
+      'ก.ย.',
+      'มี.ค.',
+      'เม.ย.',
+      'พ.ค.',
+      'มิ.ย.',
+      'ก.ค.',
+      'ส.ค.',
+      'ก.ย.',
+      'ต.ค.',
+      'พ.ย.',
+      'ธ.ค.',
+    ];
+    return monthNames[month];
+  }
+
   Map<String, double> _calculateTotals(List<FundModel> funds) {
-    final totalIncome = funds
+    final filteredFunds = _filterFundsByDate(funds);
+
+    final totalIncome = filteredFunds
         .where((fund) => fund.type == 'income')
         .fold(0.0, (sum, fund) => sum + fund.amount);
 
-    final totalOutcome = funds
+    final totalOutcome = filteredFunds
         .where((fund) => fund.type == 'outcome')
         .fold(0.0, (sum, fund) => sum + fund.amount);
 
@@ -53,20 +97,185 @@ class _HouseFundPageState extends State<HouseFundPage> {
     return {'income': totalIncome, 'outcome': totalOutcome, 'balance': balance};
   }
 
+  List<FundModel> _filterFundsByDate(List<FundModel> funds) {
+    return funds.where((fund) {
+      if (fund.createdAt == null) return false;
+
+      final fundDate = fund.createdAt!;
+      final matchesYear = fundDate.year == _selectedYear;
+      final matchesMonth =
+          _selectedMonth == null || fundDate.month == _selectedMonth;
+
+      return matchesYear && matchesMonth;
+    }).toList();
+  }
+
   List<FundModel> _filterFunds(List<FundModel> funds) {
+    final dateFilteredFunds = _filterFundsByDate(funds);
+
     switch (_selectedFilter) {
       case 'income':
-        return funds.where((fund) => fund.type == 'income').toList();
+        return dateFilteredFunds
+            .where((fund) => fund.type == 'income')
+            .toList();
       case 'outcome':
-        return funds.where((fund) => fund.type == 'outcome').toList();
+        return dateFilteredFunds
+            .where((fund) => fund.type == 'outcome')
+            .toList();
       default:
-        return funds;
+        return dateFilteredFunds;
     }
+  }
+
+  Widget _buildDateFilter(List<FundModel> allFunds) {
+    final availableYears = _getAvailableYears(allFunds);
+    final availableMonths = _getAvailableMonths(allFunds, _selectedYear);
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: ThemeColors.sandyTan,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: ThemeColors.warmStone.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // Year Dropdown
+              Expanded(
+                flex: 2,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: ThemeColors.ivoryWhite,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: ThemeColors.warmStone.withOpacity(0.3),
+                    ),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<int>(
+                      value: _selectedYear,
+                      isExpanded: true,
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      dropdownColor: ThemeColors.ivoryWhite,
+                      items: availableYears.map((year) {
+                        return DropdownMenuItem<int>(
+                          value: year,
+                          child: Text(
+                            'ปี ${year + 543}',
+                            style: TextStyle(
+                              color: ThemeColors.softBrown,
+                              fontSize: 14,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (year) {
+                        setState(() {
+                          _selectedYear = year!;
+                          // Reset month if not available in new year
+                          if (_selectedMonth != null &&
+                              !_getAvailableMonths(
+                                allFunds,
+                                year,
+                              ).contains(_selectedMonth)) {
+                            _selectedMonth = null;
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              // Month Dropdown
+              Expanded(
+                flex: 2,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: ThemeColors.ivoryWhite,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: ThemeColors.warmStone.withOpacity(0.3),
+                    ),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<int?>(
+                      value: _selectedMonth,
+                      isExpanded: true,
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      dropdownColor: ThemeColors.ivoryWhite,
+                      items: [
+                        DropdownMenuItem<int?>(
+                          value: null,
+                          child: Text(
+                            'ทั้งปี',
+                            style: TextStyle(
+                              color: ThemeColors.softBrown,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        ...availableMonths.map((month) {
+                          return DropdownMenuItem<int?>(
+                            value: month,
+                            child: Text(
+                              _getMonthName(month),
+                              style: TextStyle(
+                                color: ThemeColors.softBrown,
+                                fontSize: 14,
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                      onChanged: (month) {
+                        setState(() {
+                          _selectedMonth = month;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              // Reset Button
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedYear = DateTime.now().year;
+                    _selectedMonth = null;
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: ThemeColors.warmStone.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.refresh_rounded,
+                    color: ThemeColors.softBrown,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildFilterTabs() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: ThemeColors.beige,
@@ -142,9 +351,13 @@ class _HouseFundPageState extends State<HouseFundPage> {
   }
 
   Widget _buildBalanceCard(Map<String, double> totals) {
+    String periodText = _selectedMonth == null
+        ? 'ปี ${_selectedYear + 543}'
+        : '${_getMonthName(_selectedMonth!)} ${_selectedYear + 543}';
+
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.fromLTRB(16, 16, 16, 8),
+      margin: EdgeInsets.fromLTRB(16, 8, 16, 4),
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: ThemeColors.softBrown,
@@ -157,95 +370,114 @@ class _HouseFundPageState extends State<HouseFundPage> {
           ),
         ],
       ),
-      child: Column(
+      child: Row(
         children: [
-          // Balance Amount
-          Text(
-            _formatCurrency(totals['balance']!),
-            style: TextStyle(
-              color: ThemeColors.ivoryWhite,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+          // Period and Balance
+          Expanded(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  periodText,
+                  style: TextStyle(
+                    color: ThemeColors.ivoryWhite.withOpacity(0.8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  _formatCurrency(totals['balance']!),
+                  style: TextStyle(
+                    color: ThemeColors.ivoryWhite,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: 16),
-          // Income and Outcome Row
-          Row(
-            children: [
-              Expanded(
-                child: Row(
+          // Income
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.trending_up_rounded,
                       color: ThemeColors.oliveGreen,
-                      size: 18,
+                      size: 16,
                     ),
-                    SizedBox(width: 6),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'รายรับ',
-                          style: TextStyle(
-                            color: ThemeColors.ivoryWhite.withOpacity(0.8),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          _formatCurrency(totals['income']!),
-                          style: TextStyle(
-                            color: ThemeColors.oliveGreen,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    SizedBox(width: 4),
+                    Text(
+                      'รายรับ',
+                      style: TextStyle(
+                        color: ThemeColors.ivoryWhite.withOpacity(0.8),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              Container(
-                height: 24,
-                width: 1,
-                color: ThemeColors.ivoryWhite.withOpacity(0.2),
-              ),
-              Expanded(
-                child: Row(
+                SizedBox(height: 4),
+                Text(
+                  _formatCurrency(totals['income']!),
+                  style: TextStyle(
+                    color: ThemeColors.oliveGreen,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          // Divider
+          Container(
+            height: 40,
+            width: 1,
+            color: ThemeColors.ivoryWhite.withOpacity(0.2),
+            margin: EdgeInsets.symmetric(horizontal: 8),
+          ),
+          // Outcome
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.trending_down_rounded,
                       color: ThemeColors.burntOrange,
-                      size: 18,
+                      size: 16,
                     ),
-                    SizedBox(width: 6),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'รายจ่าย',
-                          style: TextStyle(
-                            color: ThemeColors.ivoryWhite.withOpacity(0.8),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          _formatCurrency(totals['outcome']!),
-                          style: TextStyle(
-                            color: ThemeColors.burntOrange,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    SizedBox(width: 4),
+                    Text(
+                      'รายจ่าย',
+                      style: TextStyle(
+                        color: ThemeColors.ivoryWhite.withOpacity(0.8),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                SizedBox(height: 4),
+                Text(
+                  _formatCurrency(totals['outcome']!),
+                  style: TextStyle(
+                    color: ThemeColors.burntOrange,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -287,6 +519,38 @@ class _HouseFundPageState extends State<HouseFundPage> {
                   ThemeColors.ivoryWhite,
                 ),
                 strokeWidth: 2,
+              ),
+            ],
+          ),
+        ),
+        // Loading date filter
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: ThemeColors.sandyTan.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: ThemeColors.warmStone.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: ThemeColors.warmStone.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
             ],
           ),
@@ -358,6 +622,23 @@ class _HouseFundPageState extends State<HouseFundPage> {
     return Column(
       children: [
         _buildBalanceCard({'income': 0.0, 'outcome': 0.0, 'balance': 0.0}),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: ThemeColors.sandyTan,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            'ไม่มีข้อมูลในช่วงเวลาที่เลือก',
+            style: TextStyle(
+              color: ThemeColors.softBrown,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
         _buildFilterTabs(),
         Expanded(
           child: Center(
@@ -369,6 +650,11 @@ class _HouseFundPageState extends State<HouseFundPage> {
                   decoration: BoxDecoration(
                     color: ThemeColors.beige,
                     borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Icon(
+                    Icons.calendar_month_outlined,
+                    size: 48,
+                    color: ThemeColors.warmStone,
                   ),
                 ),
                 SizedBox(height: 20),
@@ -386,9 +672,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  _selectedFilter == 'all'
-                      ? 'เริ่มต้นโดยการเพิ่มรายการแรก'
-                      : 'ลองเปลี่ยนตัวกรองหรือเพิ่มรายการใหม่',
+                  'ในช่วงเวลาที่เลือก\nลองเปลี่ยนช่วงเวลาหรือเพิ่มรายการใหม่',
                   style: TextStyle(color: ThemeColors.warmStone, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
@@ -404,6 +688,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
     return Column(
       children: [
         _buildBalanceCard({'income': 0.0, 'outcome': 0.0, 'balance': 0.0}),
+        _buildDateFilter([]), // Empty list for error state
         _buildFilterTabs(),
         Expanded(
           child: Center(
@@ -462,10 +747,11 @@ class _HouseFundPageState extends State<HouseFundPage> {
     return Column(
       children: [
         _buildBalanceCard(totals),
+        _buildDateFilter(allFunds),
         _buildFilterTabs(),
         Expanded(
           child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
+            margin: EdgeInsets.symmetric(horizontal: 8),
             child: filteredFunds.isEmpty
                 ? Center(
                     child: Column(
@@ -487,7 +773,7 @@ class _HouseFundPageState extends State<HouseFundPage> {
                             color: ThemeColors.warmStone,
                           ),
                         ),
-                        SizedBox(height: 20),
+                        SizedBox(height: 10),
                         Text(
                           _selectedFilter == 'income'
                               ? 'ไม่มีรายการรายรับ'
@@ -500,9 +786,9 @@ class _HouseFundPageState extends State<HouseFundPage> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        SizedBox(height: 4),
                         Text(
-                          'ลองเปลี่ยนตัวกรองหรือเพิ่มรายการใหม่',
+                          'ในช่วงเวลาที่เลือก\nลองเปลี่ยนช่วงเวลา ตัวกรอง หรือเพิ่มรายการใหม่',
                           style: TextStyle(
                             color: ThemeColors.warmStone,
                             fontSize: 14,

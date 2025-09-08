@@ -39,7 +39,7 @@ class _CommitteeListPageState extends State<CommitteeListPage> {
         ),
       ),
       body: FutureBuilder<List<CommitteeModel>>(
-        future: CommitteeDomain.getByVillageId(widget.villageId),
+        future: CommitteeDomain.getByVillage(villageId: widget.villageId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(

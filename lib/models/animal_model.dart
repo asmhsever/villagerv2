@@ -4,6 +4,7 @@ class AnimalModel {
   final String? type;
   final String? name;
   final String? img;
+  final String? status;
 
   AnimalModel({
     required this.animalId,
@@ -11,6 +12,7 @@ class AnimalModel {
     this.type,
     this.name,
     this.img,
+    this.status,
   });
 
   factory AnimalModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class AnimalModel {
       type: json['type'],
       name: json['name'],
       img: json['img'],
+      status: json['status'],
     );
   }
 
@@ -30,6 +33,7 @@ class AnimalModel {
       'type': type,
       'name': name,
       'img': img,
+      'status': status,
     };
   }
 }

@@ -459,126 +459,126 @@ class _BillAddPageState extends State<BillAddPage> {
           ),
           child: _hasSelectedBillImage()
               ? Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: kIsWeb && _billImageBytes != null
-                    ? Image.memory(
-                  _billImageBytes!,
-                  width: double.infinity,
-                  height: 300,
-                  fit: BoxFit.cover,
-                )
-                    : !kIsWeb && _billImageFile != null
-                    ? Image.file(
-                  _billImageFile!,
-                  width: double.infinity,
-                  height: 300,
-                  fit: BoxFit.cover,
-                )
-                    : const SizedBox(),
-              ),
-              Positioned(
-                top: 12,
-                right: 12,
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _billImageFile = null;
-                      _billImageBytes = null;
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: ThemeColors.softTerracotta,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: kIsWeb && _billImageBytes != null
+                          ? Image.memory(
+                              _billImageBytes!,
+                              width: double.infinity,
+                              height: 300,
+                              fit: BoxFit.cover,
+                            )
+                          : !kIsWeb && _billImageFile != null
+                          ? Image.file(
+                              _billImageFile!,
+                              width: double.infinity,
+                              height: 300,
+                              fit: BoxFit.cover,
+                            )
+                          : const SizedBox(),
+                    ),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _billImageFile = null;
+                            _billImageBytes = null;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: ThemeColors.softTerracotta,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 12,
-                right: 12,
-                child: GestureDetector(
-                  onTap: _pickBillImage,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: ThemeColors.burntOrange,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
+                    Positioned(
+                      bottom: 12,
+                      right: 12,
+                      child: GestureDetector(
+                        onTap: _pickBillImage,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: ThemeColors.burntOrange,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.edit,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          )
+                  ],
+                )
               : InkWell(
-            onTap: _pickBillImage,
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_photo_alternate,
-                    size: 48,
-                    color: ThemeColors.burntOrange,
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    'แตะเพื่อเลือกรูปภาพ',
-                    style: TextStyle(
-                      color: ThemeColors.earthClay,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                  onTap: _pickBillImage,
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_photo_alternate,
+                          size: 48,
+                          color: ThemeColors.burntOrange,
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          'แตะเพื่อเลือกรูปภาพ',
+                          style: TextStyle(
+                            color: ThemeColors.earthClay,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'รูปบิล',
+                          style: TextStyle(
+                            color: ThemeColors.warmStone,
+                            fontSize: 14,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB',
+                          style: TextStyle(
+                            color: ThemeColors.warmStone,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'รูปบิล',
-                    style: TextStyle(
-                      color: ThemeColors.warmStone,
-                      fontSize: 14,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB',
-                    style: TextStyle(
-                      color: ThemeColors.warmStone,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                ),
         ),
       ],
     );
@@ -623,7 +623,8 @@ class _BillAddPageState extends State<BillAddPage> {
             : 'REF${DateTime.now().millisecondsSinceEpoch}',
         status: 'PENDING',
         billImageFile: billImageFile,
-        paidImageFile: null, // ไม่มีสลิป
+        paidImageFile: null,
+        // ไม่มีสลิป
         receiptImageFile: null, // ไม่มีใบเสร็จ
       );
 
@@ -729,367 +730,368 @@ class _BillAddPageState extends State<BillAddPage> {
       ),
       body: _isLoading && (_houses.isEmpty || _services.isEmpty)
           ? const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                ThemeColors.softBrown,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ThemeColors.softBrown,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'กำลังโหลดข้อมูล...',
+                    style: TextStyle(color: ThemeColors.earthClay),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'กำลังโหลดข้อมูล...',
-              style: TextStyle(color: ThemeColors.earthClay),
-            ),
-          ],
-        ),
-      )
+            )
           : _houses.isEmpty || _services.isEmpty
           ? Center(
-        child: Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: ThemeColors.ivoryWhite,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: ThemeColors.softBorder),
-            boxShadow: [
-              BoxShadow(
-                color: ThemeColors.earthClay.withValues(alpha: 0.15),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
+              child: Container(
+                margin: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: ThemeColors.softTerracotta.withValues(
-                    alpha: 0.1,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.warning_amber_outlined,
-                  color: ThemeColors.softTerracotta,
-                  size: 48,
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'ไม่พบข้อมูล',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: ThemeColors.softTerracotta,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'ไม่พบข้อมูลบ้านหรือประเภทบริการ',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: ThemeColors.earthClay),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _fetchInitialData,
-                icon: const Icon(Icons.refresh),
-                label: const Text('ลองใหม่'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ThemeColors.burntOrange,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      )
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // การ์ดเลือกบ้าน
-              _buildFormCard(
-                title: 'เลือกบ้านเลขที่',
-                icon: Icons.home_rounded,
-                iconColor: ThemeColors.softBrown,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: ThemeColors.inputFill,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: ThemeColors.softBorder),
-                  ),
-                  child: DropdownButtonFormField<int>(
-                    value: _houses.any(
-                          (h) => h['house_id'] == _selectedHouseId,
-                    )
-                        ? _selectedHouseId
-                        : null,
-                    items: _houses.map((house) {
-                      return DropdownMenuItem<int>(
-                        value: house['house_id'],
-                        child: Text(
-                          'บ้านเลขที่ ${house['house_number']}',
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (val) =>
-                        setState(() => _selectedHouseId = val),
-                    decoration: InputDecoration(
-                      hintText: 'เลือกบ้านเลขที่',
-                      hintStyle: const TextStyle(
-                        color: ThemeColors.earthClay,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.transparent,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                    ),
-                    validator: (value) =>
-                    value == null ? 'กรุณาเลือกบ้าน' : null,
-                  ),
-                ),
-              ),
-
-              // การ์ดเลือกประเภทบริการ
-              _buildFormCard(
-                title: 'เลือกประเภทบริการ',
-                icon: Icons.receipt_long_rounded,
-                iconColor: ThemeColors.warmStone,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: ThemeColors.inputFill,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: ThemeColors.softBorder),
-                  ),
-                  child: DropdownButtonFormField<int>(
-                    value: _selectedServiceId,
-                    items: _services.map((service) {
-                      return DropdownMenuItem<int>(
-                        value: service['service_id'],
-                        child: Text(_getServiceNameTh(service['name'])),
-                      );
-                    }).toList(),
-                    onChanged: (val) =>
-                        setState(() => _selectedServiceId = val),
-                    decoration: InputDecoration(
-                      hintText: 'เลือกประเภทบริการ',
-                      hintStyle: const TextStyle(
-                        color: ThemeColors.earthClay,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.transparent,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                    ),
-                    validator: (value) =>
-                    value == null ? 'กรุณาเลือกประเภทบริการ' : null,
-                  ),
-                ),
-              ),
-
-              // การ์ดกรอกจำนวนเงิน
-              _buildFormCard(
-                title: 'จำนวนเงิน',
-                icon: Icons.attach_money_rounded,
-                iconColor: ThemeColors.oliveGreen,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: ThemeColors.inputFill,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: ThemeColors.softBorder),
-                  ),
-                  child: TextFormField(
-                    controller: _amountController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'กรอกจำนวนเงิน',
-                      hintStyle: const TextStyle(
-                        color: ThemeColors.earthClay,
-                      ),
-                      suffixText: 'บาท',
-                      suffixStyle: const TextStyle(
-                        color: ThemeColors.oliveGreen,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.transparent,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'กรุณากรอกจำนวนเงิน';
-                      }
-                      final amount = double.tryParse(value);
-                      if (amount == null || amount <= 0) {
-                        return 'กรุณากรอกจำนวนเงินที่ถูกต้อง';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ),
-
-              // การ์ดเลขอ้างอิง (Optional)
-              _buildFormCard(
-                title: 'เลขอ้างอิง (ไม่บังคับ)',
-                icon: Icons.confirmation_number_rounded,
-                iconColor: ThemeColors.mutedBurntSienna,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: ThemeColors.inputFill,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: ThemeColors.softBorder),
-                  ),
-                  child: TextFormField(
-                    controller: _referenceController,
-                    decoration: InputDecoration(
-                      hintText: 'กรอกเลขอ้างอิง (หากมี)',
-                      hintStyle: const TextStyle(
-                        color: ThemeColors.earthClay,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.transparent,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // การ์ดวันที่ออกบิล
-              _buildFormCard(
-                title: 'วันที่ออกบิล',
-                icon: Icons.today_rounded,
-                iconColor: ThemeColors.burntOrange,
-                child: _buildDateField(
-                  label: 'วันที่ออกบิล',
-                  controller: _billDateController,
-                  icon: Icons.today,
-                  onTap: _selectBillDate,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'กรุณาเลือกวันที่ออกบิล';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-
-              // การ์ดเลือกวันครบกำหนด
-              _buildFormCard(
-                title: 'วันครบกำหนดชำระ',
-                icon: Icons.calendar_today_rounded,
-                iconColor: ThemeColors.mutedBurntSienna,
-                child: _buildDateField(
-                  label: 'วันครบกำหนดชำระ',
-                  controller: _dueDateController,
-                  icon: Icons.event,
-                  onTap: _selectDueDate,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'กรุณาเลือกวันครบกำหนดชำระ';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-
-              // การ์ดอัปโหลดรูปบิล
-              _buildFormCard(
-                title: 'รูปบิล',
-                icon: Icons.photo_library_rounded,
-                iconColor: ThemeColors.warmStone,
-                child: _buildBillImagePicker(),
-              ),
-
-              // ปุ่มเพิ่มรายการ
-              Container(
-                width: double.infinity,
-                height: 56,
-                decoration: BoxDecoration(
+                  color: ThemeColors.ivoryWhite,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: ThemeColors.softBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: ThemeColors.burntOrange.withValues(
-                        alpha: 0.3,
-                      ),
-                      blurRadius: 16,
+                      color: ThemeColors.earthClay.withValues(alpha: 0.15),
+                      blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _submit,
-                  icon: _isLoading
-                      ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: ThemeColors.softTerracotta.withValues(
+                          alpha: 0.1,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.warning_amber_outlined,
+                        color: ThemeColors.softTerracotta,
+                        size: 48,
                       ),
                     ),
-                  )
-                      : const Icon(Icons.add_rounded, size: 24),
-                  label: Text(
-                    _isLoading ? 'กำลังเพิ่มรายการ...' : 'เพิ่มรายการ',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: 16),
+                    const Text(
+                      'ไม่พบข้อมูล',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: ThemeColors.softTerracotta,
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ThemeColors.burntOrange,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: ThemeColors.disabledGrey,
-                    disabledForegroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'ไม่พบข้อมูลบ้านหรือประเภทบริการ',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: ThemeColors.earthClay),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: _fetchInitialData,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('ลองใหม่'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ThemeColors.burntOrange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    // การ์ดเลือกบ้าน
+                    _buildFormCard(
+                      title: 'เลือกบ้านเลขที่',
+                      icon: Icons.home_rounded,
+                      iconColor: ThemeColors.softBrown,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: ThemeColors.inputFill,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: ThemeColors.softBorder),
+                        ),
+                        child: DropdownButtonFormField<int>(
+                          value:
+                              _houses.any(
+                                (h) => h['house_id'] == _selectedHouseId,
+                              )
+                              ? _selectedHouseId
+                              : null,
+                          items: _houses.map((house) {
+                            return DropdownMenuItem<int>(
+                              value: house['house_id'],
+                              child: Text(
+                                'บ้านเลขที่ ${house['house_number']}',
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) =>
+                              setState(() => _selectedHouseId = val),
+                          decoration: InputDecoration(
+                            hintText: 'เลือกบ้านเลขที่',
+                            hintStyle: const TextStyle(
+                              color: ThemeColors.earthClay,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.transparent,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                          validator: (value) =>
+                              value == null ? 'กรุณาเลือกบ้าน' : null,
+                        ),
+                      ),
+                    ),
 
-              const SizedBox(height: 32),
-            ],
-          ),
-        ),
-      ),
+                    // การ์ดเลือกประเภทบริการ
+                    _buildFormCard(
+                      title: 'เลือกประเภทบริการ',
+                      icon: Icons.receipt_long_rounded,
+                      iconColor: ThemeColors.warmStone,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: ThemeColors.inputFill,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: ThemeColors.softBorder),
+                        ),
+                        child: DropdownButtonFormField<int>(
+                          value: _selectedServiceId,
+                          items: _services.map((service) {
+                            return DropdownMenuItem<int>(
+                              value: service['service_id'],
+                              child: Text(_getServiceNameTh(service['name'])),
+                            );
+                          }).toList(),
+                          onChanged: (val) =>
+                              setState(() => _selectedServiceId = val),
+                          decoration: InputDecoration(
+                            hintText: 'เลือกประเภทบริการ',
+                            hintStyle: const TextStyle(
+                              color: ThemeColors.earthClay,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.transparent,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                          validator: (value) =>
+                              value == null ? 'กรุณาเลือกประเภทบริการ' : null,
+                        ),
+                      ),
+                    ),
+
+                    // การ์ดกรอกจำนวนเงิน
+                    _buildFormCard(
+                      title: 'จำนวนเงิน',
+                      icon: Icons.attach_money_rounded,
+                      iconColor: ThemeColors.oliveGreen,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: ThemeColors.inputFill,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: ThemeColors.softBorder),
+                        ),
+                        child: TextFormField(
+                          controller: _amountController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: 'กรอกจำนวนเงิน',
+                            hintStyle: const TextStyle(
+                              color: ThemeColors.earthClay,
+                            ),
+                            suffixText: 'บาท',
+                            suffixStyle: const TextStyle(
+                              color: ThemeColors.oliveGreen,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.transparent,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'กรุณากรอกจำนวนเงิน';
+                            }
+                            final amount = double.tryParse(value);
+                            if (amount == null || amount <= 0) {
+                              return 'กรุณากรอกจำนวนเงินที่ถูกต้อง';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+
+                    // การ์ดเลขอ้างอิง (Optional)
+                    _buildFormCard(
+                      title: 'เลขอ้างอิง (ไม่บังคับ)',
+                      icon: Icons.confirmation_number_rounded,
+                      iconColor: ThemeColors.mutedBurntSienna,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: ThemeColors.inputFill,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: ThemeColors.softBorder),
+                        ),
+                        child: TextFormField(
+                          controller: _referenceController,
+                          decoration: InputDecoration(
+                            hintText: 'กรอกเลขอ้างอิง (หากมี)',
+                            hintStyle: const TextStyle(
+                              color: ThemeColors.earthClay,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.transparent,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // การ์ดวันที่ออกบิล
+                    _buildFormCard(
+                      title: 'วันที่ออกบิล',
+                      icon: Icons.today_rounded,
+                      iconColor: ThemeColors.burntOrange,
+                      child: _buildDateField(
+                        label: 'วันที่ออกบิล',
+                        controller: _billDateController,
+                        icon: Icons.today,
+                        onTap: _selectBillDate,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'กรุณาเลือกวันที่ออกบิล';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+
+                    // การ์ดเลือกวันครบกำหนด
+                    _buildFormCard(
+                      title: 'วันครบกำหนดชำระ',
+                      icon: Icons.calendar_today_rounded,
+                      iconColor: ThemeColors.mutedBurntSienna,
+                      child: _buildDateField(
+                        label: 'วันครบกำหนดชำระ',
+                        controller: _dueDateController,
+                        icon: Icons.event,
+                        onTap: _selectDueDate,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'กรุณาเลือกวันครบกำหนดชำระ';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+
+                    // การ์ดอัปโหลดรูปบิล
+                    _buildFormCard(
+                      title: 'รูปบิล',
+                      icon: Icons.photo_library_rounded,
+                      iconColor: ThemeColors.warmStone,
+                      child: _buildBillImagePicker(),
+                    ),
+
+                    // ปุ่มเพิ่มรายการ
+                    Container(
+                      width: double.infinity,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: ThemeColors.burntOrange.withValues(
+                              alpha: 0.3,
+                            ),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: _isLoading ? null : _submit,
+                        icon: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                            : const Icon(Icons.add_rounded, size: 24),
+                        label: Text(
+                          _isLoading ? 'กำลังเพิ่มรายการ...' : 'เพิ่มรายการ',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ThemeColors.burntOrange,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: ThemeColors.disabledGrey,
+                          disabledForegroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 

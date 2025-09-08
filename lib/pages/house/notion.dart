@@ -25,18 +25,6 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  // Theme Colors
-  // static const Color ThemeColors.softBrown = ThemeColors.softBrown;
-  // static const Color ThemeColors.ivoryWhite = ThemeColors.ivoryWhite;
-  // static const Color ThemeColors.beige = ThemeColors.beige;
-  // static const Color ThemeColors.ThemeColors.sandyTan = ThemeColors.sandyTan;
-  // static const Color ThemeColors.earthClay = ThemeColors.earthClay;
-  // static const Color ThemeColors.warmStone = ThemeColors.warmStone;
-  // static const Color ThemeColors.oliveGreen =ThemeColors.oliveGreen;
-  // static const Color ThemeColors.burntOrange = ThemeColors.burntOrange;
-  // static const Color ThemeColors.softTerracotta = ThemeColors.softTerracotta;
-  // static const Color ThemeColors.clayOrange = ThemeColors.clayOrange;
-
   @override
   void initState() {
     print(widget.houseData!.toJson());
@@ -80,16 +68,10 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
         );
       }
 
-      // print('📦 Raw data received: $data');
-      // print('✅ Success: ${data['success']}');
-      // print('📝 Notions data type: ${data['notions'].runtimeType}');
-
       if (data['success'] == true && data['notions'] != null) {
         final rawNotions = data['notions'] as List;
-        // print('📊 Raw notions count: ${rawNotions.length}');
 
         setState(() {
-          // Add null safety when converting to NotionModel list
           _allNotions = rawNotions
               .where((item) {
                 if (item == null) {
@@ -112,10 +94,7 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
               .map((item) => item as NotionModel)
               .toList();
 
-          // print('✅ Filtered notions count: ${_allNotions.length}');
-
           _applyFilterSafe();
-          // print('✅ Final filtered notions count: ${_filteredNotions.length}');
           _isLoading = false;
           _animationController.forward();
         });
@@ -162,57 +141,6 @@ class _HouseNotionsPageState extends State<HouseNotionsPage>
       _selectedFilter = filter;
     });
     _loadNotions();
-  }
-
-  Color _getTypeColor(String type) {
-    switch (type) {
-      case 'GENERAL':
-        return ThemeColors.softBrown;
-      case 'MAINTENANCE':
-        return ThemeColors.burntOrange;
-      case 'SECURITY':
-        return ThemeColors.clayOrange;
-      case 'FINANCE':
-        return ThemeColors.oliveGreen;
-      case 'SOCIAL':
-        return ThemeColors.softTerracotta;
-      default:
-        return ThemeColors.warmStone;
-    }
-  }
-
-  String _getTypeText(String type) {
-    switch (type) {
-      case 'GENERAL':
-        return 'ข่าวสารทั่วไป';
-      case 'MAINTENANCE':
-        return 'การบำรุงรักษา';
-      case 'SECURITY':
-        return 'ความปลอดภัย';
-      case 'FINANCE':
-        return 'การเงิน';
-      case 'SOCIAL':
-        return 'กิจกรรมสังคม';
-      default:
-        return 'อื่นๆ';
-    }
-  }
-
-  IconData _getTypeIcon(String type) {
-    switch (type) {
-      case 'GENERAL':
-        return Icons.info_rounded;
-      case 'MAINTENANCE':
-        return Icons.build_rounded;
-      case 'SECURITY':
-        return Icons.security_rounded;
-      case 'FINANCE':
-        return Icons.account_balance_wallet_rounded;
-      case 'SOCIAL':
-        return Icons.groups_rounded;
-      default:
-        return Icons.article_rounded;
-    }
   }
 
   @override

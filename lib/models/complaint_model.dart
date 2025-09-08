@@ -1,3 +1,4 @@
+// แก้ไข ComplaintModel ให้ถูกต้องก่อน
 class ComplaintModel {
   final int? complaintId;
   final int houseId;
@@ -7,9 +8,12 @@ class ComplaintModel {
   final String description;
   final String level;
   final bool isPrivate;
-  late final String? img;
+  final String? complaintImg; // เปลี่ยนชื่อให้ตรง
   final String? status;
   final String? updateAt;
+  final int? resolvedByLawId; // เพิ่ม field ที่หายไป
+  final String? resolvedDescription; // เพิ่ม field ที่หายไป
+  final String? resolvedImg; // เพิ่ม field ที่หายไป
 
   ComplaintModel({
     this.complaintId,
@@ -20,9 +24,12 @@ class ComplaintModel {
     required this.description,
     required this.level,
     required this.isPrivate,
-    this.img,
+    this.complaintImg,
     this.status,
     this.updateAt,
+    this.resolvedByLawId, // เพิ่มใน constructor
+    this.resolvedDescription, // เพิ่มใน constructor
+    this.resolvedImg, // เพิ่มใน constructor
   });
 
   factory ComplaintModel.fromJson(Map<String, dynamic> json) {
@@ -35,11 +42,27 @@ class ComplaintModel {
       description: json['description'] ?? "",
       level: json['level'] ?? "",
       isPrivate: json['private'] ?? false,
-      img: (json['img'] == "null" || json['img'] == null) ? null : json['img'],
+      complaintImg:
+          (json['complaint_img'] == "null" || json['complaint_img'] == null)
+          ? null
+          : json['complaint_img'],
+      // แก้ชื่อ field
       status: (json['status'] == "null" || json['status'] == null)
           ? null
           : json['status'],
       updateAt: json['update_at'],
+      resolvedByLawId: json['resolved_by_law_id'],
+      // เพิ่ม field
+      resolvedDescription:
+          (json['resolved_description'] == "null" ||
+              json['resolved_description'] == null)
+          ? null
+          : json['resolved_description'],
+      // เพิ่ม field
+      resolvedImg:
+          (json['resolved_img'] == "null" || json['resolved_img'] == null)
+          ? null
+          : json['resolved_img'], // เพิ่ม field
     );
   }
 
@@ -53,9 +76,12 @@ class ComplaintModel {
       'description': description,
       'level': level,
       'private': isPrivate,
-      'img': img,
+      'complaint_img': complaintImg, // แก้ชื่อ field
       'status': status,
       'update_at': updateAt,
+      'resolved_by_law_id': resolvedByLawId, // เพิ่ม field
+      'resolved_description': resolvedDescription, // เพิ่ม field
+      'resolved_img': resolvedImg, // เพิ่ม field
     };
   }
 }

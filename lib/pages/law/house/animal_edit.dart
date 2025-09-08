@@ -11,11 +11,7 @@ class AnimalEditSinglePage extends StatefulWidget {
   final int houseId;
   final AnimalModel? animal; // null = create new, not null = edit existing
 
-  const AnimalEditSinglePage({
-    super.key,
-    required this.houseId,
-    this.animal,
-  });
+  const AnimalEditSinglePage({super.key, required this.houseId, this.animal});
 
   @override
   State<AnimalEditSinglePage> createState() => _AnimalEditSinglePageState();
@@ -27,9 +23,10 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
   final _notesController = TextEditingController();
 
   String? _selectedType;
+
   // ✨ รองรับทั้ง Web และ Mobile
-  File? _selectedImage;        // สำหรับ Mobile
-  Uint8List? _webImage;        // สำหรับ Web
+  File? _selectedImage; // สำหรับ Mobile
+  Uint8List? _webImage; // สำหรับ Web
   String? _currentImageUrl;
   bool _removeCurrentImage = false;
   bool _isSaving = false;
@@ -90,12 +87,18 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange[600], size: 28),
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange[600],
+              size: 28,
+            ),
             const SizedBox(width: 12),
             const Text('ยืนยันการออก'),
           ],
         ),
-        content: const Text('คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?'),
+        content: const Text(
+          'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกหรือไม่?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -140,10 +143,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
 
                 const Text(
                   'เลือกรูปภาพ',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 20),
@@ -175,7 +175,9 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                     child: const Icon(Icons.photo_library, color: Colors.green),
                   ),
                   title: Text(kIsWeb ? 'เลือกรูปภาพ' : 'เลือกจากแกลเลอรี่'),
-                  subtitle: Text(kIsWeb ? 'เลือกรูปจากเครื่อง' : 'เลือกรูปจากคลังภาพ'),
+                  subtitle: Text(
+                    kIsWeb ? 'เลือกรูปจากเครื่อง' : 'เลือกรูปจากคลังภาพ',
+                  ),
                   onTap: () => Navigator.pop(context, 'gallery'),
                 ),
 
@@ -190,7 +192,10 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                       ),
                       child: const Icon(Icons.delete, color: Colors.red),
                     ),
-                    title: const Text('ลบรูปภาพ', style: TextStyle(color: Colors.red)),
+                    title: const Text(
+                      'ลบรูปภาพ',
+                      style: TextStyle(color: Colors.red),
+                    ),
                     subtitle: const Text('ลบรูปภาพปัจจุบัน'),
                     onTap: () => Navigator.pop(context, 'delete'),
                   ),
@@ -327,6 +332,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
           name: _nameController.text.trim(),
           imageFile: imageFile,
           removeImage: _removeCurrentImage,
+          status: "active",
         );
       } else {
         // ✨ สร้างสัตว์เลี้ยงใหม่
@@ -358,9 +364,9 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
               const Icon(Icons.check_circle, color: Colors.white),
               const SizedBox(width: 12),
               Text(
-                  widget.animal != null
-                      ? 'แก้ไขสัตว์เลี้ยง "${_nameController.text}" สำเร็จแล้ว'
-                      : 'เพิ่มสัตว์เลี้ยง "${_nameController.text}" สำเร็จแล้ว'
+                widget.animal != null
+                    ? 'แก้ไขสัตว์เลี้ยง "${_nameController.text}" สำเร็จแล้ว'
+                    : 'เพิ่มสัตว์เลี้ยง "${_nameController.text}" สำเร็จแล้ว',
               ),
             ],
           ),
@@ -394,7 +400,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
 
   Color _getAnimalTypeColor(String? type) {
     final animalType = animalTypes.firstWhere(
-          (element) => element['type'] == type,
+      (element) => element['type'] == type,
       orElse: () => animalTypes.last,
     );
     return animalType['color'];
@@ -402,7 +408,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
 
   IconData _getAnimalIcon(String? type) {
     final animalType = animalTypes.firstWhere(
-          (element) => element['type'] == type,
+      (element) => element['type'] == type,
       orElse: () => animalTypes.last,
     );
     return animalType['icon'];
@@ -410,7 +416,9 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
 
   // ✨ Helper methods
   bool _hasNewImage() => _selectedImage != null || _webImage != null;
+
   bool _hasCurrentImage() => _currentImageUrl != null && !_removeCurrentImage;
+
   bool _hasAnyImage() => _hasNewImage() || _hasCurrentImage();
 
   @override
@@ -436,10 +444,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
           elevation: 1,
           actions: [
             if (_hasUnsavedChanges)
-              TextButton(
-                onPressed: _resetForm,
-                child: const Text('รีเซ็ต'),
-              ),
+              TextButton(onPressed: _resetForm, child: const Text('รีเซ็ต')),
           ],
         ),
         body: Form(
@@ -459,10 +464,6 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                 // ประเภทสัตว์เลี้ยง
                 _buildTypeSection(),
                 const SizedBox(height: 24),
-
-                // หมายเหตุเพิ่มเติม
-                _buildNotesSection(),
-                const SizedBox(height: 32),
 
                 // ปุ่มบันทึก
                 _buildActionButtons(),
@@ -491,23 +492,23 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                   borderRadius: BorderRadius.circular(16),
                   child: kIsWeb && _webImage != null
                       ? Image.memory(
-                    _webImage!,
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  )
+                          _webImage!,
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        )
                       : _selectedImage != null
                       ? Image.file(
-                    _selectedImage!,
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  )
+                          _selectedImage!,
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        )
                       : Container(
-                    width: double.infinity,
-                    height: 200,
-                    color: Colors.grey[300],
-                  ),
+                          width: double.infinity,
+                          height: 200,
+                          color: Colors.grey[300],
+                        ),
                 ),
                 Positioned(
                   top: 12,
@@ -533,7 +534,10 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                   top: 12,
                   left: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.green,
                       borderRadius: BorderRadius.circular(12),
@@ -568,7 +572,11 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                            Icon(
+                              Icons.broken_image,
+                              size: 48,
+                              color: Colors.grey,
+                            ),
                             SizedBox(height: 8),
                             Text('ไม่สามารถโหลดรูปภาพได้'),
                           ],
@@ -581,7 +589,10 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                   top: 12,
                   left: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(12),
@@ -615,18 +626,12 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                   const SizedBox(height: 12),
                   Text(
                     'ยังไม่มีรูปภาพ',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'กดปุ่มด้านล่างเพื่อเพิ่มรูป',
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[500], fontSize: 14),
                   ),
                 ],
               ),
@@ -644,9 +649,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
               icon: Icon(
                 _hasAnyImage() ? Icons.edit : Icons.add_photo_alternate,
               ),
-              label: Text(
-                _hasAnyImage() ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ',
-              ),
+              label: Text(_hasAnyImage() ? 'เปลี่ยนรูปภาพ' : 'เพิ่มรูปภาพ'),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -677,8 +680,9 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
               filled: true,
               fillColor: Colors.white,
             ),
-            validator: (value) =>
-            value?.trim().isEmpty == true ? 'กรุณาระบุชื่อสัตว์เลี้ยง' : null,
+            validator: (value) => value?.trim().isEmpty == true
+                ? 'กรุณาระบุชื่อสัตว์เลี้ยง'
+                : null,
             textInputAction: TextInputAction.next,
           ),
         ],
@@ -695,10 +699,7 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
         children: [
           const Text(
             'เลือกประเภทสัตว์เลี้ยง *',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 16),
 
@@ -727,7 +728,9 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? type['color'].withValues(alpha: 0.1) : Colors.white,
+                    color: isSelected
+                        ? type['color'].withValues(alpha: 0.1)
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected ? type['color'] : Colors.grey[300]!,
@@ -747,7 +750,9 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
                         type['type'],
                         style: TextStyle(
                           color: isSelected ? type['color'] : Colors.grey[800],
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                     ],
@@ -761,33 +766,10 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
             const SizedBox(height: 8),
             Text(
               'กรุณาเลือกประเภทสัตว์เลี้ยง',
-              style: TextStyle(
-                color: Colors.red[700],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.red[700], fontSize: 12),
             ),
           ],
         ],
-      ),
-    );
-  }
-
-  Widget _buildNotesSection() {
-    return _buildCard(
-      title: 'หมายเหตุเพิ่มเติม',
-      icon: Icons.note_alt,
-      child: TextFormField(
-        controller: _notesController,
-        decoration: InputDecoration(
-          hintText: 'เช่น อาหารที่ชอบ, นิสัยพิเศษ, หรือข้อมูลอื่นๆ (ไม่บังคับ)',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        maxLines: 4,
-        textInputAction: TextInputAction.done,
       ),
     );
   }
@@ -802,7 +784,9 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
           child: ElevatedButton(
             onPressed: _isSaving || _selectedType == null ? null : _saveAnimal,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _selectedType != null ? _getAnimalTypeColor(_selectedType) : Colors.grey,
+              backgroundColor: _selectedType != null
+                  ? _getAnimalTypeColor(_selectedType)
+                  : Colors.grey,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -810,27 +794,29 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
             ),
             child: _isSaving
                 ? const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Text('กำลังบันทึก...'),
-              ],
-            )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text('กำลังบันทึก...'),
+                    ],
+                  )
                 : Text(
-              widget.animal != null ? 'บันทึกการแก้ไข' : 'เพิ่มสัตว์เลี้ยง',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                    widget.animal != null
+                        ? 'บันทึกการแก้ไข'
+                        : 'เพิ่มสัตว์เลี้ยง',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
         ),
 
@@ -844,15 +830,15 @@ class _AnimalEditSinglePageState extends State<AnimalEditSinglePage> {
             onPressed: _isSaving
                 ? null
                 : () async {
-              if (_hasUnsavedChanges) {
-                final shouldPop = await _onWillPop();
-                if (shouldPop && mounted) {
-                  Navigator.pop(context);
-                }
-              } else {
-                Navigator.pop(context);
-              }
-            },
+                    if (_hasUnsavedChanges) {
+                      final shouldPop = await _onWillPop();
+                      if (shouldPop && mounted) {
+                        Navigator.pop(context);
+                      }
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
             style: OutlinedButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

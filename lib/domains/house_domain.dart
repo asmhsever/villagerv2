@@ -138,7 +138,6 @@ class HouseDomain {
         'owner': owner,
         'status': status,
         'user_id': userId,
-        'ownership_type': ownershipType,
         'house_type': houseType,
         'floors': floors,
         'usable_area': usableArea,

@@ -6,6 +6,7 @@ class FundModel {
   final String description;
   final DateTime? createdAt;
   final String? receiptImg;
+  final String? approvImg;
 
   FundModel({
     required this.fundId,
@@ -15,6 +16,7 @@ class FundModel {
     required this.description,
     this.createdAt,
     this.receiptImg,
+    this.approvImg,
   });
 
   factory FundModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +29,7 @@ class FundModel {
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'])
           : null,
+      approvImg: json['approv_img'] ?? "",
       receiptImg: json['receipt_img'] ?? "",
     );
   }
@@ -40,6 +43,7 @@ class FundModel {
       'description': description,
       'created_at': createdAt?.toIso8601String(),
       'receipt_img': receiptImg,
+      'approv_img': approvImg,
     };
   }
 }

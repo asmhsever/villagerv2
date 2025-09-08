@@ -16,7 +16,8 @@ class BillPage extends StatefulWidget {
   State<BillPage> createState() => _BillPageState();
 }
 
-class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin {
+class _BillPageState extends State<BillPage>
+    with SingleTickerProviderStateMixin {
   List<BillModel> _bills = [];
   LawModel? law;
   Map<int, String> houseMap = {};
@@ -41,12 +42,13 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
     _loadInitialData();
   }
 
@@ -160,7 +162,11 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                child: const Icon(
+                  Icons.error_outline,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(child: Text(message)),
@@ -239,27 +245,39 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
 
       if (target == 'RECEIPT_SENT') {
         // ชำระเสร็จสิ้น: สถานะ RECEIPT_SENT หรือ paid_status = 1
-        filtered = filtered.where((b) =>
-        b.status.toUpperCase() == 'RECEIPT_SENT' || b.paidStatus == 1
-        ).toList();
+        filtered = filtered
+            .where(
+              (b) =>
+                  b.status.toUpperCase() == 'RECEIPT_SENT' || b.paidStatus == 1,
+            )
+            .toList();
       } else if (target == 'UNPAID') {
         // ยังไม่ได้ชำระ: รวม PENDING, REJECTED, OVERDUE ที่ยังไม่จ่าย
-        filtered = filtered.where((b) =>
-        b.paidStatus == 0 &&
-            ['PENDING', 'REJECTED', 'OVERDUE', 'DRAFT'].contains(b.status.toUpperCase())
-        ).toList();
+        filtered = filtered
+            .where(
+              (b) =>
+                  b.paidStatus == 0 &&
+                  [
+                    'PENDING',
+                    'REJECTED',
+                    'OVERDUE',
+                    'DRAFT',
+                  ].contains(b.status.toUpperCase()),
+            )
+            .toList();
       } else {
         // ที่เหลือกรองตรงตาม status
-        filtered = filtered.where((b) =>
-        b.status.toUpperCase() == target
-        ).toList();
+        filtered = filtered
+            .where((b) => b.status.toUpperCase() == target)
+            .toList();
       }
     }
 
     // กรองตามคำค้นหา
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((bill) {
-        final houseNumber = houseMap[bill.houseId]?.toLowerCase() ?? '${bill.houseId}';
+        final houseNumber =
+            houseMap[bill.houseId]?.toLowerCase() ?? '${bill.houseId}';
         final serviceName = _getServiceNameTh(bill.service).toLowerCase();
         final amount = bill.amount.toString();
         final status = _getStatusText(bill).toLowerCase();
@@ -292,6 +310,10 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
       return ThemeColors.caramel; // กำลังตรวจสอบ
     }
 
+    if (bill.status.toUpperCase() == 'WAIT_RECEIPT') {
+      return ThemeColors.infoBlue; // รอส่งใบเสร็จ
+    }
+
     // ยังไม่ชำระ - ใช้สีต่างๆ ตามสถานะย่อย
     if (_isOverdue(bill) || bill.status.toUpperCase() == 'OVERDUE') {
       return ThemeColors.errorRust; // เกินกำหนด
@@ -314,6 +336,8 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
         return Icons.schedule_rounded;
       case 'UNDER_REVIEW':
         return Icons.search_rounded;
+      case 'WAIT_RECEIPT':
+        return Icons.receipt_rounded;
       case 'REJECTED': // REJECTED แสดงเป็น pending เหมือน ยังไม่ได้ชำระ
         return Icons.pending_actions_rounded;
       case 'OVERDUE':
@@ -332,6 +356,10 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
 
     if (bill.status.toUpperCase() == 'UNDER_REVIEW') {
       return 'กำลังตรวจสอบ';
+    }
+
+    if (bill.status.toUpperCase() == 'WAIT_RECEIPT') {
+      return 'รอส่งใบเสร็จ';
     }
 
     // สถานะอื่นๆ = ยังไม่ชำระ
@@ -354,6 +382,7 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
   Map<String, int> _calculateStats() {
     int pending = 0;
     int inProgress = 0;
+    int waitingReceipt = 0;
     int resolved = 0;
 
     for (var bill in _bills) {
@@ -361,6 +390,8 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
         resolved++;
       } else if (bill.status.toUpperCase() == 'UNDER_REVIEW') {
         inProgress++;
+      } else if (bill.status.toUpperCase() == 'WAIT_RECEIPT') {
+        waitingReceipt++;
       } else {
         pending++; // รวม PENDING, REJECTED, OVERDUE, DRAFT
       }
@@ -370,15 +401,16 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
       'total': _bills.length,
       'pending': pending,
       'in_progress': inProgress,
+      'waiting_receipt': waitingReceipt,
       'resolved': resolved,
     };
   }
 
   List<TextSpan> _highlightSearchText(
-      String text,
-      String query,
-      TextStyle baseStyle,
-      ) {
+    String text,
+    String query,
+    TextStyle baseStyle,
+  ) {
     if (query.isEmpty) {
       return [TextSpan(text: text, style: baseStyle)];
     }
@@ -419,13 +451,13 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
     return spans;
   }
 
-  Widget _buildEnhancedStatCard(
-      String title,
-      String value,
-      IconData icon,
-      Color color,
-      String filterType,
-      ) {
+  Widget _buildStatCard(
+    String title,
+    String count,
+    IconData icon,
+    Color color,
+    String filterType,
+  ) {
     final isSelected = filterStatus == filterType;
 
     return GestureDetector(
@@ -435,105 +467,74 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
         });
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.all(18),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: isSelected
-                ? [
-              color.withOpacity(0.15),
-              color.withOpacity(0.08),
-            ]
-                : [
-              ThemeColors.antiqueWhite,
-              ThemeColors.parchment,
-            ],
+                ? [color.withOpacity(0.2), color.withOpacity(0.1)]
+                : [color.withOpacity(0.1), color.withOpacity(0.05)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
-                ? color.withOpacity(0.5)
-                : ThemeColors.dustyBrown.withOpacity(0.3),
-            width: isSelected ? 2.5 : 1.5,
+            color: isSelected ? color.withOpacity(0.5) : color.withOpacity(0.3),
+            width: isSelected ? 2 : 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? color.withOpacity(0.2)
-                  : ThemeColors.dustyBrown.withOpacity(0.1),
-              blurRadius: isSelected ? 12 : 6,
-              offset: Offset(0, isSelected ? 6 : 3),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    color.withOpacity(0.2),
-                    color.withOpacity(0.1),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
+          boxShadow: isSelected
+              ? [
                   BoxShadow(
                     color: color.withOpacity(0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
-                ],
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(isSelected ? 0.3 : 0.2),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 28,
-              ),
+              child: Icon(icon, color: color, size: 20),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
-              value,
+              count,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: color,
-                shadows: [
-                  Shadow(
-                    color: color.withOpacity(0.3),
-                    offset: const Offset(0, 1),
-                    blurRadius: 2,
-                  ),
-                ],
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               title,
               style: TextStyle(
-                fontSize: 12,
-                color: ThemeColors.deepMahogany,
-                fontWeight: FontWeight.w600,
+                fontSize: 11,
+                color: ThemeColors.dustyBrown,
+                fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
             ),
             if (isSelected) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   'กำลังกรอง',
                   style: TextStyle(
                     color: color,
-                    fontSize: 10,
+                    fontSize: 9,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -556,35 +557,20 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
           foregroundColor: Colors.white,
           title: Text(
             'จัดการค่าส่วนกลาง',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withOpacity(0.3),
-                  offset: const Offset(0, 1),
-                  blurRadius: 2,
-                ),
-              ],
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
         ),
         body: Center(
           child: Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  ThemeColors.antiqueWhite,
-                  ThemeColors.parchment,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(24),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: ThemeColors.dustyBrown.withOpacity(0.2),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
+                  color: ThemeColors.dustyBrown.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -592,16 +578,17 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.deepMahogany),
-                  strokeWidth: 4,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ThemeColors.deepMahogany,
+                  ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Text(
                   'กำลังโหลดข้อมูล...',
                   style: TextStyle(
                     color: ThemeColors.deepMahogany,
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -618,490 +605,284 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
       backgroundColor: ThemeColors.creamWhite,
       appBar: AppBar(
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                ThemeColors.deepMahogany,
-                ThemeColors.dustyBrown,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        backgroundColor: ThemeColors.deepMahogany,
         foregroundColor: Colors.white,
         title: Text(
           'จัดการค่าส่วนกลาง',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            shadows: [
-              Shadow(
-                color: Colors.black.withOpacity(0.3),
-                offset: const Offset(0, 1),
-                blurRadius: 2,
-              ),
-            ],
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.refresh_rounded),
-              onPressed: _isLoading ? null : _refreshBills,
-              tooltip: 'รีเฟรช',
-              style: IconButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: _isLoading ? null : _refreshBills,
+            tooltip: 'รีเฟรช',
           ),
         ],
       ),
       body: _bills.isEmpty && !_isLoading
           ? FadeTransition(
-        opacity: _fadeAnimation,
-        child: Center(
-          child: Container(
-            margin: const EdgeInsets.all(32),
-            padding: const EdgeInsets.all(40),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  ThemeColors.antiqueWhite,
-                  ThemeColors.lightTaupe,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: ThemeColors.dustyBrown.withOpacity(0.2)),
-              boxShadow: [
-                BoxShadow(
-                  color: ThemeColors.dustyBrown.withOpacity(0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
+              opacity: _fadeAnimation,
+              child: Center(
+                child: Container(
+                  margin: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColors.rustOrange.withOpacity(0.2),
-                        ThemeColors.apricot.withOpacity(0.2),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Icon(
-                    Icons.receipt_long_rounded,
-                    size: 72,
-                    color: ThemeColors.rustOrange,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'ไม่มีข้อมูลค่าส่วนกลาง',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: ThemeColors.deepMahogany,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'เริ่มต้นด้วยการเพิ่มบิลใหม่',
-                  style: TextStyle(
-                    color: ThemeColors.dustyBrown,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColors.rustOrange,
-                        ThemeColors.terracottaRed,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: ThemeColors.rustOrange.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton.icon(
-                    onPressed: _navigateToAddForm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    icon: const Icon(Icons.add_rounded, size: 20),
-                    label: Text(
-                      'เพิ่มบิลแรก',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: ThemeColors.dustyBrown.withOpacity(0.2),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      )
-          : RefreshIndicator(
-        onRefresh: _refreshBills,
-        color: ThemeColors.deepMahogany,
-        backgroundColor: ThemeColors.antiqueWhite,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: Column(
-              children: [
-                // สถิติโดยรวม - Enhanced
-                Container(
-                  margin: const EdgeInsets.all(16.0),
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColors.lightTaupe,
-                        ThemeColors.antiqueWhite,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: ThemeColors.dustyBrown.withOpacity(0.15),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _buildEnhancedStatCard(
-                          'ทั้งหมด',
-                          '${stats['total']}',
-                          Icons.receipt_long_rounded,
-                          ThemeColors.deepMahogany,
-                          '',
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildEnhancedStatCard(
-                          'ยังไม่ได้ชำระ',
-                          '${stats['pending']}',
-                          Icons.pending_actions_rounded,
-                          ThemeColors.rustOrange,
-                          'UNPAID',
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildEnhancedStatCard(
-                          'กำลังตรวจสอบ',
-                          '${stats['in_progress']}',
-                          Icons.search_rounded,
-                          ThemeColors.caramel,
-                          'UNDER_REVIEW',
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildEnhancedStatCard(
-                          'ชำระเสร็จสิ้น',
-                          '${stats['resolved']}',
-                          Icons.check_circle_rounded,
-                          ThemeColors.sageGreen,
-                          'RECEIPT_SENT',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ช่องค้นหาและตัวกรอง - Enhanced
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // ช่องค้นหา - Enhanced
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              ThemeColors.antiqueWhite,
-                              Colors.white,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: ThemeColors.dustyBrown.withOpacity(0.3),
-                            width: 1.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: ThemeColors.dustyBrown.withOpacity(0.1),
-                              blurRadius: 12,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'ค้นหาบ้านเลขที่, ประเภทบริการ, จำนวนเงิน...',
-                            hintStyle: TextStyle(
-                              color: ThemeColors.dustyBrown.withOpacity(0.6),
-                              fontSize: 14,
-                            ),
-                            prefixIcon: Container(
-                              margin: const EdgeInsets.all(8),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    ThemeColors.deepMahogany.withOpacity(0.1),
-                                    ThemeColors.dustyBrown.withOpacity(0.1),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Icon(
-                                Icons.search_rounded,
-                                color: ThemeColors.deepMahogany,
-                                size: 20,
-                              ),
-                            ),
-                            suffixIcon: _searchQuery.isNotEmpty
-                                ? Container(
-                              margin: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: ThemeColors.dustyBrown.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: IconButton(
-                                icon: Icon(
-                                  Icons.clear_rounded,
-                                  color: ThemeColors.dustyBrown,
-                                  size: 18,
-                                ),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() => _searchQuery = '');
-                                },
-                              ),
-                            )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 16,
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: ThemeColors.deepMahogany,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          onChanged: (value) {
-                            setState(() => _searchQuery = value);
-                          },
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // ตัวกรองสถานะ - Enhanced
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              ThemeColors.parchment,
-                              ThemeColors.lightTaupe,
-                            ],
+                          color: ThemeColors.rustOrange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          Icons.receipt_long_rounded,
+                          size: 48,
+                          color: ThemeColors.rustOrange,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'ไม่มีข้อมูลค่าส่วนกลาง',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: ThemeColors.deepMahogany,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'เริ่มต้นด้วยการเพิ่มบิลใหม่',
+                        style: TextStyle(
+                          color: ThemeColors.dustyBrown,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: _navigateToAddForm,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ThemeColors.rustOrange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
                           ),
-                          borderRadius: BorderRadius.circular(20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(Icons.add_rounded, size: 18),
+                        label: Text(
+                          'เพิ่มบิลแรก',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _refreshBills,
+              color: ThemeColors.deepMahogany,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Column(
+                    children: [
+                      // สถิติโดยรวม - Clickable Cards
+                      Container(
+                        margin: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: ThemeColors.dustyBrown.withOpacity(0.2),
-                            width: 1.5,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: ThemeColors.dustyBrown.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
                         ),
                         child: Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    ThemeColors.deepMahogany.withOpacity(0.2),
-                                    ThemeColors.dustyBrown.withOpacity(0.2),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.filter_alt_rounded,
-                                color: ThemeColors.deepMahogany,
-                                size: 20,
+                            Expanded(
+                              child: _buildStatCard(
+                                'ทั้งหมด',
+                                '${stats['total']}',
+                                Icons.receipt_long_rounded,
+                                ThemeColors.deepMahogany,
+                                '',
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Text(
-                              'กรองสถานะ:',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: ThemeColors.deepMahogany,
-                                fontSize: 16,
+                            Expanded(
+                              child: _buildStatCard(
+                                'ยังไม่ชำระ',
+                                '${stats['pending']}',
+                                Icons.pending_actions_rounded,
+                                ThemeColors.rustOrange,
+                                'UNPAID',
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStatCard(
+                                'กำลังตรวจสอบ',
+                                '${stats['in_progress']}',
+                                Icons.search_rounded,
+                                ThemeColors.caramel,
+                                'UNDER_REVIEW',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStatCard(
+                                'รอส่งใบเสร็จ',
+                                '${stats['waiting_receipt']}',
+                                Icons.receipt_rounded,
+                                ThemeColors.infoBlue,
+                                'WAIT_RECEIPT',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStatCard(
+                                'ชำระเสร็จสิ้น',
+                                '${stats['resolved']}',
+                                Icons.check_circle_rounded,
+                                ThemeColors.sageGreen,
+                                'RECEIPT_SENT',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // ช่องค้นหาและ Clear Filter
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            // ช่องค้นหา
                             Expanded(
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.white,
-                                      ThemeColors.antiqueWhite,
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: ThemeColors.dustyBrown.withOpacity(0.3),
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: ThemeColors.dustyBrown.withOpacity(0.1),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
+                                    color: ThemeColors.dustyBrown.withOpacity(
+                                      0.2,
                                     ),
-                                  ],
+                                  ),
                                 ),
-                                child: DropdownButton<String?>(
-                                  value: filterStatus,
-                                  isExpanded: true,
-                                  underline: const SizedBox(),
+                                child: TextField(
+                                  controller: _searchController,
+                                  decoration: InputDecoration(
+                                    hintText:
+                                        'ค้นหาบ้านเลขที่, ประเภทบริการ, จำนวนเงิน...',
+                                    hintStyle: TextStyle(
+                                      color: ThemeColors.dustyBrown.withOpacity(
+                                        0.6,
+                                      ),
+                                      fontSize: 14,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.search_rounded,
+                                      color: ThemeColors.deepMahogany,
+                                      size: 20,
+                                    ),
+                                    suffixIcon: _searchQuery.isNotEmpty
+                                        ? IconButton(
+                                            icon: Icon(
+                                              Icons.clear_rounded,
+                                              color: ThemeColors.dustyBrown,
+                                              size: 18,
+                                            ),
+                                            onPressed: () {
+                                              _searchController.clear();
+                                              setState(() => _searchQuery = '');
+                                            },
+                                          )
+                                        : null,
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                  ),
                                   style: TextStyle(
                                     color: ThemeColors.deepMahogany,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
                                   ),
-                                  dropdownColor: ThemeColors.antiqueWhite,
-                                  items: <DropdownMenuItem<String?>>[
-                                    const DropdownMenuItem<String?>(
-                                      value: null,
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.all_inclusive_rounded, size: 16),
-                                          SizedBox(width: 8),
-                                          Text('ทั้งหมด'),
-                                        ],
-                                      ),
-                                    ),
-                                    const DropdownMenuItem<String?>(
-                                      value: 'UNPAID',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.pending_actions_rounded, size: 16, color: ThemeColors.rustOrange),
-                                          SizedBox(width: 8),
-                                          Text('ยังไม่ได้ชำระ'),
-                                        ],
-                                      ),
-                                    ),
-                                    const DropdownMenuItem<String?>(
-                                      value: 'UNDER_REVIEW',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.search_rounded, size: 16, color: ThemeColors.caramel),
-                                          SizedBox(width: 8),
-                                          Text('รอตรวจสอบ'),
-                                        ],
-                                      ),
-                                    ),
-                                    const DropdownMenuItem<String?>(
-                                      value: 'OVERDUE',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.warning_amber_rounded, size: 16, color: ThemeColors.errorRust),
-                                          SizedBox(width: 8),
-                                          Text('เกินกำหนด'),
-                                        ],
-                                      ),
-                                    ),
-                                    const DropdownMenuItem<String?>(
-                                      value: 'RECEIPT_SENT',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.check_circle_rounded, size: 16, color: ThemeColors.sageGreen),
-                                          SizedBox(width: 8),
-                                          Text('ชำระเสร็จสิ้น'),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                  onChanged: (value) => setState(() => filterStatus = value),
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: ThemeColors.deepMahogany,
-                                  ),
+                                  onChanged: (value) {
+                                    setState(() => _searchQuery = value);
+                                  },
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+
+                            // Clear Filter และ Result Count
+                            if (filterStatus != null) ...[
+                              const SizedBox(width: 12),
+                              GestureDetector(
+                                onTap: () =>
+                                    setState(() => filterStatus = null),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: ThemeColors.terracottaRed
+                                          .withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.clear_rounded,
+                                        color: ThemeColors.terracottaRed,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'ล้างตัวกรอง',
+                                        style: TextStyle(
+                                          color: ThemeColors.terracottaRed,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+
+                            // Result Count
+                            const SizedBox(width: 12),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
-                                vertical: 8,
+                                vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    ThemeColors.goldenHoney.withOpacity(0.2),
-                                    ThemeColors.wheatGold.withOpacity(0.2),
-                                  ],
-                                ),
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: ThemeColors.goldenHoney.withOpacity(0.4),
+                                  color: ThemeColors.goldenHoney.withOpacity(
+                                    0.3,
+                                  ),
                                 ),
                               ),
                               child: Text(
@@ -1116,295 +897,342 @@ class _BillPageState extends State<BillPage> with SingleTickerProviderStateMixin
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
 
-                const SizedBox(height: 8),
+                      const SizedBox(height: 16),
 
-                // รายการบิล - Enhanced
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    itemCount: filteredBills.length,
-                    itemBuilder: (context, index) {
-                      final bill = filteredBills[index];
-                      final houseNumber = houseMap[bill.houseId] ?? '${bill.houseId}';
+                      // รายการบิล
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          itemCount: filteredBills.length,
+                          itemBuilder: (context, index) {
+                            final bill = filteredBills[index];
+                            final houseNumber =
+                                houseMap[bill.houseId] ?? '${bill.houseId}';
 
-                      return TweenAnimationBuilder<double>(
-                        duration: Duration(milliseconds: 400 + (index * 100)),
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        builder: (context, value, child) {
-                          return Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
-                            child: Opacity(
-                              opacity: value,
-                              child: Container(
-                                margin: const EdgeInsets.only(bottom: 12.0),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.white,
-                                      ThemeColors.antiqueWhite,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: _getStatusColor(bill).withOpacity(0.3),
-                                    width: 1.5,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: _getStatusColor(bill).withOpacity(0.1),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 6),
-                                    ),
-                                  ],
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(20),
-                                    onTap: () => _navigateToDetail(bill),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: Row(
-                                        children: [
-                                          // Status Icon - Enhanced
-                                          Container(
-                                            padding: const EdgeInsets.all(14),
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: [
-                                                  _getStatusColor(bill),
-                                                  _getStatusColor(bill).withOpacity(0.8),
-                                                ],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
-                                              borderRadius: BorderRadius.circular(16),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: _getStatusColor(bill).withOpacity(0.3),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 4),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Icon(
-                                              _getStatusIcon(bill),
-                                              color: Colors.white,
-                                              size: 26,
-                                            ),
+                            return TweenAnimationBuilder<double>(
+                              duration: Duration(
+                                milliseconds: 300 + (index * 50),
+                              ),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              builder: (context, animationValue, child) {
+                                return Transform.translate(
+                                  offset: Offset(0, 10 * (1 - animationValue)),
+                                  child: Opacity(
+                                    opacity: animationValue,
+                                    child: Container(
+                                      margin: const EdgeInsets.only(
+                                        bottom: 12.0,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: _getStatusColor(
+                                            bill,
+                                          ).withOpacity(0.2),
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: ThemeColors.dustyBrown
+                                                .withOpacity(0.1),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
                                           ),
-
-                                          const SizedBox(width: 16),
-
-                                          // Bill Info - Enhanced
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                        ],
+                                      ),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          onTap: () => _navigateToDetail(bill),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: Row(
                                               children: [
-                                                // House Number & Status
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: RichText(
+                                                // Status Icon
+                                                Container(
+                                                  padding: const EdgeInsets.all(
+                                                    12,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: _getStatusColor(
+                                                      bill,
+                                                    ).withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                    border: Border.all(
+                                                      color: _getStatusColor(
+                                                        bill,
+                                                      ).withOpacity(0.3),
+                                                    ),
+                                                  ),
+                                                  child: Icon(
+                                                    _getStatusIcon(bill),
+                                                    color: _getStatusColor(
+                                                      bill,
+                                                    ),
+                                                    size: 20,
+                                                  ),
+                                                ),
+
+                                                const SizedBox(width: 16),
+
+                                                // Bill Info
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      // House Number & Status
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child: RichText(
+                                                              text: TextSpan(
+                                                                children: _highlightSearchText(
+                                                                  'บ้านเลขที่ $houseNumber',
+                                                                  _searchQuery,
+                                                                  TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color: ThemeColors
+                                                                        .deepMahogany,
+                                                                    fontSize:
+                                                                        16,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              setState(() {
+                                                                // ตั้งค่า filter ตามสถานะที่กด
+                                                                if (bill.paidStatus ==
+                                                                        1 ||
+                                                                    bill.status
+                                                                            .toUpperCase() ==
+                                                                        'RECEIPT_SENT') {
+                                                                  filterStatus =
+                                                                      'RECEIPT_SENT';
+                                                                } else if (bill
+                                                                        .status
+                                                                        .toUpperCase() ==
+                                                                    'UNDER_REVIEW') {
+                                                                  filterStatus =
+                                                                      'UNDER_REVIEW';
+                                                                } else if (bill
+                                                                        .status
+                                                                        .toUpperCase() ==
+                                                                    'WAIT_RECEIPT') {
+                                                                  filterStatus =
+                                                                      'WAIT_RECEIPT';
+                                                                } else {
+                                                                  filterStatus =
+                                                                      'UNPAID';
+                                                                }
+                                                              });
+                                                            },
+                                                            child: Container(
+                                                              padding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    horizontal:
+                                                                        8,
+                                                                    vertical: 4,
+                                                                  ),
+                                                              decoration: BoxDecoration(
+                                                                color:
+                                                                    _getStatusColor(
+                                                                      bill,
+                                                                    ).withOpacity(
+                                                                      0.1,
+                                                                    ),
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      12,
+                                                                    ),
+                                                                border: Border.all(
+                                                                  color:
+                                                                      _getStatusColor(
+                                                                        bill,
+                                                                      ).withOpacity(
+                                                                        0.3,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                children: [
+                                                                  Text(
+                                                                    _getStatusText(
+                                                                      bill,
+                                                                    ),
+                                                                    style: TextStyle(
+                                                                      color:
+                                                                          _getStatusColor(
+                                                                            bill,
+                                                                          ),
+                                                                      fontSize:
+                                                                          11,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(
+                                                                    width: 4,
+                                                                  ),
+                                                                  Icon(
+                                                                    Icons
+                                                                        .filter_alt_rounded,
+                                                                    size: 12,
+                                                                    color:
+                                                                        _getStatusColor(
+                                                                          bill,
+                                                                        ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+
+                                                      const SizedBox(height: 8),
+
+                                                      // Service & Amount
+                                                      RichText(
                                                         text: TextSpan(
                                                           children: _highlightSearchText(
-                                                            'บ้านเลขที่ $houseNumber',
+                                                            '${_getServiceNameTh(bill.service)} • ฿${formatCurrency(bill.amount)}',
                                                             _searchQuery,
                                                             TextStyle(
-                                                              fontWeight: FontWeight.bold,
-                                                              color: ThemeColors.deepMahogany,
-                                                              fontSize: 16,
+                                                              color: ThemeColors
+                                                                  .dustyBrown,
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Container(
-                                                      padding: const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 6,
-                                                      ),
-                                                      decoration: BoxDecoration(
-                                                        gradient: LinearGradient(
-                                                          colors: [
-                                                            _getStatusColor(bill).withOpacity(0.2),
-                                                            _getStatusColor(bill).withOpacity(0.1),
+
+                                                      const SizedBox(height: 6),
+
+                                                      // Due Date
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .calendar_today_rounded,
+                                                            size: 14,
+                                                            color: ThemeColors
+                                                                .infoBlue,
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 6,
+                                                          ),
+                                                          Text(
+                                                            'ครบกำหนด: ${formatDate(bill.dueDate)}',
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: ThemeColors
+                                                                  .dustyBrown,
+                                                            ),
+                                                          ),
+                                                          if (_isOverdue(
+                                                            bill,
+                                                          )) ...[
+                                                            const SizedBox(
+                                                              width: 8,
+                                                            ),
+                                                            Container(
+                                                              padding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    horizontal:
+                                                                        6,
+                                                                    vertical: 2,
+                                                                  ),
+                                                              decoration: BoxDecoration(
+                                                                color: ThemeColors
+                                                                    .errorRust
+                                                                    .withOpacity(
+                                                                      0.1,
+                                                                    ),
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      6,
+                                                                    ),
+                                                              ),
+                                                              child: Text(
+                                                                'เกิน ${DateTime.now().difference(bill.dueDate).inDays} วัน',
+                                                                style: TextStyle(
+                                                                  fontSize: 10,
+                                                                  color: ThemeColors
+                                                                      .errorRust,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                              ),
+                                                            ),
                                                           ],
-                                                        ),
-                                                        borderRadius: BorderRadius.circular(16),
-                                                        border: Border.all(
-                                                          color: _getStatusColor(bill).withOpacity(0.4),
-                                                          width: 1,
-                                                        ),
+                                                        ],
                                                       ),
-                                                      child: Text(
-                                                        _getStatusText(bill),
-                                                        style: TextStyle(
-                                                          color: _getStatusColor(bill),
-                                                          fontSize: 11,
-                                                          fontWeight: FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-
-                                                const SizedBox(height: 12),
-
-                                                // Service & Amount
-                                                RichText(
-                                                  text: TextSpan(
-                                                    children: _highlightSearchText(
-                                                      '${_getServiceNameTh(bill.service)} • ฿${formatCurrency(bill.amount)}',
-                                                      _searchQuery,
-                                                      TextStyle(
-                                                        color: ThemeColors.dustyBrown,
-                                                        fontSize: 14,
-                                                        fontWeight: FontWeight.w600,
-                                                      ),
-                                                    ),
+                                                    ],
                                                   ),
                                                 ),
 
-                                                const SizedBox(height: 8),
+                                                const SizedBox(width: 12),
 
-                                                // Due Date with enhanced styling
-                                                Row(
-                                                  children: [
-                                                    Container(
-                                                      padding: const EdgeInsets.all(6),
-                                                      decoration: BoxDecoration(
-                                                        color: ThemeColors.infoBlue.withOpacity(0.2),
-                                                        borderRadius: BorderRadius.circular(8),
-                                                      ),
-                                                      child: Icon(
-                                                        Icons.calendar_today_rounded,
-                                                        size: 14,
-                                                        color: ThemeColors.infoBlue,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Text(
-                                                      'ครบกำหนด: ${formatDate(bill.dueDate)}',
-                                                      style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: ThemeColors.dustyBrown,
-                                                        fontWeight: FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                    if (_isOverdue(bill)) ...[
-                                                      const SizedBox(width: 8),
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 4,
-                                                        ),
-                                                        decoration: BoxDecoration(
-                                                          color: ThemeColors.errorRust.withOpacity(0.1),
-                                                          borderRadius: BorderRadius.circular(8),
-                                                          border: Border.all(
-                                                            color: ThemeColors.errorRust.withOpacity(0.3),
-                                                          ),
-                                                        ),
-                                                        child: Text(
-                                                          'เกิน ${DateTime.now().difference(bill.dueDate).inDays} วัน',
-                                                          style: TextStyle(
-                                                            fontSize: 10,
-                                                            color: ThemeColors.errorRust,
-                                                            fontWeight: FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ],
+                                                // Action Arrow
+                                                Icon(
+                                                  Icons
+                                                      .arrow_forward_ios_rounded,
+                                                  color: ThemeColors.dustyBrown,
+                                                  size: 16,
                                                 ),
                                               ],
                                             ),
                                           ),
-
-                                          const SizedBox(width: 12),
-
-                                          // Action Arrow with enhanced styling
-                                          Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: [
-                                                  ThemeColors.dustyBrown.withOpacity(0.1),
-                                                  ThemeColors.dustyBrown.withOpacity(0.05),
-                                                ],
-                                              ),
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: Icon(
-                                              Icons.arrow_forward_ios_rounded,
-                                              color: ThemeColors.dustyBrown,
-                                              size: 16,
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+
+                      // Spacing for FAB
+                      const SizedBox(height: 80),
+                    ],
                   ),
                 ),
-
-                // Spacing for FAB
-                const SizedBox(height: 80),
-              ],
+              ),
             ),
-          ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _navigateToAddForm,
+        backgroundColor: ThemeColors.rustOrange,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(
+          'เพิ่มค่าส่วนกลาง',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              ThemeColors.rustOrange,
-              ThemeColors.terracottaRed,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: ThemeColors.rustOrange.withOpacity(0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: FloatingActionButton.extended(
-          onPressed: _navigateToAddForm,
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          icon: const Icon(Icons.add_rounded, size: 22),
-          label: Text(
-            'เพิ่มค่าส่วนกลาง',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

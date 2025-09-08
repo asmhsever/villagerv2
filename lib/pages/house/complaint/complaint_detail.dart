@@ -146,8 +146,12 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 const SizedBox(height: 16),
 
                 // Image Section
-                if (complaint.img != null) _buildImageSection(complaint.img!),
-                const SizedBox(height: 24),
+                if (complaint.complaintImg != null)
+                  _buildImageSection(complaint.complaintImg!),
+                const SizedBox(height: 16),
+                if (complaint.status?.toLowerCase() == 'resolved')
+                  _buildResolutionSection(complaint),
+                const SizedBox(height: 16),
               ],
             ),
           );
@@ -224,24 +228,365 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
+                  // Delete button with confirmation dialog
                   child: ElevatedButton.icon(
-                    onPressed: () => _deleteComplaint(complaint),
-                    icon: const Icon(Icons.delete_rounded, size: 18),
-                    label: const Text('ลบ'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ThemeColors.clayOrange,
-                      foregroundColor: ThemeColors.ivoryWhite,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                    ),
+                    onPressed: () => _showDeleteConfirmation(complaint),
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                    label: const Text('ลบข้อร้องเรียน'),
+                    style:
+                        ElevatedButton.styleFrom(
+                          backgroundColor: ThemeColors.mutedBurntSienna,
+                          foregroundColor: ThemeColors.ivoryWhite,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                          shadowColor: ThemeColors.clayOrange.withOpacity(0.3),
+                        ).copyWith(
+                          // Hover effect for web/desktop
+                          overlayColor:
+                              MaterialStateProperty.resolveWith<Color?>((
+                                Set<MaterialState> states,
+                              ) {
+                                if (states.contains(MaterialState.hovered)) {
+                                  return ThemeColors.clayOrange.withOpacity(
+                                    0.1,
+                                  );
+                                }
+                                if (states.contains(MaterialState.pressed)) {
+                                  return ThemeColors.clickHighlight.withOpacity(
+                                    0.2,
+                                  );
+                                }
+                                return null;
+                              }),
+                        ),
                   ),
                 ),
               ],
             ),
         ],
+      ),
+    );
+  }
+
+  // Confirmation dialog function
+  void _showDeleteConfirmation(ComplaintModel complaint) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: ThemeColors.ivoryWhite,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'ยืนยันการลบ',
+            style: TextStyle(
+              color: ThemeColors.softBrown,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'คุณแน่ใจหรือไม่ที่จะลบข้อร้องเรียนนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้',
+            style: TextStyle(color: ThemeColors.earthClay),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'ยกเลิก',
+                style: TextStyle(color: ThemeColors.warmStone),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteComplaint(complaint);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ThemeColors.clayOrange,
+                foregroundColor: ThemeColors.ivoryWhite,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('ลบ'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Enhanced delete function with loading state
+  void _deleteComplaint(ComplaintModel complaint) async {
+    try {
+      // Show loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('กำลังลบข้อร้องเรียน...'),
+          backgroundColor: ThemeColors.warmStone,
+        ),
+      );
+
+      // Perform delete
+      await ComplaintDomain.delete(complaint.complaintId!);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('ลบข้อร้องเรียนสำเร็จ'),
+          backgroundColor: ThemeColors.oliveGreen,
+        ),
+      );
+      Navigator.pop(context);
+
+      // Refresh the list or update UI
+      // setState(() {
+      //   complaints.removeWhere((c) => c.complaintId == complaint.complaintId);
+      // });
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('เกิดข้อผิดพลาด: ${e.toString()}'),
+          backgroundColor: ThemeColors.clayOrange,
+        ),
+      );
+    }
+  }
+
+  Widget _buildResolutionSection(ComplaintModel complaint) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            ThemeColors.oliveGreen.withOpacity(0.05),
+            ThemeColors.oliveGreen.withOpacity(0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: ThemeColors.oliveGreen.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: ThemeColors.oliveGreen.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with success icon
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: ThemeColors.oliveGreen,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.check_circle_rounded,
+                    color: ThemeColors.ivoryWhite,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'แก้ไขเสร็จสิ้นแล้ว',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: ThemeColors.oliveGreen,
+                      ),
+                    ),
+                    Text(
+                      'ผลการดำเนินการ',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: ThemeColors.oliveGreen.withOpacity(0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // Resolved by information (if available)
+            if (complaint.resolvedByLawId != null) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: ThemeColors.ivoryWhite.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: ThemeColors.oliveGreen.withOpacity(0.2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.person_rounded,
+                      color: ThemeColors.oliveGreen,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ดำเนินการโดย',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: ThemeColors.earthClay,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'เจ้าหน้าที่นิติ ID: ${complaint.resolvedByLawId}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: ThemeColors.softBrown,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // Resolution description
+            if (complaint.resolvedDescription != null &&
+                complaint.resolvedDescription!.isNotEmpty) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: ThemeColors.ivoryWhite.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: ThemeColors.oliveGreen.withOpacity(0.2),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.description_rounded,
+                          color: ThemeColors.oliveGreen,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'รายละเอียดการแก้ไข',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: ThemeColors.earthClay,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      complaint.resolvedDescription!,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: ThemeColors.softBrown,
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // Resolution image (if available)
+            if (complaint.resolvedImg != null &&
+                complaint.resolvedImg!.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: ThemeColors.ivoryWhite.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: ThemeColors.oliveGreen.withOpacity(0.2),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.photo_camera_rounded,
+                          color: ThemeColors.oliveGreen,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'รูปภาพผลการแก้ไข',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: ThemeColors.earthClay,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: ThemeColors.oliveGreen.withOpacity(0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: BuildImage(
+                          imagePath: complaint.resolvedImg!,
+                          tablePath: 'complaint/resolved',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -399,7 +744,10 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                     ),
                   ],
                 ),
-                child: BuildImage(imagePath: imageUrl, tablePath: 'complaint'),
+                child: BuildImage(
+                  imagePath: imageUrl,
+                  tablePath: 'complaint/complaint',
+                ),
               ),
             ),
           ],
@@ -610,18 +958,18 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
     }
   }
 
-  void _deleteComplaint(ComplaintModel complaint) async {
-    final result = await DeleteComplaintWidget.show(
-      context: context,
-      complaint: complaint,
-      getTypeText: _getTypeText,
-      getStatusText: _getStatusText,
-    );
-
-    if (result == true) {
-      Navigator.pop(context, true);
-    }
-  }
+  // void _deleteComplaint(ComplaintModel complaint) async {
+  //   final result = await DeleteComplaintWidget.show(
+  //     context: context,
+  //     complaint: complaint,
+  //     getTypeText: _getTypeText,
+  //     getStatusText: _getStatusText,
+  //   );
+  //
+  //   if (result == true) {
+  //     Navigator.pop(context, true);
+  //   }
+  // }
 
   void _editComplaint(ComplaintModel complaint) async {
     final result = await Navigator.push(

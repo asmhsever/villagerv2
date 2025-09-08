@@ -54,7 +54,7 @@ class _HouseComplaintEditPageState extends State<HouseComplaintEditPage> {
     _descriptionController.text = widget.complaint.description;
     _selectedTypeId = widget.complaint.typeComplaint;
     _isPrivate = widget.complaint.isPrivate;
-    _currentImageUrl = widget.complaint.img;
+    _currentImageUrl = widget.complaint.complaintImg;
   }
 
   Future<void> _loadComplaintTypes() async {
