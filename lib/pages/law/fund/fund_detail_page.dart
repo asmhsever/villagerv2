@@ -4,6 +4,7 @@ import 'package:fullproject/pages/law/fund/fund_edit_page.dart';
 import 'package:fullproject/services/image_service.dart';
 import 'package:fullproject/theme/Color.dart';
 import 'package:intl/intl.dart';
+import '../../../services/pdf/fund_pdf_service.dart';
 
 class LawFundDetailPage extends StatelessWidget {
   final FundModel fund;
@@ -16,11 +17,11 @@ class LawFundDetailPage extends StatelessWidget {
   }
 
   void _showFullScreenImage(
-    BuildContext context,
-    String imageUrl,
-    String title,
-    String bucketPath,
-  ) {
+      BuildContext context,
+      String imageUrl,
+      String title,
+      String bucketPath,
+      ) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => _FullScreenImageViewer(
@@ -36,6 +37,263 @@ class LawFundDetailPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => LawFundEditPage(fund: fund)),
+    );
+  }
+
+  // เพิ่มฟังก์ชั่น Export PDF
+  void _exportToPDF(BuildContext context) async {
+    try {
+      print('Starting PDF export...');
+      // แสดง loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: ThemeColors.beige,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(ThemeColors.softBrown),
+                    strokeWidth: 3,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'กำลังสร้างไฟล์ PDF...',
+                    style: TextStyle(
+                      color: ThemeColors.softBrown,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'กรุณารอสักครู่',
+                    style: TextStyle(
+                      color: ThemeColors.warmStone,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+      print('Calling FundPDFService.quickExportFund...');
+      // Export PDF
+      await SimpleFundPDFService.exportFundDetail(fund);
+      print('PDF export completed successfully');
+      // ปิด loading dialog
+      Navigator.pop(context);
+
+      // แสดงข้อความสำเร็จ
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'ส่งออก PDF สำเร็จแล้ว',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: ThemeColors.oliveGreen,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+    } catch (e) {
+      print('PDF Export Error: $e'); // เพิ่มบรรทัดนี้
+      print('Error details: ${e.toString()}'); // และบรรทัดนี้
+      // ปิด loading dialog ถ้ายังเปิดอยู่
+      Navigator.pop(context);
+
+
+      // แสดงข้อความ error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'เกิดข้อผิดพลาดในการส่งออก',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      'กรุณาลองใหม่อีกครั้ง',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: ThemeColors.burntOrange,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          duration: Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'ลองใหม่',
+            textColor: Colors.white,
+            onPressed: () => _exportToPDF(context),
+          ),
+        ),
+      );
+    }
+  }
+
+  // แสดง Export Options
+  void _showExportOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: ThemeColors.beige,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: Offset(0, -5),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              margin: EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: ThemeColors.warmStone.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Header
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: ThemeColors.softBrown.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.file_download,
+                    color: ThemeColors.softBrown,
+                    size: 20,
+                  ),
+                ),
+                SizedBox(width: 12),
+                Text(
+                  'ส่งออกรายการ',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: ThemeColors.softBrown,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+
+            // PDF Export Option
+            Container(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _exportToPDF(context);
+                },
+                icon: Container(
+                  padding: EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(Icons.picture_as_pdf, color: Colors.red, size: 20),
+                ),
+                label: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ส่งออกเป็น PDF',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: ThemeColors.softBrown,
+                      ),
+                    ),
+                    Text(
+                      'รายการเดี่ยวพร้อมรายละเอียดครบถ้วน',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: ThemeColors.warmStone,
+                      ),
+                    ),
+                  ],
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ThemeColors.ivoryWhite,
+                  foregroundColor: ThemeColors.softBrown,
+                  elevation: 0,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: ThemeColors.sandyTan, width: 1),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 20),
+          ],
+        ),
+      ),
     );
   }
 
@@ -68,7 +326,16 @@ class LawFundDetailPage extends StatelessWidget {
         foregroundColor: ThemeColors.ivoryWhite,
         elevation: 0,
         centerTitle: true,
+        // เพิ่มปุ่ม Export PDF ใน AppBar
+        actions: [
+          IconButton(
+            icon: Icon(Icons.file_download),
+            onPressed: () => _showExportOptions(context),
+            tooltip: 'ส่งออก PDF',
+          ),
+        ],
       ),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,46 +374,36 @@ class LawFundDetailPage extends StatelessWidget {
                       children: [
                         Icon(icon, color: ThemeColors.ivoryWhite, size: 20),
                         SizedBox(width: 8),
-                        Row(
-                          children: [
-                            Text(
-                              typeText,
-                              style: TextStyle(
-                                color: ThemeColors.ivoryWhite,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          typeText,
+                          style: TextStyle(
+                            color: ThemeColors.ivoryWhite,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
                         ),
                         SizedBox(width: 20),
-                        Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () => _navigateToEdit(context),
-                              child: Container(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.edit_outlined,
-                                      color: ThemeColors.ivoryWhite,
-                                      size: 16,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'แก้ไข',
-                                      style: TextStyle(
-                                        color: ThemeColors.ivoryWhite,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+                        GestureDetector(
+                          onTap: () => _navigateToEdit(context),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.edit_outlined,
+                                color: ThemeColors.ivoryWhite,
+                                size: 16,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'แก้ไข',
+                                style: TextStyle(
+                                  color: ThemeColors.ivoryWhite,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -330,7 +587,33 @@ class LawFundDetailPage extends StatelessWidget {
               ),
             ],
 
-            SizedBox(height: 32),
+            // Export Button Section (alternative floating button)
+            Container(
+              margin: EdgeInsets.all(16),
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _showExportOptions(context),
+                icon: Icon(Icons.file_download),
+                label: Text(
+                  'ส่งออก PDF',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ThemeColors.softBrown,
+                  foregroundColor: ThemeColors.ivoryWhite,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+              ),
+            ),
+
+            SizedBox(height: 16),
           ],
         ),
       ),
@@ -379,13 +662,12 @@ class LawFundDetailPage extends StatelessWidget {
   }
 
   Widget _buildImageCard(
-    BuildContext context,
-    String imageUrl,
-    String title,
-    IconData icon,
-    String bucketPath,
-  ) {
-    print(imageUrl);
+      BuildContext context,
+      String imageUrl,
+      String title,
+      IconData icon,
+      String bucketPath,
+      ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
