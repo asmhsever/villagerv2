@@ -14,6 +14,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'dart:typed_data';
 
+import '../../../services/pdf/bill_pdf.dart';
+
 class BillDetailPage extends StatefulWidget {
   final BillModel bill;
 
@@ -1105,71 +1107,11 @@ class _BillDetailPageState extends State<BillDetailPage>
   Future<void> _exportSingleBillAsPdf(BillModel bill) async {
     setState(() => _isLoading = true);
     try {
-      final pdf = pw.Document();
-      pdf.addPage(
-        pw.Page(
-          margin: const pw.EdgeInsets.all(24),
-          build: (context) => pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'ใบแจ้งค่าส่วนกลาง',
-                    style: pw.TextStyle(
-                      fontSize: 20,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.Text(
-                    'Bill #${bill.billId}',
-                    style: const pw.TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 20),
-              pw.Text(
-                'ข้อมูลบิล',
-                style: pw.TextStyle(
-                  fontSize: 16,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.SizedBox(height: 8),
-              pw.Text('รหัสบิล: ${bill.billId}'),
-              pw.Text('บ้านเลขที่: ${houseNumber ?? bill.houseId}'),
-              pw.Text('ประเภทบริการ: ${_getServiceNameTh(serviceName)}'),
-              pw.Text(
-                'จำนวนเงิน: ${NumberFormat('#,##0.00').format(bill.amount)} บาท',
-              ),
-              pw.Text('สถานะ: ${_getStatusText(bill)}'),
-              pw.SizedBox(height: 16),
-              pw.Text(
-                'ข้อมูลวันที่',
-                style: pw.TextStyle(
-                  fontSize: 16,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.SizedBox(height: 8),
-              pw.Text('วันที่ออกบิล: ${_formatDate(bill.billDate)}'),
-              pw.Text('วันครบกำหนด: ${_formatDate(bill.dueDate)}'),
-              if (bill.paidDate != null)
-                pw.Text('วันที่ชำระ: ${_formatDate(bill.paidDate)}'),
-              if (bill.slipDate != null)
-                pw.Text('วันที่อัพโหลดสลิป: ${_formatDate(bill.slipDate)}'),
-              pw.Spacer(),
-              pw.Divider(),
-              pw.Text(
-                'สร้างเมื่อ: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
-                style: const pw.TextStyle(fontSize: 10),
-              ),
-            ],
-          ),
-        ),
+      await BillPDFService.exportBillDetail(
+        bill,
+        houseNumber: houseNumber,
+        serviceName: serviceName,
       );
-      await Printing.layoutPdf(onLayout: (format) async => pdf.save());
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

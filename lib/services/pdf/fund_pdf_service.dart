@@ -127,7 +127,7 @@ class SimpleFundPDFService {
                         pw.SizedBox(height: 8),
                         _buildDetailRow('วันที่และเวลา', _formatDate(fund.createdAt), thaiFont),
                         pw.SizedBox(height: 8),
-                        _buildDetailRow('หมู่บ้าน ID', fund.villageId.toString(), thaiFont),
+                        _buildDetailRow('หมู่บ้านเลขที่', fund.villageId.toString(), thaiFont),
                       ],
                     ),
                   ),

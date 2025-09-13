@@ -10,6 +10,8 @@ import 'package:fullproject/pages/law/complaint/complaint_delete.dart';
 import 'package:fullproject/theme/Color.dart';
 import 'package:intl/intl.dart';
 
+import '../../../services/pdf/complaint_pdf.dart';
+
 class LawComplaintDetailPage extends StatefulWidget {
   final ComplaintModel complaint;
 
@@ -25,8 +27,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
   String? complaintTypeName;
   bool isLoading = false;
   bool isUpdatingStatus = false;
-
-  // Palette
+  bool isExportingPDF = false; // เพิ่ม state สำหรับ PDF export
 
   @override
   void initState() {
@@ -45,7 +46,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
           .maybeSingle();
 
       final ComplaintTypeModel? complaintType =
-          await ComplaintTypeDomain.getById(currentComplaint.typeComplaint);
+      await ComplaintTypeDomain.getById(currentComplaint.typeComplaint);
 
       if (mounted) {
         setState(() {
@@ -57,6 +58,28 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
       _showErrorSnackBar('เกิดข้อผิดพลาดในการโหลดข้อมูล: $e');
     } finally {
       if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  // --- เพิ่มฟังก์ชัน export PDF ---
+  Future<void> _exportComplaintPDF() async {
+    setState(() => isExportingPDF = true);
+    try {
+      await ComplaintPDFService.exportComplaintDetail(
+        currentComplaint,
+        houseNumber: houseNumber,
+        complaintTypeName: complaintTypeName,
+      );
+
+      if (mounted) {
+        _showSuccessSnackBar('ส่งออก PDF สำเร็จ');
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar('เกิดข้อผิดพลาดในการสร้าง PDF: $e');
+      }
+    } finally {
+      if (mounted) setState(() => isExportingPDF = false);
     }
   }
 
@@ -174,7 +197,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
       case 'pending':
         return ThemeColors.warmAmber;
       case 'received':
-        return ThemeColors.focusedBrown; // distinguish from pending
+        return ThemeColors.focusedBrown;
       case 'in_progress':
         return ThemeColors.softTerracotta;
       case 'resolved':
@@ -245,7 +268,6 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
       );
 
       if (updatedComplaint != null && mounted) {
-        // ใช้ microtask เพื่อป้องกัน build conflicts
         await Future.microtask(() {});
         setState(() => currentComplaint = updatedComplaint);
         await _loadAdditionalData();
@@ -287,9 +309,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
             end: Alignment.bottomRight,
             colors: [
               backgroundColor ?? ThemeColors.ivoryWhite,
-              (backgroundColor ?? ThemeColors.ivoryWhite).withValues(
-                alpha: 0.8,
-              ),
+              (backgroundColor ?? ThemeColors.ivoryWhite).withValues(alpha: 0.8),
             ],
           ),
         ),
@@ -343,11 +363,11 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
   }
 
   Widget _buildInfoRow(
-    String label,
-    String value, {
-    Color? valueColor,
-    Widget? trailing,
-  }) {
+      String label,
+      String value, {
+        Color? valueColor,
+        Widget? trailing,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
@@ -387,8 +407,6 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
       ),
     );
   }
-
-  // เพิ่ม functions เหล่านี้ในคลาส _LawComplaintDetailPageState
 
   Future<void> _acceptComplaint() async {
     final confirm = await showDialog<bool>(
@@ -538,7 +556,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
     setState(() => isUpdatingStatus = true);
 
     try {
-      const acceptedByLawId = 1; // แทนที่ด้วย law user ID จริง
+      const acceptedByLawId = 1;
 
       await ComplaintDomain.acceptComplaint(
         complaintId: currentComplaint.complaintId!,
@@ -563,12 +581,10 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
     }
   }
 
-  // Widget สำหรับแสดงปุ่ม Action ตามสถานะ
   Widget _buildStatusActionButtons() {
     final status = currentComplaint.status?.toLowerCase();
 
     if (status == 'pending' || status == null) {
-      // แสดงปุ่มรับคำร้องเรียน
       return Column(
         children: [
           const SizedBox(height: 16),
@@ -594,15 +610,15 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
               onPressed: isUpdatingStatus ? null : _acceptComplaint,
               icon: isUpdatingStatus
                   ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          ThemeColors.ivoryWhite,
-                        ),
-                      ),
-                    )
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ThemeColors.ivoryWhite,
+                  ),
+                ),
+              )
                   : Icon(Icons.check_circle_outline, size: 24),
               label: Text(
                 isUpdatingStatus ? 'กำลังรับเรื่อง...' : 'รับคำร้องเรียน',
@@ -625,7 +641,6 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
         ],
       );
     } else if (status == 'in_progress') {
-      // แสดงปุ่มส่งคำร้องเรียน
       return Column(
         children: [
           const SizedBox(height: 16),
@@ -651,15 +666,15 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
               onPressed: isUpdatingStatus ? null : _resolveComplaint,
               icon: isUpdatingStatus
                   ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          ThemeColors.ivoryWhite,
-                        ),
-                      ),
-                    )
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ThemeColors.ivoryWhite,
+                  ),
+                ),
+              )
                   : Icon(Icons.send_rounded, size: 24),
               label: Text(
                 isUpdatingStatus ? 'กำลังส่งเรื่อง...' : 'ส่งคำร้องเรียน',
@@ -683,7 +698,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
       );
     }
 
-    return const SizedBox.shrink(); // ไม่แสดงปุ่มสำหรับสถานะอื่น
+    return const SizedBox.shrink();
   }
 
   Future<void> _resolveComplaint() async {
@@ -747,6 +762,30 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
               tooltip: 'รีเฟรชข้อมูล',
             ),
           ),
+          // เพิ่มปุ่ม Export PDF
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: isExportingPDF
+                  ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ThemeColors.ivoryWhite,
+                  ),
+                ),
+              )
+                  : const Icon(Icons.picture_as_pdf_rounded),
+              onPressed: (isLoading || isExportingPDF) ? null : _exportComplaintPDF,
+              tooltip: isExportingPDF ? 'กำลังส่งออก PDF...' : 'ส่งออก PDF',
+            ),
+          ),
           Container(
             margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
@@ -772,9 +811,7 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: ThemeColors.clayOrange.withValues(
-                              alpha: 0.1,
-                            ),
+                            color: ThemeColors.clayOrange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
@@ -802,83 +839,515 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
       ),
       body: isLoading
           ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: ThemeColors.softBrown),
+            SizedBox(height: 16),
+            Text(
+              'กำลังโหลด...',
+              style: TextStyle(color: ThemeColors.earthClay),
+            ),
+          ],
+        ),
+      )
+          : RefreshIndicator(
+        color: ThemeColors.softBrown,
+        backgroundColor: ThemeColors.ivoryWhite,
+        onRefresh: _refreshData,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              if (isHighPriority)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ThemeColors.clayOrange,
+                        ThemeColors.softTerracotta,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ThemeColors.clayOrange.withValues(alpha: 0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.priority_high,
+                          color: ThemeColors.ivoryWhite,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'ร้องเรียนระดับความสำคัญสูง',
+                              style: TextStyle(
+                                color: ThemeColors.ivoryWhite,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Header Summary Card
+              Card(
+                elevation: 8,
+                color: ThemeColors.ivoryWhite,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                margin: const EdgeInsets.only(bottom: 24),
+                shadowColor: ThemeColors.softBrown.withValues(alpha: 0.15),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        ThemeColors.ivoryWhite,
+                        ThemeColors.inputFill,
+                      ],
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(28),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: getStatusColor(currentComplaint.status).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: getStatusColor(currentComplaint.status).withValues(alpha: 0.3),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                getTypeIcon(currentComplaint.typeComplaint),
+                                color: getStatusColor(currentComplaint.status),
+                                size: 36,
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    currentComplaint.header,
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: ThemeColors.softBrown,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'บ้านเลขที่ ${houseNumber ?? currentComplaint.houseId}',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: ThemeColors.earthClay,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    getStatusColor(currentComplaint.status),
+                                    getStatusColor(currentComplaint.status).withValues(alpha: 0.8),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: getStatusColor(currentComplaint.status).withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                getStatusLabel(currentComplaint.status),
+                                style: const TextStyle(
+                                  color: ThemeColors.ivoryWhite,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        _buildStatusActionButtons(),
+                        const SizedBox(height: 24),
+                        Container(
+                          height: 1,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                ThemeColors.softBorder,
+                                ThemeColors.softBorder.withValues(alpha: 0.3),
+                                ThemeColors.softBorder,
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'ระดับความสำคัญ',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: ThemeColors.earthClay,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: getLevelColor(currentComplaint.level).withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: getLevelColor(currentComplaint.level).withValues(alpha: 0.4),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'ระดับ ${getLevelLabel(currentComplaint.level)}',
+                                      style: TextStyle(
+                                        color: getLevelColor(currentComplaint.level),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 50,
+                              color: ThemeColors.softBorder,
+                            ),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'ประเภท',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: ThemeColors.earthClay,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    complaintTypeName ?? 'ไม่ระบุ',
+                                    style: const TextStyle(
+                                      color: ThemeColors.softBrown,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Base info
+              _buildInfoCard(
+                title: 'ข้อมูลคำร้องเรียน',
+                icon: Icons.report_problem,
                 children: [
-                  CircularProgressIndicator(color: ThemeColors.softBrown),
-                  SizedBox(height: 16),
-                  Text(
-                    'กำลังโหลด...',
-                    style: TextStyle(color: ThemeColors.earthClay),
+                  _buildInfoRow(
+                    'วันที่ส่ง:',
+                    formatDateFromString(currentComplaint.createAt),
+                  ),
+                  if (currentComplaint.updateAt != null)
+                    _buildInfoRow(
+                      'อัปเดตล่าสุด:',
+                      formatDateFromString(currentComplaint.updateAt),
+                    ),
+                  _buildInfoRow(
+                    'ความเป็นส่วนตัว:',
+                    currentComplaint.isPrivate ? 'ส่วนตัว' : 'สาธารณะ',
+                    valueColor: currentComplaint.isPrivate
+                        ? ThemeColors.burntOrange
+                        : ThemeColors.oliveGreen,
+                    trailing: Icon(
+                      currentComplaint.isPrivate ? Icons.lock : Icons.public,
+                      color: currentComplaint.isPrivate
+                          ? ThemeColors.burntOrange
+                          : ThemeColors.oliveGreen,
+                      size: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'รายละเอียดปัญหา:',
+                    style: TextStyle(
+                      color: ThemeColors.earthClay,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [ThemeColors.sandyTan, ThemeColors.beige],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: ThemeColors.softBorder, width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: ThemeColors.softBrown.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      currentComplaint.description,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: ThemeColors.softBrown,
+                        height: 1.6,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 ],
               ),
-            )
-          : RefreshIndicator(
-              color: ThemeColors.softBrown,
-              backgroundColor: ThemeColors.ivoryWhite,
-              onRefresh: _refreshData,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
+
+              if (currentComplaint.complaintImg != null &&
+                  currentComplaint.complaintImg!.isNotEmpty)
+                _buildInfoCard(
+                  title: 'รูปภาพปัญหา',
+                  icon: Icons.image,
                   children: [
-                    if (isHighPriority)
+                    _buildImageWidget(currentComplaint.complaintImg!),
+                  ],
+                ),
+
+              // Show resolved information if status is resolved
+              if (currentComplaint.status?.toLowerCase() == 'resolved')
+                _buildInfoCard(
+                  title: 'ข้อมูลการแก้ไข',
+                  icon: Icons.task_alt,
+                  backgroundColor: ThemeColors.oliveGreen.withValues(alpha: 0.05),
+                  iconColor: ThemeColors.oliveGreen,
+                  children: [
+                    if (currentComplaint.updateAt != null)
+                      _buildInfoRow(
+                        'วันที่แก้ไข:',
+                        formatDateFromString(currentComplaint.updateAt),
+                        valueColor: ThemeColors.oliveGreen,
+                      ),
+
+                    if (currentComplaint.resolvedByLawId != null)
+                      _buildInfoRow(
+                        'ผู้แก้ไข:',
+                        'เจ้าหน้าที่ ID: ${currentComplaint.resolvedByLawId}',
+                        valueColor: ThemeColors.softBrown,
+                      ),
+
+                    if (currentComplaint.resolvedDescription != null &&
+                        currentComplaint.resolvedDescription!.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      const Text(
+                        'รายละเอียดการแก้ไข:',
+                        style: TextStyle(
+                          color: ThemeColors.earthClay,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
-                        margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              ThemeColors.clayOrange,
-                              ThemeColors.softTerracotta,
-                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
+                            colors: [
+                              ThemeColors.oliveGreen.withValues(alpha: 0.1),
+                              ThemeColors.oliveGreen.withValues(alpha: 0.05),
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: ThemeColors.clayOrange.withValues(
-                                alpha: 0.3,
+                              color: ThemeColors.oliveGreen.withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.check_circle_outline,
+                                  color: ThemeColors.oliveGreen,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'การแก้ไขปัญหา',
+                                  style: TextStyle(
+                                    color: ThemeColors.oliveGreen,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              currentComplaint.resolvedDescription!,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: ThemeColors.softBrown,
+                                height: 1.6,
+                                fontWeight: FontWeight.w500,
                               ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    // Show resolved image if exists
+                    if (currentComplaint.resolvedImg != null &&
+                        currentComplaint.resolvedImg!.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      const Text(
+                        'รูปภาพการแก้ไข:',
+                        style: TextStyle(
+                          color: ThemeColors.earthClay,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: ThemeColors.oliveGreen.withValues(alpha: 0.1),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
                           ],
                         ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: BuildImage(
+                            imagePath: currentComplaint.resolvedImg!,
+                            tablePath: "complaint/resolved",
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Success message
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: ThemeColors.oliveGreen.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: ThemeColors.oliveGreen.withValues(alpha: 0.3),
+                          ),
+                        ),
                         child: Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.priority_high,
-                                color: ThemeColors.ivoryWhite,
-                                size: 24,
-                              ),
+                            Icon(
+                              Icons.verified,
+                              color: ThemeColors.oliveGreen,
+                              size: 24,
                             ),
-                            const SizedBox(width: 16),
-                            const Expanded(
+                            const SizedBox(width: 12),
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'ร้องเรียนระดับความสำคัญสูง',
+                                    'คำร้องเรียนได้รับการแก้ไขเรียบร้อย',
                                     style: TextStyle(
-                                      color: ThemeColors.ivoryWhite,
+                                      color: ThemeColors.oliveGreen,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                     ),
                                   ),
                                   Text(
-                                    'ต้องดำเนินการโดยเร่งด่วน',
+                                    'ขอบคุณที่รอคอย เจ้าหน้าที่ได้ดำเนินการแก้ไขปัญหาแล้ว',
                                     style: TextStyle(
-                                      color: ThemeColors.ivoryWhite,
+                                      color: ThemeColors.earthClay,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -888,516 +1357,13 @@ class _LawComplaintDetailPageState extends State<LawComplaintDetailPage> {
                           ],
                         ),
                       ),
-
-                    // Header Summary Card
-                    Card(
-                      elevation: 8,
-                      color: ThemeColors.ivoryWhite,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      margin: const EdgeInsets.only(bottom: 24),
-                      shadowColor: ThemeColors.softBrown.withValues(
-                        alpha: 0.15,
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              ThemeColors.ivoryWhite,
-                              ThemeColors.inputFill,
-                            ],
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(28),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: getStatusColor(
-                                        currentComplaint.status,
-                                      ).withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: getStatusColor(
-                                          currentComplaint.status,
-                                        ).withValues(alpha: 0.3),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      getTypeIcon(
-                                        currentComplaint.typeComplaint,
-                                      ),
-                                      color: getStatusColor(
-                                        currentComplaint.status,
-                                      ),
-                                      size: 36,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          currentComplaint.header,
-                                          style: const TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
-                                            color: ThemeColors.softBrown,
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'บ้านเลขที่ ${houseNumber ?? currentComplaint.houseId}',
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            color: ThemeColors.earthClay,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          getStatusColor(
-                                            currentComplaint.status,
-                                          ),
-                                          getStatusColor(
-                                            currentComplaint.status,
-                                          ).withValues(alpha: 0.8),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(24),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: getStatusColor(
-                                            currentComplaint.status,
-                                          ).withValues(alpha: 0.3),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Text(
-                                      getStatusLabel(currentComplaint.status),
-                                      style: const TextStyle(
-                                        color: ThemeColors.ivoryWhite,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              _buildStatusActionButtons(),
-                              const SizedBox(height: 24),
-                              Container(
-                                height: 1,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      ThemeColors.softBorder,
-                                      ThemeColors.softBorder.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                      ThemeColors.softBorder,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        const Text(
-                                          'ระดับความสำคัญ',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: ThemeColors.earthClay,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 8,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: getLevelColor(
-                                              currentComplaint.level,
-                                            ).withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                            border: Border.all(
-                                              color: getLevelColor(
-                                                currentComplaint.level,
-                                              ).withValues(alpha: 0.4),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'ระดับ ${getLevelLabel(currentComplaint.level)}',
-                                            style: TextStyle(
-                                              color: getLevelColor(
-                                                currentComplaint.level,
-                                              ),
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 1,
-                                    height: 50,
-                                    color: ThemeColors.softBorder,
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        const Text(
-                                          'ประเภท',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: ThemeColors.earthClay,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          complaintTypeName ?? 'ไม่ระบุ',
-                                          style: const TextStyle(
-                                            color: ThemeColors.softBrown,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Base info
-                    _buildInfoCard(
-                      title: 'ข้อมูลคำร้องเรียน',
-                      icon: Icons.report_problem,
-                      children: [
-                        _buildInfoRow(
-                          'วันที่ส่ง:',
-                          formatDateFromString(currentComplaint.createAt),
-                        ),
-                        if (currentComplaint.updateAt != null)
-                          _buildInfoRow(
-                            'อัปเดตล่าสุด:',
-                            formatDateFromString(currentComplaint.updateAt),
-                          ),
-                        _buildInfoRow(
-                          'ความเป็นส่วนตัว:',
-                          currentComplaint.isPrivate ? 'ส่วนตัว' : 'สาธารณะ',
-                          valueColor: currentComplaint.isPrivate
-                              ? ThemeColors.burntOrange
-                              : ThemeColors.oliveGreen,
-                          trailing: Icon(
-                            currentComplaint.isPrivate
-                                ? Icons.lock
-                                : Icons.public,
-                            color: currentComplaint.isPrivate
-                                ? ThemeColors.burntOrange
-                                : ThemeColors.oliveGreen,
-                            size: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'รายละเอียดปัญหา:',
-                          style: TextStyle(
-                            color: ThemeColors.earthClay,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [ThemeColors.sandyTan, ThemeColors.beige],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: ThemeColors.softBorder,
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: ThemeColors.softBrown.withValues(
-                                  alpha: 0.1,
-                                ),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            currentComplaint.description,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: ThemeColors.softBrown,
-                              height: 1.6,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    if (currentComplaint.complaintImg != null &&
-                        currentComplaint.complaintImg!.isNotEmpty)
-                      _buildInfoCard(
-                        title: 'รูปภาพปัญหา',
-                        icon: Icons.image,
-                        children: [
-                          _buildImageWidget(currentComplaint.complaintImg!),
-                        ],
-                      ),
-
-                    // Show resolved information if status is resolved
-                    if (currentComplaint.status?.toLowerCase() == 'resolved')
-                      _buildInfoCard(
-                        title: 'ข้อมูลการแก้ไข',
-                        icon: Icons.task_alt,
-                        backgroundColor: ThemeColors.oliveGreen.withValues(
-                          alpha: 0.05,
-                        ),
-                        iconColor: ThemeColors.oliveGreen,
-                        children: [
-                          if (currentComplaint.updateAt != null)
-                            _buildInfoRow(
-                              'วันที่แก้ไข:',
-                              formatDateFromString(currentComplaint.updateAt),
-                              valueColor: ThemeColors.oliveGreen,
-                            ),
-
-                          if (currentComplaint.resolvedByLawId != null)
-                            _buildInfoRow(
-                              'ผู้แก้ไข:',
-                              'เจ้าหน้าที่ ID: ${currentComplaint.resolvedByLawId}',
-                              valueColor: ThemeColors.softBrown,
-                            ),
-
-                          if (currentComplaint.resolvedDescription != null &&
-                              currentComplaint
-                                  .resolvedDescription!
-                                  .isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            const Text(
-                              'รายละเอียดการแก้ไข:',
-                              style: TextStyle(
-                                color: ThemeColors.earthClay,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    ThemeColors.oliveGreen.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    ThemeColors.oliveGreen.withValues(
-                                      alpha: 0.05,
-                                    ),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: ThemeColors.oliveGreen.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  width: 1,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: ThemeColors.oliveGreen.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle_outline,
-                                        color: ThemeColors.oliveGreen,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'การแก้ไขปัญหา',
-                                        style: TextStyle(
-                                          color: ThemeColors.oliveGreen,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    currentComplaint.resolvedDescription!,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: ThemeColors.softBrown,
-                                      height: 1.6,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-
-                          // Show resolved image if exists
-                          if (currentComplaint.resolvedImg != null &&
-                              currentComplaint.resolvedImg!.isNotEmpty) ...[
-                            const SizedBox(height: 24),
-                            const Text(
-                              'รูปภาพการแก้ไข:',
-                              style: TextStyle(
-                                color: ThemeColors.earthClay,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: ThemeColors.oliveGreen.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: ThemeColors.oliveGreen.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(14),
-                                child: BuildImage(
-                                  imagePath: currentComplaint.resolvedImg!,
-                                  tablePath: "complaint/resolved",
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            // Success message
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: ThemeColors.oliveGreen.withValues(
-                                  alpha: 0.1,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: ThemeColors.oliveGreen.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.verified,
-                                    color: ThemeColors.oliveGreen,
-                                    size: 24,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'คำร้องเรียนได้รับการแก้ไขเรียบร้อย',
-                                          style: TextStyle(
-                                            color: ThemeColors.oliveGreen,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        Text(
-                                          'ขอบคุณที่รอคอย เจ้าหน้าที่ได้ดำเนินการแก้ไขปัญหาแล้ว',
-                                          style: TextStyle(
-                                            color: ThemeColors.earthClay,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                    ],
                   ],
                 ),
-              ),
-            ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
